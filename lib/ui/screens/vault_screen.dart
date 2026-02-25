@@ -9,11 +9,11 @@ import 'authenticator_screen.dart';
 import 'add_auth_screen.dart';
 import 'settings_screen.dart';
 
-/// Vault 主页�?- 三重鼎立架构
-/// 
+/// Vault 主页 - 三重鼎立架构
+///
 /// 底部导航栏：
 /// 1. 密码 (Password) - 密码管理
-/// 2. 验证�?(Authenticator) - TOTP 二步验证
+/// 2. 验证器 (Authenticator) - TOTP 二步验证
 /// 3. 设置 (Settings) - 配置管理
 class VaultScreen extends StatefulWidget {
   final VaultService vaultService;
@@ -31,10 +31,10 @@ class VaultScreen extends StatefulWidget {
 
 class _VaultScreenState extends State<VaultScreen> {
   int _currentIndex = 0;
-  
+
   // Services
   final AuthService _authService = AuthService();
-  
+
   // Password tab state
   final _searchController = TextEditingController();
   List<PasswordCard> _cards = [];
@@ -63,7 +63,7 @@ class _VaultScreenState extends State<VaultScreen> {
     try {
       final cards = await widget.vaultService.getAllCards();
       final stats = await widget.vaultService.getStats();
-      
+
       setState(() {
         _cards = cards;
         _filteredCards = cards;
@@ -150,10 +150,12 @@ class _VaultScreenState extends State<VaultScreen> {
         leading: IconButton(
           icon: const Icon(Icons.lock_outline),
           onPressed: widget.onLockRequested,
-          tooltip: '锁定保险�?,
+          tooltip: '锁定保险箱',
         ),
         actions: [
-          if (_currentIndex == 0 && _stats != null && _stats!.pendingSyncCount > 0)
+          if (_currentIndex == 0 &&
+              _stats != null &&
+              _stats!.pendingSyncCount > 0)
             Badge(
               label: Text('${_stats!.pendingSyncCount}'),
               child: IconButton(
@@ -174,8 +176,8 @@ class _VaultScreenState extends State<VaultScreen> {
       ),
       body: _buildBody(),
       bottomNavigationBar: _buildBottomNavBar(),
-      floatingActionButton: _currentIndex == 2 
-          ? null // 设置页面不需�?FAB
+      floatingActionButton: _currentIndex == 2
+          ? null // 设置页面不需要FAB
           : FloatingActionButton.extended(
               onPressed: _currentIndex == 0
                   ? _navigateToAddPassword
@@ -192,9 +194,9 @@ class _VaultScreenState extends State<VaultScreen> {
   String _getTitle() {
     switch (_currentIndex) {
       case 0:
-        return '密码保险�?;
+        return '密码保险箱';
       case 1:
-        return '身份验证�?;
+        return '身份验证';
       case 2:
         return '设置';
       default:
@@ -211,7 +213,7 @@ class _VaultScreenState extends State<VaultScreen> {
           vaultService: widget.vaultService,
           authService: _authService,
           // DEK/SearchKey 通过 VaultService 会话获取
-          // 这里�?null 是因为安全考虑，实际使用时需�?VaultService 获取
+          // 这里为null 是因为安全考虑，实际使用时需要VaultService 获取
           dek: null,
           searchKey: null,
           deviceId: null,
@@ -226,7 +228,7 @@ class _VaultScreenState extends State<VaultScreen> {
   Widget _buildPasswordTab() {
     return Column(
       children: [
-        // 搜索�?
+        // 搜索框
         Padding(
           padding: const EdgeInsets.all(16),
           child: TextField(
@@ -247,7 +249,7 @@ class _VaultScreenState extends State<VaultScreen> {
             ),
           ),
         ),
-        // 统计�?
+        // 统计卡片
         if (_stats != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -294,7 +296,7 @@ class _VaultScreenState extends State<VaultScreen> {
   }
 
   Widget _buildSettingsTab() {
-    // 直接嵌入设置页面内容（而非导航跳转�?
+    // 直接嵌入设置页面内容（而非导航跳转）
     return SettingsScreen(
       vaultService: widget.vaultService,
       onLockRequested: widget.onLockRequested,
@@ -317,7 +319,7 @@ class _VaultScreenState extends State<VaultScreen> {
     });
   }
 
-  /// 底部导航�?- 三重鼎立
+  /// 底部导航栏 - 三重鼎立
   Widget _buildBottomNavBar() {
     return Container(
       decoration: BoxDecoration(
@@ -347,7 +349,7 @@ class _VaultScreenState extends State<VaultScreen> {
                 index: 1,
                 icon: Icons.verified_user_outlined,
                 activeIcon: Icons.verified_user,
-                label: '验证�?,
+                label: '验证器',
                 color: const Color(0xFF00BFA6),
               ),
               _buildNavItem(
@@ -372,7 +374,7 @@ class _VaultScreenState extends State<VaultScreen> {
     required Color color,
   }) {
     final isActive = _currentIndex == index;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -459,9 +461,7 @@ class _VaultScreenState extends State<VaultScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            _searchController.text.isEmpty
-                ? '暂无密码'
-                : '未找到匹配项',
+            _searchController.text.isEmpty ? '暂无密码' : '未找到匹配项',
             style: TextStyle(
               fontSize: 18,
               color: Colors.white.withValues(alpha: 0.6),
@@ -470,7 +470,7 @@ class _VaultScreenState extends State<VaultScreen> {
           const SizedBox(height: 8),
           if (_searchController.text.isEmpty)
             Text(
-              '点击右下�?+ 按钮添加第一个密�?,
+              '点击右下角 + 按钮添加第一个密码',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.white.withValues(alpha: 0.4),

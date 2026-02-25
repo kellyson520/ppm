@@ -6,11 +6,11 @@ import '../../core/models/auth_card.dart';
 import '../../core/crypto/totp_generator.dart';
 import 'add_auth_screen.dart';
 
-/// 验证器详情页�?
-/// 
+/// 验证器详情页
+///
 /// 展示解密后的 TOTP 详情，支持：
-/// - 实时验证码显�?
-/// - 导出为文�?(otpauth:// URI)
+/// - 实时验证码显示
+/// - 导出为文件 (otpauth:// URI)
 /// - 导出为二维码
 /// - 编辑 / 删除
 class AuthDetailScreen extends StatefulWidget {
@@ -78,23 +78,23 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
     HapticFeedback.lightImpact();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$label 已复制到剪贴�?),
+        content: Text('$label 已复制到剪贴板'),
         backgroundColor: const Color(0xFF00BFA6),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
       ),
     );
-    
+
     // 10 秒后清除敏感数据
     Future.delayed(const Duration(seconds: 10), () {
       Clipboard.setData(const ClipboardData(text: ''));
     });
   }
 
-  /// 导出为文�?(otpauth:// URI)
+  /// 导出为文件 (otpauth:// URI)
   void _exportAsText() {
     final uri = widget.payload.toOtpAuthUri();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -104,7 +104,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '⚠️ �?URI 包含密钥，请安全保管�?,
+              '⚠️ 此 URI 包含密钥，请安全保管',
               style: TextStyle(color: Colors.orange, fontSize: 13),
             ),
             const SizedBox(height: 12),
@@ -146,11 +146,11 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
   /// 导出为二维码
   void _exportAsQrCode() {
     final uri = widget.payload.toOtpAuthUri();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('二维码导�?),
+        title: const Text('二维码导出'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -160,7 +160,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
             ),
             const SizedBox(height: 16),
             // 简易二维码展示（使用文本图案模拟）
-            // 实际生产中应使用 qr_flutter �?
+            // 实际生产中应使用 qr_flutter 套件
             Container(
               width: 200,
               height: 200,
@@ -172,7 +172,8 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.qr_code_2, size: 100, color: Colors.black87),
+                    const Icon(Icons.qr_code_2,
+                        size: 100, color: Colors.black87),
                     const SizedBox(height: 8),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -200,7 +201,8 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
             const SizedBox(height: 12),
             Text(
               '提示: 可使用其他验证器扫描此二维码导入',
-              style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5)),
+              style: TextStyle(
+                  fontSize: 12, color: Colors.white.withValues(alpha: 0.5)),
               textAlign: TextAlign.center,
             ),
           ],
@@ -249,10 +251,10 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除验证�?),
+        title: const Text('删除验证器'),
         content: Text(
-          '确定要删�?"${widget.payload.issuer}" 的验证器吗？\n\n'
-          '⚠️ 删除后将无法恢复，请确保你已在对应网站禁用了二步验证或有其他备份�?,
+          '确定要删除 "${widget.payload.issuer}" 的验证器吗？\n\n'
+          '⚠️ 删除后将无法恢复，请确保你已在对应网站禁用了二步验证或有其他备份',
         ),
         actions: [
           TextButton(
@@ -285,9 +287,8 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.payload.issuer.isNotEmpty 
-            ? widget.payload.issuer 
-            : '验证器详�?),
+        title: Text(
+            widget.payload.issuer.isNotEmpty ? widget.payload.issuer : '验证器详情'),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -319,7 +320,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                 value: 'export_text',
                 child: ListTile(
                   leading: Icon(Icons.text_snippet, size: 20),
-                  title: Text('导出为文�?),
+                  title: Text('导出为文件'),
                   dense: true,
                 ),
               ),
@@ -347,7 +348,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // ====== 验证码区�?======
+          // ====== 验证码区域 ======
           Card(
             elevation: 4,
             color: const Color(0xFF1A2744),
@@ -359,7 +360,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  // 发行方图�?+ 名称
+                  // 发行方图标 + 名称
                   Container(
                     width: 64,
                     height: 64,
@@ -395,9 +396,9 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                       ),
                     ),
                   const SizedBox(height: 20),
-                  // 验证�?
+                  // 验证码
                   GestureDetector(
-                    onTap: () => _copyToClipboard(_currentCode, '验证�?),
+                    onTap: () => _copyToClipboard(_currentCode, '验证码'),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -434,7 +435,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // 倒计�?
+                  // 倒计时
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -461,9 +462,8 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                color: _remaining <= 5
-                                    ? Colors.red
-                                    : Colors.white,
+                                color:
+                                    _remaining <= 5 ? Colors.red : Colors.white,
                               ),
                             ),
                           ],
@@ -495,16 +495,18 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
             ),
             child: Column(
               children: [
-                _buildInfoTile('发行�?, widget.payload.issuer, Icons.business),
-                _buildInfoTile('账号', widget.payload.account, Icons.person_outline),
+                _buildInfoTile('发行方', widget.payload.issuer, Icons.business),
+                _buildInfoTile(
+                    '账号', widget.payload.account, Icons.person_outline),
                 _buildInfoTile('算法', widget.payload.algorithm, Icons.settings),
-                _buildInfoTile('位数', '${widget.payload.digits} �?, Icons.pin),
+                _buildInfoTile('位数', '${widget.payload.digits} 位', Icons.pin),
                 _buildInfoTile(
                   '刷新周期',
-                  '${widget.payload.period} �?,
+                  '${widget.payload.period} 秒',
                   Icons.timer,
                 ),
-                if (widget.payload.notes != null && widget.payload.notes!.isNotEmpty)
+                if (widget.payload.notes != null &&
+                    widget.payload.notes!.isNotEmpty)
                   _buildInfoTile('备注', widget.payload.notes!, Icons.notes),
               ],
             ),
@@ -527,7 +529,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
               Expanded(
                 child: _buildActionButton(
                   icon: Icons.qr_code,
-                  label: '导出二维�?,
+                  label: '导出二维码',
                   color: const Color(0xFF00BFA6),
                   onPressed: _exportAsQrCode,
                 ),
@@ -568,7 +570,8 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
   Widget _buildInfoTile(String label, String value, IconData icon) {
     return ListTile(
       leading: Icon(icon, color: const Color(0xFF6C63FF), size: 20),
-      title: Text(label, style: const TextStyle(fontSize: 13, color: Colors.white60)),
+      title: Text(label,
+          style: const TextStyle(fontSize: 13, color: Colors.white60)),
       trailing: Text(
         value,
         style: const TextStyle(

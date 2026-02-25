@@ -8,11 +8,11 @@ import '../../core/crypto/totp_generator.dart';
 import 'auth_detail_screen.dart';
 
 /// Authenticator 页面 - 三重鼎立之验证器
-/// 
-/// 加密策略�?
+///
+/// 加密策略
 /// - 列表状态：卡片名称显示为盲索引摘要（轻度加密）
-/// - 点击卡片：按需解密，显�?TOTP 验证�?
-/// - 验证码每 30 秒自动刷�?
+/// - 点击卡片：按需解密，显示 TOTP 验证码
+/// - 验证码每 30 秒自动刷新
 class AuthenticatorScreen extends StatefulWidget {
   final VaultService vaultService;
   final AuthService authService;
@@ -39,10 +39,10 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
   List<AuthCard> _cards = [];
   List<AuthCard> _filteredCards = [];
   bool _isLoading = true;
-  
+
   // TOTP 刷新
   Timer? _totpTimer;
-  final Map<String, _DecryptedEntry> _decryptedEntries = {};  // 展开的卡片缓�?
+  final Map<String, _DecryptedEntry> _decryptedEntries = {}; // 展开的卡片缓存
 
   @override
   void initState() {
@@ -110,7 +110,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
     });
   }
 
-  /// 按需解密 - 切换卡片展开/折叠状�?
+  /// 按需解密 - 切换卡片展开/折叠状态
   void _toggleCard(AuthCard card) {
     setState(() {
       if (_decryptedEntries.containsKey(card.cardId)) {
@@ -131,7 +131,8 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
             _decryptedEntries[card.cardId] = _DecryptedEntry(
               payload: payload,
               code: code,
-              remaining: TOTPGenerator.getRemainingSeconds(period: payload.period),
+              remaining:
+                  TOTPGenerator.getRemainingSeconds(period: payload.period),
               progress: TOTPGenerator.getProgress(period: payload.period),
             );
             HapticFeedback.mediumImpact();
@@ -141,18 +142,18 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
     });
   }
 
-  /// 复制验证码到剪贴�?
+  /// 复制验证码到剪贴板
   void _copyCode(String code) {
     Clipboard.setData(ClipboardData(text: code));
     HapticFeedback.lightImpact();
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
             const Icon(Icons.check_circle, color: Colors.white, size: 20),
             const SizedBox(width: 8),
-            Text('验证�?$code 已复�?),
+            Text('验证码 $code 已复制'),
           ],
         ),
         backgroundColor: const Color(0xFF00BFA6),
@@ -161,13 +162,12 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
-    
-    // 10 秒后清除剪贴�?
+
+    // 10 秒后清除剪贴板
     Future.delayed(const Duration(seconds: 10), () {
       Clipboard.setData(const ClipboardData(text: ''));
     });
   }
-
 
   Future<void> _navigateToAuthDetail(AuthCard card) async {
     final entry = _decryptedEntries[card.cardId];
@@ -197,14 +197,14 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // 搜索�?
+        // 搜索框
         Padding(
           padding: const EdgeInsets.all(16),
           child: TextField(
             controller: _searchController,
             onChanged: _search,
             decoration: InputDecoration(
-              hintText: '搜索验证�?..',
+              hintText: '搜索验证器...',
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
@@ -218,7 +218,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
             ),
           ),
         ),
-        // 统计�?
+        // 统计卡片
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
@@ -226,7 +226,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
               _buildStatChip(
                 Icons.verified_user,
                 '${_cards.length}',
-                '验证�?,
+                '验证器',
               ),
               const SizedBox(width: 8),
               _buildStatChip(
@@ -263,16 +263,14 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
 
   Widget _buildAuthCardItem(AuthCard card, _DecryptedEntry? entry) {
     final isExpanded = entry != null;
-    
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       margin: const EdgeInsets.only(bottom: 12),
       child: Card(
         elevation: isExpanded ? 4 : 0,
-        color: isExpanded 
-            ? const Color(0xFF1A2744) 
-            : const Color(0xFF16213E),
+        color: isExpanded ? const Color(0xFF1A2744) : const Color(0xFF16213E),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: isExpanded
@@ -288,18 +286,25 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 头部：图�?+ 名称 + 锁状�?
+                // 头部：图标 + 名称 + 锁状态
                 Row(
                   children: [
-                    // 发行方图�?
+                    // 发行方图标
                     Container(
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: isExpanded
-                              ? [const Color(0xFF00BFA6), const Color(0xFF6C63FF)]
-                              : [const Color(0xFF6C63FF).withValues(alpha: 0.6), const Color(0xFF00BFA6).withValues(alpha: 0.6)],
+                              ? [
+                                  const Color(0xFF00BFA6),
+                                  const Color(0xFF6C63FF)
+                                ]
+                              : [
+                                  const Color(0xFF6C63FF)
+                                      .withValues(alpha: 0.6),
+                                  const Color(0xFF00BFA6).withValues(alpha: 0.6)
+                                ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -318,11 +323,11 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            isExpanded 
-                                ? entry.payload.issuer.isNotEmpty 
-                                    ? entry.payload.issuer 
+                            isExpanded
+                                ? entry.payload.issuer.isNotEmpty
+                                    ? entry.payload.issuer
                                     : entry.payload.account
-                                : '●●�?点击解密 ●●�?,
+                                : '●● 点击解密 ●●',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -352,21 +357,21 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                         ],
                       ),
                     ),
-                    // �?解锁状�?
+                    // 解锁状态
                     Icon(
                       isExpanded ? Icons.lock_open : Icons.lock_outline,
-                      color: isExpanded 
-                          ? const Color(0xFF00BFA6) 
+                      color: isExpanded
+                          ? const Color(0xFF00BFA6)
                           : Colors.white.withValues(alpha: 0.3),
                       size: 20,
                     ),
                   ],
                 ),
-                
-                // 展开区域：TOTP 验证�?
+
+                // 展开区域：TOTP 验证码
                 if (isExpanded) ...[
                   const SizedBox(height: 16),
-                  // 分隔�?
+                  // 分隔线
                   Container(
                     height: 1,
                     decoration: BoxDecoration(
@@ -380,7 +385,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // 验证码区�?
+                  // 验证码区域
                   Row(
                     children: [
                       // 倒计时环
@@ -395,7 +400,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                               strokeWidth: 3,
                               backgroundColor: Colors.white10,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                entry.remaining <= 5 
+                                entry.remaining <= 5
                                     ? Colors.red
                                     : entry.remaining <= 10
                                         ? Colors.orange
@@ -407,8 +412,8 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: entry.remaining <= 5 
-                                    ? Colors.red 
+                                color: entry.remaining <= 5
+                                    ? Colors.red
                                     : Colors.white,
                               ),
                             ),
@@ -416,7 +421,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // 验证�?
+                      // 验证码
                       Expanded(
                         child: GestureDetector(
                           onTap: () => _copyCode(entry.code),
@@ -429,7 +434,8 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                               color: const Color(0xFF0F3460),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: const Color(0xFF6C63FF).withValues(alpha: 0.2),
+                                color: const Color(0xFF6C63FF)
+                                    .withValues(alpha: 0.2),
                               ),
                             ),
                             child: Row(
@@ -459,7 +465,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // 底部操作�?
+                  // 底部操作栏
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -534,9 +540,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            _searchController.text.isEmpty
-                ? '暂无验证�?
-                : '未找到匹配项',
+            _searchController.text.isEmpty ? '暂无验证器' : '未找到匹配项',
             style: TextStyle(
               fontSize: 18,
               color: Colors.white.withValues(alpha: 0.6),
@@ -545,7 +549,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
           const SizedBox(height: 8),
           if (_searchController.text.isEmpty)
             Text(
-              '点击右下�?+ 按钮添加第一个验证器',
+              '点击右下角 + 按钮添加第一个验证器',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.white.withValues(alpha: 0.4),

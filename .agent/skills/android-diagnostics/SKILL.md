@@ -1,40 +1,63 @@
 ---
 name: android-diagnostics
-description: Android/Kotlin 编译与运行时错误分析专家。专门处理 Gradle 同步失败、协程死锁、以及 Android 运行时崩溃。
-version: 1.0
+description: Flutter 构建与原生层错误诊断。处理 Gradle 同步失败、build_runner 代码生成异常、SQLCipher 链接错误及平台特定崩溃。
+version: 2.0
 ---
 
 # 🎯 Triggers
-- 当编译报错并提示 "Gradle sync failed" 或 "Compilation error" 时。
-- 当出现 Android 运行时崩溃 (NullPointerException, ANR, IllegalStateException) 时。
-- 当协程执行出现死锁或挂起不返回时。
-- 当 Proguard/R8 混淆导致类找不到 (ClassNotFoundException) 时。
+- `flutter build` 或 `flutter run` 报错时。
+- `dart run build_runner build` 生成代码报错（freezed/json_serializable 冲突）。
+- Android 原生层崩溃（Logcat 中出现 `FATAL EXCEPTION`）。
+- SQLCipher native library 加载失败 (`UnsatisfiedLinkError`, `DllNotFoundException`)。
+- iOS `pod install` 失败或 CocoaPods 版本冲突。
 
 # 🧠 Role & Context
-你是一名 **Android 诊断专家**。你对 JVM 字节码、DEX 优化、Android Framework 源码及 Gradle 构建系统有深入理解。你能够从堆栈信息中快速定位到根源。
+你是本项目的 **构建诊断专家**。项目是 Flutter 密码管理器 (ZTD Password Manager)，依赖 `sqflite_sqlcipher`（本地加密DB）、`flutter_secure_storage`（TEE）、`mobile_scanner`（QR扫描）等原生插件。你需要快速定位构建错误是来自 Dart 层、Gradle/Xcode 层还是 native library 层。
 
 # ✅ Standards & Rules
-- **Stacktrace Analysis**:
-    - 必须优先检查 `Caused by:` 链条中的最底层原因。
-    - 对于混淆后的堆栈，必须询问用户是否提供 `mapping.txt`。
-- **Gradle Diagnostics**:
-    - 检查 `build.gradle.kts` 中的版本冲突。
-    - 推荐使用 `./gradlew <task> --stacktrace --info` 获取详细日志。
-- **Coroutine Safety**:
-    - 诊断协程问题时，检查是否在 UI 线程执行了耗时操作。
-    - 检查 `ViewModelScope` 是否正确取消。
+
+## 项目特定依赖链
+```
+pubspec.yaml
+├── sqflite_sqlcipher → 需要 NDK (Android) / libsqlcipher (iOS)
+├── flutter_secure_storage → Android Keystore / iOS Keychain
+├── local_auth → BiometricPrompt (Android) / LAContext (iOS)
+├── mobile_scanner → CameraX (Android) / AVFoundation (iOS)
+├── webdav_client → dio → HTTP/TLS stack
+└── freezed + json_serializable → build_runner 代码生成
+```
+
+## 诊断矩阵
+| 错误类型 | 检查路径 | 修复方向 |
+|---------|---------|---------|
+| `build_runner` 冲突 | `*.g.dart` / `*.freezed.dart` 文件 | `dart run build_runner build --delete-conflicting-outputs` |
+| Gradle sync 失败 | `android/build.gradle`, `android/app/build.gradle` | 检查 minSdkVersion、NDK 版本、依赖冲突 |
+| SQLCipher 链接错误 | native library path | 检查 NDK 配置或 `sqflite_sqlcipher` 版本 |
+| iOS Pod 失败 | `ios/Podfile`, `ios/Podfile.lock` | `cd ios && pod install --repo-update` |
+| `flutter analyze` 报错 | `analysis_options.yaml` | 逐条修复 lint warning/error |
+
+## 项目实际路径
+- 入口: `lib/main.dart` → `AppNavigator` (StatefulWidget 状态机)
+- 模型: `lib/core/models/` (password_card, auth_card, hlc, password_event)
+- 加密: `lib/core/crypto/` (crypto_service, key_manager, crypto_facade, totp_generator)
+- 存储: `lib/core/storage/database_service.dart` (SQLCipher)
+- 同步: `lib/core/sync/webdav_sync.dart`
+- 服务: `lib/services/vault_service.dart`, `lib/services/auth_service.dart`
+- UI: `lib/ui/screens/` (11 screens)
+- 测试: `test/crypto_test.dart`, `test/hlc_test.dart`
 
 # 🚀 Workflow
-1.  **Extract**: 提取完整的错误堆栈或 Gradle Output。
-2.  **Locate**: 确定错误发生的层级（Build time vs Runtime）。
-3.  **Root Cause**: 
-    - Build: 检查依赖树 (`./gradlew app:dependencies`)。
-    - Runtime: 检查代码路径、Nullability 及 Lifecycle。
-4.  **Fix**: 提供修复建议并验证。
+1. **Extract**: 获取完整 error output（`flutter build apk --release 2>&1`）。
+2. **Classify**: 判断错误层级 → Dart compile / build_runner / Gradle / Native。
+3. **Fix**: 对症下药。
+4. **Verify**: `flutter analyze` + `flutter build apk --release` 通过。
 
 # 💡 Examples
-**User:** "应用启动就崩溃了。"
-**Agent:** 
-"请提供 Logcat 堆栈。
-通过分析堆栈，我发现是 `Room` 数据库在升迁时缺少了 `Migration` 路径导致 `IllegalStateException`。
-建议：增加 `Migration` 类或在测试环境启用 `fallbackToDestructiveMigration()`。"
+**Scenario:** `build_runner` 报 `Conflicting outputs` 错误。
+**Fix:** 
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+**Scenario:** SQLCipher 在 Android 14 上崩溃。
+**Fix:** 检查 `android/app/build.gradle` 的 `minSdkVersion` 及 NDK ABI filter。

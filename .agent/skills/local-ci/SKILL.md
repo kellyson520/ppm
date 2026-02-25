@@ -1,7 +1,7 @@
 ---
 name: local-ci
-description: 本地 CI 执行器。在提交代码前强制运行架构检查、风格检查和针对性单元测试，确保本地质量门禁通过后才允许推送云端。支持进度显示、时间统计和执行摘要。
-version: 1.1
+description: 本地 CI 执行器。在提交代码前强制运行架构检查、风格检查和针对性单元测试（适配 Flutter/Dart 及原生层），确保本地质量门禁通过。
+version: 2.0
 ---
 
 # 🎯 Triggers
@@ -10,73 +10,39 @@ version: 1.1
 - 当用户询问 "代码是否符合规范" 时。
 
 # 🧠 Role & Context
-你是一名 **质量卫士 (Gatekeeper)**。你的职责是阻止并将低质量代码（架构违规、风格差、未通过测试）拦截在本地。你绝不妥协，因为你是 PSB 工程系统的最后一道防线。
+你是一名 **质量卫士 (Gatekeeper)**。你的职责是拦截并将低质量代码（分析错误、格式差、未通过测试）拦截在本地。由于本项目为 Flutter 项目，你必须优先执行 Flutter 原生质量检查工具。
 
 # ✅ Standards & Rules
-## 1. Local CI 流程 (Standard Procedure)
-执行 Local CI 必须遵循以下严格顺序，**且参数配置必须与 GitHub Actions (`.github/workflows/ci.yml`) 保持 1:1 一致** (Production Mirroring)：
 
-1.  **代码风格检查 (Detekt)**: 检查 Kotlin 代码风格与复杂度。
-2.  **静态分析 (Android Lint)**: 检查 Android 资源、权限及潜在 Bug。
-3.  **单元测试 (Test)**: 
-    - 如果用户提供了测试类，运行指定的针对性测试。命令: `./gradlew :app:testDebugUnitTest --tests "com.focusflow.path.to.Test"`。
-    - 如果用户未提供文件，**不推荐全量测试**（耗时过长），应优先运行相关模块测试。
+## 1. Flutter Local CI 流程 (Standard)
+1.  **代码风格格式化**: `dart format .`
+2.  **静态分析**: `flutter analyze` (禁止任何 error/warning/info，根据项目配置决定阈值)。
+3.  **生成代码校验**: 
+    - 若修改了模型或 BLoC：`dart run build_runner build --delete-conflicting-outputs`。
+4.  **单元测试 (Test)**: 
+    - 针对性测试: `flutter test test/path/to/test.dart`。
+    - 全量测试: `flutter test` (仅在必要时执行，建议聚焦修改模块)。
 
-## 2. 失败处置 (Failure Handling)
-- 任何 Build Breaker 步骤失败，立即终止流程。
-- 必须给出具体的修复建议（例如：哪个文件违反了架构，哪一行代码风格不对）。
-- **禁止推送到云端**: 只有当 Local CI 全部通过时，才允许调用 `git-manager` 的推送功能。
+## 2. 原生层检查 (Native Layer)
+- 若修改了 `android/` 目录: `./gradlew lintDebug`。
+- 若修改了 `ios/` 目录: 执行 `pod lib lint` (若适用)。
+
+## 3. 失败处置 (Failure Handling)
+- 任何步骤失败，立即终止。
+- 禁止推送到云端。
+- 必须定位到具体的分析错误或测试失败点。
 
 # 🚀 Workflow
-1.  **Analyze**: 确认当前工作区根目录及 `.github/workflows/ci.yml` 配置。
-2.  **Execute Static Analysis**: 运行 `python .agent/skills/local-ci/scripts/local_ci.py` (不带测试参数)。
-    - *Agent 注意*: 若发现 CI 脚本与 GitHub Actions 不一致，应优先修复 CI 脚本。
-3.  **Execute Local CI**: 
-    - 运行 `./gradlew testDebugUnitTest`。
-    - **针对性测试**: 使用 `--tests` 参数。
-    - **跳过检查**: 使用 `-x detekt` 或 `-x lint`。
-4.  **Result**:
-    - ✅ **PASS**: 提示用户 "Local CI Passed. You may proceed to Ship." 并推荐调用 `git-manager`。
-    - ❌ **FAIL**: 打印 Gradle 错误输出，定位具体失败的测试用例。
-    
-## 3. 自动修复 (Auto-Fix)
-如果 CI 报告中出现大量 Lint 错误 (如 F401, F811)：
-- AI 应当主动建议或自动运行修复脚本：
-  `python .agent/skills/local-ci/scripts/fix_lint.py`
-- 修复后，必须再次运行 `local_ci.py` 验证修复结果。
-
-## 4. 进度显示 (Progress Display)
-**v1.1 新增功能**: 本地 CI 现在提供清晰的进度显示和执行摘要：
-- **总体进度**: 显示 `[当前步骤/总步骤] (百分比)` 格式的进度信息
-- **时间统计**: 每个步骤完成后显示耗时，帮助识别性能瓶颈
-- **执行摘要**: 以表格形式展示所有步骤的执行结果和耗时
-- **视觉优化**: 使用统一的图标系统（🔄 执行中、✅ 成功、❌ 失败、⚠️ 警告）
-
-### 可用参数
-- `--test, -t <file1> <file2> ...`: 指定测试文件（无数量限制，推荐聚焦核心）
-- `--concurrency, -n <num>`: 指定测试并发数 (默认: 2)
-- `--skip-arch`: 跳过架构检查
-- `--skip-flake`: 跳过代码质量检查
-- `--skip-test`: 跳过测试阶段（新增）
-- **报告生成**: 测试日志会自动保存至 `tests/temp/reports/`，避免污染根目录。
-
-详细示例请参考 `PROGRESS_DEMO.md`。
-
-
+1.  **Analyze**: 确认当前工作区是否为 Flutter。
+2.  **Execute Flutter Lint**: `flutter analyze`。
+3.  **Execute Build Runner**: 若涉及 Freezed/JsonSerializable，运行 `dart run build_runner build`。
+4.  **Execute Tests**: 运行受影响模块的 `flutter test`。
+5.  **Result**: 全部 ✅ 通过后，提示用户可进行 `git commit`。
 
 # 💡 Examples
-
-**User:** "我要提交代码。"
+**User:** "准备提交二维码扫描功能的改动。"
 **Agent:** 
-"收到。在提交之前，我需要执行本地 CI 检查。
-首先运行静态检查...
-(Run `python .agent/skills/local-ci/scripts/local_ci.py`)
-静态检查通过。
-为了验证逻辑正确性，请告诉我您修改的核心逻辑对应的测试文件路径（最多 3 个）。"
-
-**User:** "tests/unit/services/test_auth.py tests/unit/services/test_user.py"
-**Agent:**
-"正在运行针对性测试...
-(Run `python .agent/skills/local-ci/scripts/local_ci.py --test tests/unit/services/test_auth.py tests/unit/services/test_user.py`)
-测试通过！✅
-您现在可以使用 `git-manager` 推送代码了。"
+"收到。正在执行 Flutter 本地 CI 预检...
+1. 运行 `flutter analyze`... [成功]
+2. 运行相关测试 `test/ui/screens/qr_scanner_test.dart`... [成功]
+CI 预检通过！您可以放心提交。"

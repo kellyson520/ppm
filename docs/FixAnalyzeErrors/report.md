@@ -14,6 +14,7 @@
    - 修复了 unnecessary_const (第 538, 539 行)。
    - 修复了 prefer_const_constructors (第 454, 480 行)。
 4. **全局废弃警告**: 批量将所有 .withOpacity(...) 替换为 .withValues(alpha: ...)，以适配 Flutter 3.24+。
+5. **构建配置优化**: 添加了 `build.yaml` 过滤 `lib/ui/**` 相关目录的 AST 扫描，解决 `json_serializable` 分析器无限卡死/超时问题。
 
 ## 验证方式
 
