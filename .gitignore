@@ -8,6 +8,11 @@
 build/
 *.g.dart
 *.freezed.dart
+*.mocks.dart
+build.yaml
+
+# build_runner local cache
+.build/
 
 # IDE
 .idea/
