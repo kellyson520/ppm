@@ -23,6 +23,13 @@
 
 ---
 
+## 版本兼容性说明 (Compatibility)
+
+- **Flutter 版本**: 本次开发使用了 `withOpacity` 并配合 `// ignore: deprecated_member_use`。
+- **原因**: 项目 CI 环境锁定在 Flutter `3.24.5`，该版本尚未完全支持 `withValues` (undefined_method)。为了确保 CI 质量门禁通过，统一使用兼容性写法。
+
+---
+
 ## 架构说明
 
 ```
