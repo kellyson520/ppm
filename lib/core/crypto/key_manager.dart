@@ -38,7 +38,7 @@ class KeyManager {
           ),
           iOptions: IOSOptions(
             accountName: 'ztd_password_manager',
-            accessibility: KeychainAccessibility.whenUnlockedThisDeviceOnly,
+            accessibility: KeychainAccessibility.unlocked,
           ),
         ),
         _cryptoService = cryptoService ?? CryptoService();

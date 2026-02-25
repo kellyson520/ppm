@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:webdav_client/webdav_client.dart' as webdav;
@@ -227,7 +229,7 @@ class WebDavSyncManager {
       final response = await client.read(
         'ztd-password-manager/manifest.json',
       );
-      final json = jsonDecode(response) as Map<String, dynamic>;
+      final json = jsonDecode(utf8.decode(response)) as Map<String, dynamic>;
       return SyncManifest.fromJson(json);
     } catch (e) {
       return null;
@@ -269,7 +271,7 @@ class WebDavSyncManager {
             final content = await client.read(
               'ztd-password-manager/events/${file.name}',
             );
-            final json = jsonDecode(content) as Map<String, dynamic>;
+            final json = jsonDecode(utf8.decode(content)) as Map<String, dynamic>;
             events.add(PasswordEvent.fromJson(json));
           } catch (e) {
             // Skip invalid event files
@@ -321,7 +323,7 @@ class WebDavSyncManager {
         
         await client.write(
           'ztd-password-manager/snapshots/$snapshotName',
-          content,
+          Uint8List.fromList(content),
         );
       } catch (e) {
         // Failed to upload snapshot to this node

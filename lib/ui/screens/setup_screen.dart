@@ -362,7 +362,7 @@ class _SetupScreenState extends State<SetupScreen> {
           Icon(
             met ? Icons.check_circle : Icons.circle_outlined,
             size: 16,
-            color: met ? Colors.green : Colors.white40,
+            color: met ? Colors.green : Colors.white.withValues(alpha: 0.4),
           ),
           const SizedBox(width: 8),
           Text(

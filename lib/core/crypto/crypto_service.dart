@@ -198,8 +198,8 @@ class CryptoService {
     hkdf.init(HkdfParameters(
       ikm,
       length,
-      salt: salt ?? Uint8List(0),
-      info: info ?? Uint8List(0),
+      salt ?? Uint8List(0),
+      info ?? Uint8List(0),
     ));
     
     return hkdf.process(Uint8List(0));

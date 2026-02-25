@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:equatable/equatable.dart';
 import 'package:uuid/uuid.dart';
@@ -43,7 +42,7 @@ class EncryptedPayload extends Equatable {
   String serialize() => base64Encode(utf8.encode(jsonEncode(toJson())));
 
   factory EncryptedPayload.deserialize(String data) {
-    final json = jsonDecode(utf8.encode(base64Decode(data)) as String) as Map<String, dynamic>;
+    final json = jsonDecode(utf8.decode(base64Decode(data))) as Map<String, dynamic>;
     return EncryptedPayload.fromJson(json);
   }
 
