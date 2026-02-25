@@ -1,6 +1,16 @@
 # Changelog
 
+## [0.2.4] - 2026-02-25
+
+### ✨ 新功能 (Features)
+- **崩溃日志系统**：新增全局异常捕获与崩溃弹窗机制
+  - 新增 `lib/core/diagnostics/crash_report_service.dart`：Singleton 服务，三路拦截 Flutter 框架/Platform/Zone 异常
+  - 新增 `lib/ui/screens/crash_report_screen.dart`：深色主题全屏崩溃界面，展示时间戳、来源标签、错误摘要与完整可选择 StackTrace
+  - 提供「**复制报告**」（写入剪贴板，含格式化文本）和「**关闭应用**」两个操作按钮
+  - `main.dart` 注入 `GlobalKey<NavigatorState>` 与 `runZonedGuarded`，崩溃时自动清空路由栈并导航至崩溃界面
+
 ## [0.2.3] - 2026-02-25
+
 
 ### ✨ 新功能 (Features)
 - **多平台支持**：正式启用 Windows, macOS, Linux 及 Web 端支持，完成全平台工程初始化
