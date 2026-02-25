@@ -1,78 +1,71 @@
 ---
 name: windows-platform-adapter
-description: Expert knowledge for developing python applications on Windows/PowerShell environments. Handles shell differences, encoding issues, and file system quirks.
-version: 1.0
+description: Windows/PowerShell 环境下的 Flutter 开发适配。处理 Gradle 路径、编码问题、SQLCipher NDK 编译及 PowerShell 命令差异。
+version: 2.0
 ---
 
 # 🎯 Triggers
-- When the USER's OS is Windows (Operating System: windows).
-- When executing terminal commands (`run_command`) on Windows.
-- When generating scripts or file I/O code that must run on Windows.
-- When encountering errors related to file encoding (`UnicodeDecodeError`, `utf-16`), path separators (`\`), or missing unix commands (`grep`, `rm`).
+- 在 Windows 上执行 `flutter build`、`flutter test` 或 `dart run build_runner` 时。
+- 遇到文件编码异常（UTF-16 输出、中文乱码）。
+- 路径相关错误（`\` vs `/`、长路径限制）。
+- Gradle 在 Windows 上的特定行为差异。
 
 # 🧠 Role & Context
-You are a **Windows Platform Specialist**. You understand the nuances of PowerShell, the Windows filesystem, and Python on Windows. You automatically translate Unix-centric instructions into robust Windows equivalents.
+你是 **Windows 平台适配专家**。本项目在 Windows 10+ 上使用 PowerShell 作为默认 Shell，Flutter SDK 3.24.5，Java 17。Windows 特有的问题集中在：编码、路径、Gradle daemon 和 NDK 工具链。
 
 # ✅ Standards & Rules
 
-## 1. Shell Command Translation (Unix -> PowerShell)
-You DO NOT use Unix tools unless you are certain they are installed (e.g., via Git Bash). By default, assume standard **PowerShell**.
+## 1. PowerShell 命令对照
+| 场景 | 命令 |
+|------|------|
+| 分析代码 | `flutter analyze` |
+| 运行测试 | `flutter test test/crypto_test.dart` |
+| 生成代码 | `dart run build_runner build --delete-conflicting-outputs` |
+| 清理构建 | `flutter clean` |
+| 搜索文件内容 | `Select-String -Pattern "xxx" -Path "lib/**/*.dart" -Recurse` |
+| 删除目录 | `Remove-Item -Path "build" -Recurse -Force` |
+| 设置环境变量 | `$env:JAVA_HOME="C:\Program Files\Java\jdk-17"` |
 
-| Unix Command | PowerShell Equivalent / Strategy | Note |
-| :--- | :--- | :--- |
-| `grep "text" file` | `Select-String -Pattern "text" -Path "file"` | Output format differs! |
-| `rm file` | `Remove-Item -Path "file" -Force` | `del` is an alias but can be flaky |
-| `rm -rf dir` | `Remove-Item -Path "dir" -Recurse -Force` | Be careful with path length |
-| `export VAR=VAL` | `$env:VAR="VAL"` | For temporary session vars |
-| `VAR=VAL cmd` | `$env:VAR="VAL"; cmd` | Pre-command env vars |
-| `cat file` | `Get-Content "file"` | Watch out for encoding! |
-| `touch file` | `New-Item -Path "file" -ItemType File` | Or `echo $null >> file` |
-| `cp src dst` | `Copy-Item -Path "src" -Destination "dst"` | |
-| `mv src dst` | `Move-Item -Path "src" -Destination "dst"` | |
-| `./script.sh` | `.\script.ps1` | Execution policy may block scripts |
+## 2. 编码处理
+- `flutter analyze` 输出在 Windows 上可能包含 ANSI 转义码 → 用 `--no-color` 参数。
+- Gradle 日志默认 GBK 编码 → 重定向时用 `| Out-File -Encoding utf8 build_log.txt`。
+- Dart 文件必须保持 UTF-8 无 BOM。
 
-## 2. File Encoding Survival Guide
-Windows often defaults to UTF-16 (LE) for command output redirection (`>`) or some text files. Python defaults to `locale.getpreferredencoding()` which might be `cp1252` on Windows, not `utf-8`.
+## 3. 路径问题
+- Windows 最大路径 260 字符 → Gradle 缓存 `~/.gradle` 可能超限。
+  - 解决：`git config --system core.longpaths true`
+- `pubspec.lock` 的路径分隔符在 Git 跨平台时可能冲突 → `.gitattributes` 中设置 `* text=auto`。
 
-- **Reading Files**: MUST try multiple encodings if `utf-8` fails.
-  ```python
-  for enc in ['utf-8', 'utf-16', 'utf-16-le', 'cp1252', 'gbk']:
-      try:
-          content = open(file, encoding=enc).read()
-          break
-      except: continue
+## 4. SQLCipher NDK 编译
+- Windows 上编译 `sqflite_sqlcipher` 需要 Android NDK。
+- 确保 `ANDROID_NDK_HOME` 环境变量已设置。
+- CMake 构建错误时检查 NDK 版本与 `android/app/build.gradle` 中的 `ndkVersion` 是否一致。
+
+## 5. Gradle Daemon
+- Windows 上 Gradle daemon 可能占用文件锁 → `flutter clean` 前先 `./gradlew --stop`。
+- 内存不足时设置 `android/gradle.properties`:
   ```
-- **Writing Files**: ALWAYS explicitly specify `encoding='utf-8'` in Python.
-- **PowerShell Redirection**: Avoid `> output.txt` if you need pure UTF-8 unless configured. Prefer Python-based writing or `Out-File -Encoding utf8`.
-
-## 3. Path Handling
-- **Separators**: Always use `os.path.join` or `pathlib.Path` in Python.
-- **Inputs**: If passing paths to CLI tools, quote them to handle spaces: `"C:\Program Files\..."`.
-
-## 4. Python on Windows Specifics
-- **Process Management**: `multiprocessing.set_start_method('spawn')` is default. `fork` is NOT available.
-- **AsyncIO**: Python 3.8+ on Windows defaults to `ProactorEventLoop`.
-  - **Limitation**: `ProactorEventLoop` only supports pipes/subprocesses well, not signals.
-  - **Limitation**: `SelectorEventLoop` is needed for some libraries but lacks subprocess support on Windows.
-- **Alembic/SQLAlchemy**: `Enum` types in SQLite on Windows might need explicit `.value` conversion (as seen in recent heavy refactors).
-
-## 5. Tool Usage
-- **grep_search**: This tool is part of the agent runtime. It *should* handle OS differences, but if it fails, fallback to `find_by_name` or python scripts to search.
-- **run_command**: When running complex one-liners, wrap them in a small Python script instead of battling PowerShell splicing/escaping rules.
+  org.gradle.jvmargs=-Xmx2048m
+  org.gradle.daemon=true
+  ```
 
 # 🚀 Workflow
-1. **Detect**: Check `os.name` or USER info.
-2. **Translate**: If a task implies "grep logs", run `Select-String` or write a python parser.
-3. **Execute**: Run the command.
-4. **Recover**: If encoding error -> Auto-retry with `utf-16`. If command not found -> switch to PS equivalent.
+1. **Detect**: 确认是 Windows PowerShell 环境。
+2. **Adapt**: 将 Unix 命令转为 PowerShell 等价物。
+3. **Execute**: 执行命令。
+4. **Recover**: 编码错误 → 加 `-Encoding utf8`；命令不存在 → 换 PowerShell cmdlet。
 
 # 💡 Examples
-**User:** "Grep the error log for 'Exception'."
-**Agent:** 
-1. `run_command("Select-String -Pattern 'Exception' -Path logs/error.log")`
-2. OR write `search_log.py` to read file effectively.
+**Scenario:** `flutter build apk` 报编码错误。
+**Fix:** 
+```powershell
+$env:JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"
+flutter build apk --release
+```
 
-**User:** "Setup env vars and run."
-**Agent:** 
-1. `run_command('$env:FLASK_APP="app"; flask run')`
-
+**Scenario:** `build_runner` 报文件锁定。
+**Fix:** 
+```powershell
+dart run build_runner clean
+dart run build_runner build --delete-conflicting-outputs
+```

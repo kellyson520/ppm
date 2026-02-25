@@ -34,8 +34,8 @@ class PasswordCardItem extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      const Color(0xFF6C63FF).withValues(alpha: 0.8),
-                      const Color(0xFF00BFA6).withValues(alpha: 0.8),
+                      const Color(0xFF6C63FF).withOpacity(0.8),
+                      const Color(0xFF00BFA6).withOpacity(0.8),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -68,7 +68,7 @@ class PasswordCardItem extends StatelessWidget {
                       'ID: ${card.cardId.substring(0, 8)}...',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: Colors.white.withOpacity(0.5),
                       ),
                     ),
                   ],
@@ -77,7 +77,7 @@ class PasswordCardItem extends StatelessWidget {
               // Arrow
               Icon(
                 Icons.chevron_right,
-                color: Colors.white.withValues(alpha: 0.3),
+                color: Colors.white.withOpacity(0.3),
               ),
             ],
           ),

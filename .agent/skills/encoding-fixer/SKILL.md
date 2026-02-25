@@ -1,69 +1,34 @@
 ---
 name: encoding-fixer
-description: Advanced code sanitization tool for fixing Mojibake, encoding errors, and resulting syntax issues in Python/Text files.
-version: 2.1
+description: 文件编码修复工具。处理 Windows 环境下 Gradle 输出乱码、Dart 文件 BOM 问题及构建日志 UTF-16 转换。
+version: 2.0
 ---
 
 # 🎯 Triggers
-- When the user reports "乱码" (Mojibake) or "encoding error".
-- When `UnicodeDecodeError` or `SyntaxError: unterminated string literal` appears.
-- **NEW**: When Chinese text appears as "鍘" (History), "锟" (Replacement), or other GBK-decoding artifacts in Kotlin/XML files.
-- When Kotlin/XML files fail to compile due to illegal character errors.
-- When log files contain `U+FFFD` replacement characters or truncated Chinese text.
+- Gradle 构建日志出现乱码（GBK/CP1252 → UTF-8 转换失败）。
+- Dart 源文件包含 BOM 导致 `flutter analyze` 异常。
+- PowerShell 重定向输出为 UTF-16LE 格式。
+- `CHANGELOG.md` 或其他文档文件编码不一致。
 
 # 🧠 Role & Context
-You are the **Code Sanitizer**. Your job is not just to convert encodings, but to **repair the damage** caused by bad encodings. You know that simple conversion often leaves behind "toxic waste" like truncated strings, unclosed quotes, and chaotic indentation. You use a multi-stage process to restore code health.
+你是 **编码修复专家**。Windows 环境下的 Flutter 开发经常遇到编码问题：Gradle 用 GBK 输出，PowerShell 重定向用 UTF-16LE，而 Dart 要求 UTF-8 无 BOM。
 
 # ✅ Standards & Rules
 
-## 1. Safety First
-- **Backup**: Always ensure a `.bak` file is created before aggressive repair.
-- **Verification**: After repair, YOU MUST run `scripts/syntax_check.py` to ensure the code is valid.
-- **Scope**: Focus on the specific files reported; avoiding scanning the entire project unless asked.
+## 检测矩阵
+| 文件类型 | 期望编码 | 常见异常 |
+|---------|---------|---------|
+| `*.dart` | UTF-8 无 BOM | BOM 头导致 analyze 报错 |
+| `*.md`, `*.yaml` | UTF-8 | Windows 编辑器写入 UTF-16 |
+| Gradle 输出 (`*.log`) | GBK → UTF-8 | 中文注释乱码 |
+| PowerShell 重定向 | UTF-16LE → UTF-8 | `flutter analyze > result.txt` |
 
-## 2. The Repair Hierarchy
-1.  **Level 1: Re-encoding**: Try to open with correct encoding (GB18030, CP1252) and save as UTF-8.
-2.  **Level 2: Dictionary Repair**: If re-encoding fails (double-encoded mojibake), use `smart_repair.py` to replace known garbage patterns with correct text.
-3.  **Level 3: Syntax Patching**: Fix specific syntax errors strings (`unterminated string`) and indentation (`IndentationError`) that result from text truncation.
-
-## 3. Automation
-- Use the provided scripts in `.agent/skills/encoding-fixer/scripts/`.
+## 修复方法
+- **Dart 文件 BOM**: 用编辑器或脚本去除 BOM (`0xEF 0xBB 0xBF`)。
+- **Gradle 日志**: `Get-Content build_log.txt -Encoding Default | Out-File build_log_utf8.txt -Encoding utf8`
+- **PowerShell 输出**: 使用 `| Out-File -Encoding utf8` 替代 `>`。
 
 # 🚀 Workflow
-
-1.  **Diagnosis**:
-    Scan the file to identify issues.
-    ```bash
-    python .agent/skills/encoding-fixer/scripts/scan.py path/to/file.py
-    ```
-
-2.  **Smart Repair**:
-    Apply the intelligent repair script which handles Mojibake mapping and syntax fixing.
-    ```bash
-    python .agent/skills/encoding-fixer/scripts/smart_repair.py path/to/file.py
-    ```
-
-3.  **Syntax Verification**:
-    - For Python: `python .agent/skills/encoding-fixer/scripts/syntax_check.py path/to/file.py`
-    - For Kotlin: `./gradlew ktlintCheck` or check IDE errors.
-
-4.  **Final Polish (Optional)**:
-    If needed, run a code formatter (like `black`) to fix indentation issues permanently.
-    ```bash
-    black path/to/file.py
-    ```
-
-# 🛠️ Toolkit
-
-- **`scripts/scan.py`**: Detects non-UTF8 and binary characters.
-- **`scripts/fix.py`**: Basic encoding converter (GBK -> UTF-8).
-- **`scripts/smart_repair.py`**: Advanced repair for Mojibake, truncated strings, and unclosed quotes.
-- **`scripts/syntax_check.py`**: Validates Python syntax using `ast` and `compile()`.
-
-# 💡 Examples
-
-**User**: "The `config.py` has weird characters and fails to run."
-**Agent**:
-1.  Run `scan.py` -> "Found GBK sequences".
-2.  Run `smart_repair.py` -> "Fixed 12 mojibake lines, closed 2 unterminated strings".
-3.  Run `syntax_check.py` -> "Syntax OK".
+1. **Detect**: 识别文件编码（前几个字节判定 BOM/UTF-16/GBK）。
+2. **Convert**: 转换为 UTF-8 无 BOM。
+3. **Verify**: 确认文件可被 `flutter analyze` 和 `dart format` 正确处理。

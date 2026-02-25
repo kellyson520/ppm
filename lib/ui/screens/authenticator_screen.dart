@@ -302,8 +302,8 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                                 ]
                               : [
                                   const Color(0xFF6C63FF)
-                                      .withValues(alpha: 0.6),
-                                  const Color(0xFF00BFA6).withValues(alpha: 0.6)
+                                      .withOpacity(0.6),
+                                  const Color(0xFF00BFA6).withOpacity(0.6)
                                 ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -341,7 +341,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                               entry.payload.account,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.white.withValues(alpha: 0.5),
+                                color: Colors.white.withOpacity(0.5),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -351,7 +351,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                               'ID: ${card.cardId.substring(0, 12)}...',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.white.withValues(alpha: 0.3),
+                                color: Colors.white.withOpacity(0.3),
                               ),
                             ),
                         ],
@@ -362,7 +362,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                       isExpanded ? Icons.lock_open : Icons.lock_outline,
                       color: isExpanded
                           ? const Color(0xFF00BFA6)
-                          : Colors.white.withValues(alpha: 0.3),
+                          : Colors.white.withOpacity(0.3),
                       size: 20,
                     ),
                   ],
@@ -378,7 +378,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                       gradient: LinearGradient(
                         colors: [
                           Colors.transparent,
-                          const Color(0xFF6C63FF).withValues(alpha: 0.3),
+                          const Color(0xFF6C63FF).withOpacity(0.3),
                           Colors.transparent,
                         ],
                       ),
@@ -435,7 +435,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: const Color(0xFF6C63FF)
-                                    .withValues(alpha: 0.2),
+                                    .withOpacity(0.2),
                               ),
                             ),
                             child: Row(
@@ -454,7 +454,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                                 const SizedBox(width: 12),
                                 Icon(
                                   Icons.copy_rounded,
-                                  color: Colors.white.withValues(alpha: 0.5),
+                                  color: Colors.white.withOpacity(0.5),
                                   size: 20,
                                 ),
                               ],
@@ -536,14 +536,14 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
           Icon(
             Icons.verified_user_outlined,
             size: 80,
-            color: Colors.white.withValues(alpha: 0.2),
+            color: Colors.white.withOpacity(0.2),
           ),
           const SizedBox(height: 16),
           Text(
             _searchController.text.isEmpty ? '暂无验证器' : '未找到匹配项',
             style: TextStyle(
               fontSize: 18,
-              color: Colors.white.withValues(alpha: 0.6),
+              color: Colors.white.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: 8),
@@ -552,7 +552,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
               '点击右下角 + 按钮添加第一个验证器',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.4),
+                color: Colors.white.withOpacity(0.4),
               ),
             ),
         ],

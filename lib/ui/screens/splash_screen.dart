@@ -24,7 +24,7 @@ class SplashScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
+                    color: const Color(0xFF6C63FF).withOpacity(0.3),
                     blurRadius: 20,
                     spreadRadius: 5,
                   ),
@@ -72,7 +72,7 @@ class SplashScreen extends StatelessWidget {
               child: CircularProgressIndicator(
                 strokeWidth: 3,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  const Color(0xFF6C63FF).withValues(alpha: 0.8),
+                  const Color(0xFF6C63FF).withOpacity(0.8),
                 ),
               ),
             ),

@@ -615,15 +615,15 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    const Color(0xFF6C63FF).withValues(alpha: 0.15),
-                    const Color(0xFF00BFA6).withValues(alpha: 0.15),
+                    const Color(0xFF6C63FF).withOpacity(0.15),
+                    const Color(0xFF00BFA6).withOpacity(0.15),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(28),
                 border: Border.all(
-                  color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
+                  color: const Color(0xFF6C63FF).withOpacity(0.3),
                   width: 2,
                 ),
               ),
@@ -649,7 +649,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.5),
+                color: Colors.white.withOpacity(0.5),
                 height: 1.5,
               ),
             ),
@@ -685,7 +685,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F3460).withValues(alpha: 0.5),
+                color: const Color(0xFF0F3460).withOpacity(0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Column(

@@ -1,69 +1,65 @@
 ---
 name: full-system-verification
-description: Orchestrates comprehensive system testing including Unit, Integration, and Edge cases.
-version: 1.1
+description: 全系统验证。按项目 CI 流程执行 flutter analyze → flutter test → flutter build，覆盖加密、CRDT、同步等核心模块。
+version: 2.0
 ---
 
 # 🎯 Triggers
-- When the user asks to "verify the system", "run tests", or "check for regressions".
-- During the **Verify** phase of the PSB protocol (Plan-Setup-Build-Verify-Report).
-- After significant refactoring or feature implementation to ensure stability.
-- When `core-engineering` requests a quality gate check.
+- 用户要求"验证系统"、"跑测试"或发版前回归检查。
+- PSB 协议的 **Verify** 阶段。
+- 重大重构或新功能上线后。
 
 # 🧠 Role & Context
-You are the **QA Orchestrator**. Your responsibility is to ensure the code works as expected under various conditions. You interpret results and decide if the system is "Green" (Go) or "Red" (Stop). You use the evolved `verify_system.py` runner for robust execution.
+你是 **QA 协调者**。负责确保代码在本地和 CI 上均能通过。项目 CI 定义在 `.github/workflows/ci.yml`，流程为：
+```
+flutter pub get → flutter analyze → flutter test → flutter build apk/aab/web
+```
 
 # ✅ Standards & Rules
-- **Quick Check First**: Use `mode=quick` for fast feedback (auto-discovers unit tests).
-- **Interactive**: The runner now supports streaming output, so you can see progress in real-time.
-- **Timeouts**: Default timeout is 300s (5m), full mode is 600s (10m).
-- **Arguments**: You can pass raw pytest arguments in `specific` mode or appended to other modes.
+
+## 测试覆盖优先级
+| 优先级 | 模块 | 测试文件 | 关注点 |
+|--------|------|---------|--------|
+| P0 | 加密核心 | `test/crypto_test.dart` | AES-GCM 加解密正确性、密钥派生 |
+| P0 | HLC 时钟 | `test/hlc_test.dart` | 因果排序、单调增长、tie-breaker |
+| P1 | CRDT 合并 | (待补充) | LWW 语义、Tombstone 处理 |
+| P1 | 事件溯源 | (待补充) | 事件链校验、快照压缩 |
+| P2 | VaultService | (待补充) | CRUD、搜索、盲索引 |
+| P2 | WebDAV 同步 | (待补充) | 协议流程、错误恢复 |
+
+## 验证模式
+- **Quick**: `flutter analyze` + 现有测试 (`flutter test`)。
+- **Targeted**: `flutter test test/crypto_test.dart`（针对修改模块）。
+- **Full**: analyze + test + build apk（模拟完整 CI）。
+
+## 与 CI 对齐
+本地验证必须与 `.github/workflows/ci.yml` 步骤 **1:1 一致**：
+1. `flutter pub get`
+2. `flutter analyze` 
+3. `flutter test`
+4. `flutter build apk --release`
 
 # 🚀 Workflow
-### 3. Verification Modes
-- `quick` (Default): Auto-discovers and runs core sanity tests.
-- `unit`: Runs all unit tests.
-- `integration`: Runs integration tests.
-- `edge`: Runs edge/stress/security tests.
-- `full`: Runs EVERYTHING + Coverage Report.
-- `specific`: Runs specific tests passed as extra arguments.
-
-**Reports**: Test logs are automatically saved to `tests/temp/reports/` with timestamp.
-
-2.  **Execute**:
-    ```bash
-    # Standard
-    python .agent/skills/full-system-verification/scripts/verify_system.py quick
-
-    # With Filter (e.g., only login tests in integration)
-    python .agent/skills/full-system-verification/scripts/verify_system.py integration -k login
-
-    # Specific File
-    python .agent/skills/full-system-verification/scripts/verify_system.py specific tests/unit/test_auth.py
-    ```
-
-3.  **Analyze**:
-    - If **PASS**: Report success.
-    - If **FAIL**: Analyze the streaming logs (highlighted in RED). 
-      - Distinguish between AssertionErrors (Logic) vs ImportErrors (Environment).
+1. **Quick Check**:
+   ```powershell
+   flutter analyze
+   flutter test
+   ```
+2. **Targeted** (只改了加密模块):
+   ```powershell
+   flutter test test/crypto_test.dart
+   ```
+3. **Full Regression** (发版前):
+   ```powershell
+   flutter analyze
+   flutter test
+   flutter build apk --release
+   ```
+4. **Analyze Result**: PASS → 允许发版。FAIL → 定位失败测试并修复。
 
 # 💡 Examples
+**User:** "我修改了 HLC 逻辑，验证一下。"
+**Action:** `flutter test test/hlc_test.dart`
 
-**User Input:**
-"I only changed the auth service, verify it."
-
-**Ideal Agent Response:**
-"Running targeted verification for Auth Service..."
-```bash
-python .agent/skills/full-system-verification/scripts/verify_system.py specific tests/unit/services/test_auth_service.py
-```
-
----
-**User Input:**
-"Do a full regression."
-
-**Ideal Agent Response:**
-"Initiating Full System Verification..."
-```bash
-python .agent/skills/full-system-verification/scripts/verify_system.py full
-```
+**User:** "准备发版，全量回归。"
+**Action:** 按 Full Regression 流程顺序执行。

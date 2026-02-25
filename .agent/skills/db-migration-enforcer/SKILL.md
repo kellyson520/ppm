@@ -1,41 +1,48 @@
 ---
 name: db-migration-enforcer
-description: 自动化执行数据库架构演进检查，确保 SQLAlchemy 模型与数据库表结构同步。自动生成缺失的 ALTER TABLE 语句并维护 migrate_db 函数。
+description: SQLCipher Schema 版本演进检查。确保 database_service.dart 中的 onCreate/onUpgrade 与模型定义同步，防止用户升级时数据丢失。
+version: 2.0
 ---
 
 # 🎯 Triggers
-- 当在修改 `models/models.py` 中的模型定义（添加列/修改列）后。
-- 当系统启动或运行时出现 `sqlite3.OperationalError: no such column` 时。
-- 在执行任何涉及数据库的变更任务之前和之后。
-- 当用户要求"同步数据库结构"或"检查数据库完整性"时。
+- 修改 `lib/core/models/` 下的实体类（password_card, auth_card, password_event）后。
+- 修改 `lib/core/storage/database_service.dart` 中的表定义后。
+- 用户报告升级后应用崩溃或数据丢失。
+- 新增数据库表或列时。
 
 # 🧠 Role & Context
-你是 **数据库一致性守护者 (Database Consistency Warden)**。你理解在快速迭代的项目中，代码模型和物理库结构最容易脱节。你的使命是确保 `models.py` 中的每一行 `Column` 定义都在实际数据库中有对应的列，并且 `migrate_db` 函数能够自动填补这些差异。
+你是 **数据库一致性守护者**。本项目使用 `sqflite_sqlcipher` 加密数据库，表结构包括：
+- `password_cards` — 加密的密码卡片
+- `blind_index_entries` — 盲索引（可搜索的 HMAC 值）
+- `password_events` — 事件溯源日志
+- `snapshots` — 压缩快照
+
+数据库版本管理通过 `database_service.dart` 中的 `_onCreate` 和 `_onUpgrade` 回调实现。
 
 # ✅ Standards & Rules
 
-1. **先检查后执行 (Check-Before-DDL)**: 始终先运行脚本检查差异，而不是盲目执行 SQL。
-2. **迁移逻辑中心化**: 所有的物理库变更必须体现在 `models/models.py` 的 `migrate_db` 函数中，严禁在 `scripts/` 中直接执行无法回溯的 DDL。
-3. **try-except 保护**: 所有的迁移 SQL 必须用 `try...except` 包装，以容忍列已存在的情况。
-4. **日志留痕**: 每次成功的迁移必须通过 `logger.info` 记录，便于回溯。
+## 1. 迁移安全
+- 新增列必须使用 `ALTER TABLE ... ADD COLUMN ... DEFAULT ...`，不可使用 `DROP TABLE`。
+- `_onUpgrade` 中必须逐版本递增处理（`if (oldVersion < 2) {...} if (oldVersion < 3) {...}`）。
+- 迁移 SQL 必须用 `try-catch` 包装，容忍列已存在的场景。
+
+## 2. 检查流程
+- 对比 `_onCreate` 中的 CREATE TABLE 语句与 Model 类的字段列表。
+- 若发现 Model 中新增了字段但 `_onUpgrade` 中无对应 ALTER TABLE → 标记为 P0 缺陷。
+
+## 3. 数据完整性
+- 涉及加密字段的迁移必须确保不破坏已有加密数据。
+- 修改 `password_events` 表结构时必须同时检查 `core/events/event_store.dart` 的序列化逻辑。
 
 # 🚀 Workflow
-
-1. **识别变更**: 检查 `models/models.py` 的版本历史或当前修改内容。
-2. **运行对齐脚本**: 
-   ```bash
-   python .agent/skills/db-migration-enforcer/scripts/check_migrations.py
-   ```
-3. **生成补丁**: 根据脚本输出的缺失列，更新 `models/models.py` 中的 `migrate_db` 逻辑。
-4. **执行修复**: 运行 `python models/models.py` (设置 PYTHONPATH=.) 触发迁移。
-5. **验证**: 再次运行 `check_migrations.py` 确认状态为 `Clean`。
+1. **Diff**: 检查 `lib/core/models/` 中的字段与 `database_service.dart` 中的 DDL。
+2. **Gap Analysis**: 找出 Model 有但 DDL 缺失的列。
+3. **Generate Migration**: 在 `_onUpgrade` 中添加对应 ALTER TABLE，递增 DB 版本号。
+4. **Verify**: `flutter test test/` 通过，确认数据完整性。
 
 # 💡 Examples
-
-**Scenario:** User added `is_active` to `User` model but forgot the migration.
-**Agent Action:**
-1. 执行 `@check_migrations`。
-2. 发现 `users` 表缺失 `is_active`。
-3. 自动向 `models/models.py` 的 `migrate_db` 中 `user_new_columns` 添加：
-   `'is_active': 'ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT 1'`。
-4. 提交变更并验证。
+**Scenario:** `auth_card.dart` 新增了 `issuerIcon` 字段，但 `database_service.dart` 中无迁移。
+**Fix:** 
+1. 在 `_onUpgrade` 中增加 `if (oldVersion < N)` 分支。
+2. 执行 `ALTER TABLE auth_cards ADD COLUMN issuer_icon TEXT DEFAULT ''`。
+3. 递增 `_databaseVersion`。

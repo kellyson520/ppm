@@ -399,15 +399,15 @@ class _ScanLineWidget extends AnimatedWidget {
           gradient: LinearGradient(
             colors: [
               Colors.transparent,
-              const Color(0xFF00BFA6).withValues(alpha: 0.8),
+              const Color(0xFF00BFA6).withOpacity(0.8),
               const Color(0xFF6C63FF),
-              const Color(0xFF00BFA6).withValues(alpha: 0.8),
+              const Color(0xFF00BFA6).withOpacity(0.8),
               Colors.transparent,
             ],
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00BFA6).withValues(alpha: 0.4),
+              color: const Color(0xFF00BFA6).withOpacity(0.4),
               blurRadius: 8,
               spreadRadius: 2,
             ),

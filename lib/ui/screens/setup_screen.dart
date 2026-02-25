@@ -209,7 +209,7 @@ class _SetupScreenState extends State<SetupScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF6C63FF).withValues(alpha: 0.2),
+            color: const Color(0xFF6C63FF).withOpacity(0.2),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: const Color(0xFF6C63FF)),
@@ -361,7 +361,7 @@ class _SetupScreenState extends State<SetupScreen> {
           Icon(
             met ? Icons.check_circle : Icons.circle_outlined,
             size: 16,
-            color: met ? Colors.green : Colors.white.withValues(alpha: 0.4),
+            color: met ? Colors.green : Colors.white.withOpacity(0.4),
           ),
           const SizedBox(width: 8),
           Text(
@@ -413,7 +413,7 @@ class _SetupScreenState extends State<SetupScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.2),
+                color: Colors.red.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(

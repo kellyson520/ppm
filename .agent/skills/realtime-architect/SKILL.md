@@ -1,111 +1,62 @@
 ---
 name: realtime-architect
-description: Standardized Full-Stack WebSocket Architecture for Real-time Systems
-version: 1.0
+description: WebDAV 增量同步与 CRDT 冲突解决架构。负责多设备同步协议设计、HLC 时钟校准及 EventStore 事件流管理。
+version: 2.0
 ---
 
-# 🎯 Triggers (触发条件)
-- When implementing features requiring instant updates (e.g., Dashboards, Chat, Progress Bars, Logs).
-- When replacing polling loops (`setInterval`) with push notifications.
-- When designing WebSocket protocols or infrastructure.
-- When debugging WebSocket connection issues or message loss.
+# 🎯 Triggers
+- 设计或修改 WebDAV 同步逻辑 (`lib/core/sync/webdav_sync.dart`)。
+- 处理多设备冲突（CRDT merge 异常、HLC 时钟漂移）。
+- 优化同步性能（减少网络请求、增量传输）。
+- 实现新的同步节点类型（LAN 节点、次要节点）。
 
-# 🧠 Role & Context (角色设定)
-You are the **Real-time Systems Architect**. You design robust, scalable, and resilient websocket solutions. You prioritize **Reliability** (Reconnect/Heartbeat) over raw speed, and always ensure a **Graceful Fallback** (Polling) exists for unstable networks.
+# 🧠 Role & Context
+你是本项目的 **分布式同步架构师**。项目使用 WebDAV 作为无服务器同步传输层，CRDT (Conflict-free Replicated Data Types) 保证多设备一致性。核心组件：
+- `core/sync/webdav_sync.dart` — WebDAV 客户端与同步状态机
+- `core/crdt/crdt_merger.dart` — LWW-Register + Add-Wins Set + Tombstone
+- `core/models/hlc.dart` — Hybrid Logical Clock (物理时间 + 逻辑计数器 + 设备ID)
+- `core/events/event_store.dart` — 只追加事件日志 + 快照压缩
 
-# ✅ Standards & Rules (执行标准)
+# ✅ Standards & Rules
 
-## 1. Architecture Pattern (Hybrid)
-- **Primary**: WebSocket for real-time events.
-- **Fallback**: Auto-switch to Polling if WebSocket fails (>3 reconnect attempts).
-- **Structure**: Backend `ConnectionManager` <-> Frontend `WebSocketManager`.
-
-## 2. Protocol Specification (JSON)
-All messages MUST follow this structure:
-```json
-// Server -> Client
-{
-  "type": "event_type",   // e.g., "stats_update", "log", "pong"
-  "topic": "channel_name", // e.g., "stats", "system"
-  "data": { ... },        // Payload
-  "timestamp": 1234567890
-}
-
-// Client -> Server
-{
-  "action": "subscribe",  // e.g., "subscribe", "unsubscribe", "ping"
-  "topic": "channel_name"
-}
+## 1. 同步协议（6步）
+```
+1. 检查远端 manifest
+2. 计算 diff（对比 HLC 水位线）
+3. 下载缺失事件
+4. CRDT 合并（crdt_merger.dart）
+5. 上传本地事件
+6. 更新 manifest
 ```
 
-## 3. Backend Implementation (FastAPI)
-- **Singleton Manager**: Use a global `ConnectionManager` instance.
-- **Pub/Sub**: Support topic-based subscription (`manager.subscribe(client_id, topic)`).
-- **Throttling**: For high-frequency events (e.g., logs/stats), implement a throttle (e.g., 100ms) to prevent frontend flooding.
-- **EventBus Integration**: Hook into system EventBus to auto-broadcast domain events.
+## 2. CRDT 语义
+| 操作 | 策略 | 实现 |
+|------|------|------|
+| 创建卡片 | Add-Wins Set | 允许重复，后续合并 |
+| 更新卡片 | LWW-Register | HLC 更大者胜出 |
+| 删除卡片 | Tombstone | 永久标记，同步后不可撤销 |
+| HLC 相等 | Device ID 字典序 | 确定性 tie-breaker |
 
-## 4. Frontend Implementation (Vanilla JS)
-- **Singleton**: `window.wsManager` (Global Instance).
-- **Life-cycle**:
-  - `initWebSocket()`: Connect and setup listeners.
-  - `startPolling()` / `stopPolling()`: Toggle fallback mechanism.
-  - `beforeunload`: Close connection gracefully.
-- **Visual Feedback**:
-  - Show connection status (Pulse Dot: Green=Connected, Red=Disconnected).
-  - Use Animations (`animate-fade-in`, `animate-pulse`) for incoming data.
+## 3. 安全约束
+- 所有上传/下载的事件数据必须是 **已加密** 的 `EncryptedPayload`。
+- manifest 不得包含任何明文密码信息。
+- 传输层必须使用 HTTPS。
 
-# 🚀 Workflow (工作流)
+## 4. 容错
+- 网络中断时本地事件必须缓存在 `password_events` 表中，标记为 `unsynced`。
+- 同步失败不得影响本地 CRUD 正常使用。
+- 重试策略：指数退避，最大间隔 5 分钟。
 
-1.  **Define Topics**:
-    - Identify data streams (e.g., `logs`, `stats`, `tasks`).
-    - Add topic constants to Backend `ConnectionManager` and Frontend.
+# 🚀 Workflow
+1. **Analyze**: 确认变更涉及同步的哪个阶段。
+2. **Design**: 若新增功能，先更新同步协议文档。
+3. **Implement**: 修改 `webdav_sync.dart` 或 `crdt_merger.dart`。
+4. **Test**: 编写冲突场景的单元测试（两个设备同时修改同一卡片）。
+5. **Verify**: 确认旧版客户端仍能正确解析新格式（向后兼容）。
 
-2.  **Backend Implementation**:
-    - Ensure `websocket_router.py` handles the new topic.
-    - Add `broadcast_{topic}_update` helper function.
-    - Hook into Business Logic (Service Layer) to trigger broadcast.
-
-3.  **Frontend Integration**:
-    - **Step 3.1**: Check `wsManager` availability.
-    - **Step 3.2**: Implement `handle{Topic}Update(msg)` function.
-    - **Step 3.3**: Subscribe on connect: `wsManager.subscribe('topic', handler)`.
-    - **Step 3.4**: Implement `updateUI` logic (partial DOM update, NOT page reload).
-    - **Step 3.5**: Add Polling Fallback logic.
-
-4.  **Verification**:
-    - Verify Heartbeat (Ping/Pong every 30s).
-    - Verify Reconnect (Kill backend, restart, frontend should auto-reconnect).
-    - Verify Fallback (Block WS port, frontend should switch to polling).
-
-# 💡 Examples (代码片段)
-
-## Frontend Handler Pattern
-```javascript
-function initRealtime() {
-    if (!window.wsManager) { startPolling(); return; }
-    
-    wsManager.onConnect(() => {
-        stopPolling();
-        wsManager.subscribe('dashboard_stats', (msg) => {
-            if (msg.type === 'update') updateDashboard(msg.data);
-        });
-    });
-    
-    wsManager.onDisconnect(() => {
-        startPolling(); // Graceful degradation
-    });
-}
-```
-
-## Backend Broadcast Pattern
-```python
-# In Service Layer
-await container.event_bus.emit(
-    "stats_update", 
-    {"cpu": 45.2, "mem": 60.1}
-)
-
-# In WebSocket Router (hooked via EventBus)
-if event_name == "stats_update":
-    await manager.broadcast("stats", {"type": "stats", "data": event_data})
-```
+# 💡 Examples
+**Scenario:** 设备A和设备B同时修改了同一密码卡片的 `password` 字段。
+**Resolution:**
+1. 两端各自生成 `PasswordEvent(UPDATE)` 并附带各自的 HLC。
+2. 同步时 `crdt_merger.dart` 对比 HLC → 更大的 HLC 胜出。
+3. 败方事件保留在 history 中但不影响当前状态。
