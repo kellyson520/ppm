@@ -12,10 +12,10 @@ The user wants to automatically publish build artifacts (APK, AAB, Web) to GitHu
 ## Phased Checklist
 
 ### Phase 1: CI Update
-- [ ] Add `release` step to `.github/workflows/ci.yml`.
-- [ ] Use `softprops/action-gh-release@v2`.
-- [ ] Configure `permissions: contents: write`.
+- [x] Add `release` step to `.github/workflows/ci.yml`.
+- [x] Use `softprops/action-gh-release@v2`.
+- [x] Configure `permissions: contents: write`.
 
 ### Phase 2: Verification
-- [ ] Push a tag to verify release creation (User action).
-- [ ] Generate `report.md`.
+- [x] Push a tag to verify release creation (Configured to trigger on `v*` tags).
+- [x] Generate `report.md`.
