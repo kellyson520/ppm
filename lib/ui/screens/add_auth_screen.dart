@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/auth_service.dart';
@@ -452,7 +451,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                           _digits = selected.first;
                         });
                       },
-                      style: ButtonStyle(
+                      style: const ButtonStyle(
                         visualDensity: VisualDensity.compact,
                       ),
                     ),
@@ -478,7 +477,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                           _period = selected.first;
                         });
                       },
-                      style: ButtonStyle(
+                      style: const ButtonStyle(
                         visualDensity: VisualDensity.compact,
                       ),
                     ),
@@ -517,17 +516,17 @@ class _AddAuthScreenState extends State<AddAuthScreen>
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+          child: const Padding(
+            padding: EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Icon(Icons.info_outline, 
-                         color: const Color(0xFF6C63FF), size: 20),
-                    const SizedBox(width: 8),
-                    const Text(
+                         color: Color(0xFF6C63FF), size: 20),
+                    SizedBox(width: 8),
+                    Text(
                       '导入方式',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
@@ -536,8 +535,8 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                const Text(
+                SizedBox(height: 8),
+                Text(
                   '粘贴 otpauth:// URI 或多个 URI（每行一个）来批量导入。\n'
                   '格式: otpauth://totp/Label?secret=XXX&issuer=YYY',
                   style: TextStyle(fontSize: 13, color: Colors.white60),
@@ -573,7 +572,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: _parseUri,
-                icon: const Icon(Icons.parse_outlined, size: 18),
+                icon: const Icon(Icons.article_outlined, size: 18),
                 label: const Text('解析并编辑'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF6C63FF),
@@ -616,15 +615,15 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    const Color(0xFF6C63FF).withOpacity(0.15),
-                    const Color(0xFF00BFA6).withOpacity(0.15),
+                    const Color(0xFF6C63FF).withValues(alpha: 0.15),
+                    const Color(0xFF00BFA6).withValues(alpha: 0.15),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(28),
                 border: Border.all(
-                  color: const Color(0xFF6C63FF).withOpacity(0.3),
+                  color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
                   width: 2,
                 ),
               ),
@@ -650,7 +649,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 height: 1.5,
               ),
             ),
@@ -686,7 +685,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F3460).withOpacity(0.5),
+                color: const Color(0xFF0F3460).withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Column(

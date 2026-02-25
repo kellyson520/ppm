@@ -124,12 +124,12 @@ class AuthPayload extends Equatable {
     final parsed = Uri.parse(uri);
     
     // 解析 path 中的 label (issuer:account)
-    String label = Uri.decodeComponent(parsed.path.replaceFirst('/totp/', '').replaceFirst('/hotp/', ''));
+    final String rawLabel = Uri.decodeComponent(parsed.path.replaceFirst('/totp/', '').replaceFirst('/hotp/', ''));
     String issuer = '';
-    String account = label;
+    String account = rawLabel;
     
-    if (label.contains(':')) {
-      final parts = label.split(':');
+    if (rawLabel.contains(':')) {
+      final parts = rawLabel.split(':');
       issuer = parts[0].trim();
       account = parts.sublist(1).join(':').trim();
     }

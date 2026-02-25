@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import '../core/models/models.dart';
 import '../core/crypto/crypto_service.dart';
 import '../core/crypto/totp_generator.dart';
-import '../core/models/auth_card.dart';
 
 /// Authenticator Service - 身份验证器业务逻辑
 /// 
@@ -17,7 +16,7 @@ class AuthService {
   final CryptoService _cryptoService;
   
   // 内存中缓存的卡片列表（加密状态）
-  List<AuthCard> _cards = [];
+  final List<AuthCard> _cards = [];
   
   AuthService({CryptoService? cryptoService})
       : _cryptoService = cryptoService ?? CryptoService();
@@ -99,7 +98,9 @@ class AuthService {
 
   /// 永久删除
   bool permanentlyDeleteCard(String cardId) {
-    return _cards.removeWhere((c) => c.cardId == cardId) == null || true;
+    final before = _cards.length;
+    _cards.removeWhere((c) => c.cardId == cardId);
+    return _cards.length < before;
   }
 
   /// 获取活跃卡片
@@ -109,11 +110,8 @@ class AuthService {
 
   /// 获取单张卡片
   AuthCard? getCard(String cardId) {
-    try {
-      return _cards.firstWhere((c) => c.cardId == cardId && !c.isDeleted);
-    } catch (_) {
-      return null;
-    }
+    final cards = _cards.where((c) => c.cardId == cardId && !c.isDeleted);
+    return cards.isEmpty ? null : cards.first;
   }
 
   // ==================== Decryption (On-demand) ====================

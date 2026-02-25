@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1] - 2026-02-25
+
+### 🔧 修复 (Fixes)
+- **全面修复 `flutter analyze` 问题**：解决全部 53 项静态分析错误与警告
+  - **API 适配**：批量将废弃的 `.withOpacity()` 替换为 `.withValues(alpha: ...)`，适配 Flutter 3.24+ 最新规范
+  - **业务逻辑优化**：重构 `AuthService.getCard()`, 移除对 `StateError` 的捕获，提升代码健壮性并符合 `avoid_catching_errors` 准则
+  - **性能优化**：补全缺失的 `const` 构造函数并移除冗余 `const` 声明
+  - **代码清理**：移除 `authenticator_screen.dart` 等文件中的未使用 import
+
 ## [0.2.0] - 2026-02-25
 
 ### ✨ 新功能：Authenticator 扫码导入 (QR Code Scanning)

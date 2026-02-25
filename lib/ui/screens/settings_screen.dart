@@ -366,7 +366,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: const Icon(Icons.lock),
               label: const Text('Lock Vault'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.withOpacity(0.8),
+                backgroundColor: Colors.red.withValues(alpha: 0.8),
                 foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 50),
               ),

@@ -9,11 +9,11 @@ import 'authenticator_screen.dart';
 import 'add_auth_screen.dart';
 import 'settings_screen.dart';
 
-/// Vault 主页面 - 三重鼎立架构
+/// Vault 主页�?- 三重鼎立架构
 /// 
 /// 底部导航栏：
 /// 1. 密码 (Password) - 密码管理
-/// 2. 验证器 (Authenticator) - TOTP 二步验证
+/// 2. 验证�?(Authenticator) - TOTP 二步验证
 /// 3. 设置 (Settings) - 配置管理
 class VaultScreen extends StatefulWidget {
   final VaultService vaultService;
@@ -150,7 +150,7 @@ class _VaultScreenState extends State<VaultScreen> {
         leading: IconButton(
           icon: const Icon(Icons.lock_outline),
           onPressed: widget.onLockRequested,
-          tooltip: '锁定保险箱',
+          tooltip: '锁定保险�?,
         ),
         actions: [
           if (_currentIndex == 0 && _stats != null && _stats!.pendingSyncCount > 0)
@@ -175,7 +175,7 @@ class _VaultScreenState extends State<VaultScreen> {
       body: _buildBody(),
       bottomNavigationBar: _buildBottomNavBar(),
       floatingActionButton: _currentIndex == 2 
-          ? null // 设置页面不需要 FAB
+          ? null // 设置页面不需�?FAB
           : FloatingActionButton.extended(
               onPressed: _currentIndex == 0
                   ? _navigateToAddPassword
@@ -192,9 +192,9 @@ class _VaultScreenState extends State<VaultScreen> {
   String _getTitle() {
     switch (_currentIndex) {
       case 0:
-        return '密码保险箱';
+        return '密码保险�?;
       case 1:
-        return '身份验证器';
+        return '身份验证�?;
       case 2:
         return '设置';
       default:
@@ -211,7 +211,7 @@ class _VaultScreenState extends State<VaultScreen> {
           vaultService: widget.vaultService,
           authService: _authService,
           // DEK/SearchKey 通过 VaultService 会话获取
-          // 这里传 null 是因为安全考虑，实际使用时需从 VaultService 获取
+          // 这里�?null 是因为安全考虑，实际使用时需�?VaultService 获取
           dek: null,
           searchKey: null,
           deviceId: null,
@@ -226,7 +226,7 @@ class _VaultScreenState extends State<VaultScreen> {
   Widget _buildPasswordTab() {
     return Column(
       children: [
-        // 搜索栏
+        // 搜索�?
         Padding(
           padding: const EdgeInsets.all(16),
           child: TextField(
@@ -247,7 +247,7 @@ class _VaultScreenState extends State<VaultScreen> {
             ),
           ),
         ),
-        // 统计栏
+        // 统计�?
         if (_stats != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -294,7 +294,7 @@ class _VaultScreenState extends State<VaultScreen> {
   }
 
   Widget _buildSettingsTab() {
-    // 直接嵌入设置页面内容（而非导航跳转）
+    // 直接嵌入设置页面内容（而非导航跳转�?
     return SettingsScreen(
       vaultService: widget.vaultService,
       onLockRequested: widget.onLockRequested,
@@ -317,14 +317,14 @@ class _VaultScreenState extends State<VaultScreen> {
     });
   }
 
-  /// 底部导航栏 - 三重鼎立
+  /// 底部导航�?- 三重鼎立
   Widget _buildBottomNavBar() {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF16213E),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -347,7 +347,7 @@ class _VaultScreenState extends State<VaultScreen> {
                 index: 1,
                 icon: Icons.verified_user_outlined,
                 activeIcon: Icons.verified_user,
-                label: '验证器',
+                label: '验证�?,
                 color: const Color(0xFF00BFA6),
               ),
               _buildNavItem(
@@ -386,7 +386,7 @@ class _VaultScreenState extends State<VaultScreen> {
           vertical: 8,
         ),
         decoration: BoxDecoration(
-          color: isActive ? color.withOpacity(0.15) : Colors.transparent,
+          color: isActive ? color.withValues(alpha: 0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -455,7 +455,7 @@ class _VaultScreenState extends State<VaultScreen> {
           Icon(
             Icons.lock_outline,
             size: 80,
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
           ),
           const SizedBox(height: 16),
           Text(
@@ -464,16 +464,16 @@ class _VaultScreenState extends State<VaultScreen> {
                 : '未找到匹配项',
             style: TextStyle(
               fontSize: 18,
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 8),
           if (_searchController.text.isEmpty)
             Text(
-              '点击右下角 + 按钮添加第一个密码',
+              '点击右下�?+ 按钮添加第一个密�?,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.4),
+                color: Colors.white.withValues(alpha: 0.4),
               ),
             ),
         ],

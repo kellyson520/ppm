@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-/// QR 码扫描页面
+/// QR 码扫描页�?
 ///
-/// 全屏相机扫描界面，用于扫描 2FA 设置二维码：
+/// 全屏相机扫描界面，用于扫�?2FA 设置二维码：
 /// - 自动识别 otpauth:// URI
-/// - 支持手电筒开关
-/// - 支持前后摄像头切换
-/// - 扫描成功后自动返回 URI 字符串
+/// - 支持手电筒开�?
+/// - 支持前后摄像头切�?
+/// - 扫描成功后自动返�?URI 字符�?
 class QrScannerScreen extends StatefulWidget {
   const QrScannerScreen({super.key});
 
@@ -31,7 +31,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
   @override
   void initState() {
     super.initState();
-    // 扫描线动画
+    // 扫描线动�?
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -65,7 +65,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
         _hasScanned = true;
         HapticFeedback.heavyImpact();
 
-        // 短暂延迟后返回结果，让用户看到成功动画
+        // 短暂延迟后返回结果，让用户看到成功动�?
         Future.delayed(const Duration(milliseconds: 300), () {
           if (mounted) {
             Navigator.pop(context, rawValue);
@@ -88,23 +88,23 @@ class _QrScannerScreenState extends State<QrScannerScreen>
             onDetect: _onDetect,
           ),
 
-          // 扫描框遮罩
+          // 扫描框遮�?
           _buildScanOverlay(),
 
-          // 顶部操作栏
+          // 顶部操作�?
           _buildTopBar(),
 
-          // 底部控制栏
+          // 底部控制�?
           _buildBottomControls(),
 
-          // 成功状态覆盖
+          // 成功状态覆�?
           if (_hasScanned) _buildSuccessOverlay(),
         ],
       ),
     );
   }
 
-  /// 构建扫描框遮罩
+  /// 构建扫描框遮�?
   Widget _buildScanOverlay() {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -136,7 +136,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                       width: scanAreaSize,
                       height: scanAreaSize,
                       decoration: BoxDecoration(
-                        color: Colors.red, // 任意颜色，会被 srcOut 裁剪
+                        color: Colors.red, // 任意颜色，会�?srcOut 裁剪
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
@@ -145,14 +145,14 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               ),
             ),
 
-            // 扫描框四角装饰
+            // 扫描框四角装�?
             Positioned(
               left: left,
               top: top,
               child: _buildCornerDecoration(scanAreaSize),
             ),
 
-            // 扫描线动画
+            // 扫描线动�?
             Positioned(
               left: left + 16,
               top: top,
@@ -168,7 +168,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               right: 0,
               top: top + scanAreaSize + 24,
               child: const Text(
-                '将 2FA 设置二维码放入框内',
+                '�?2FA 设置二维码放入框�?,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white70,
@@ -183,7 +183,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               right: 0,
               top: top + scanAreaSize + 52,
               child: const Text(
-                '自动识别 otpauth:// 二维码',
+                '自动识别 otpauth:// 二维�?,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white38,
@@ -197,7 +197,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
     );
   }
 
-  /// 扫描框四角装饰
+  /// 扫描框四角装�?
   Widget _buildCornerDecoration(double size) {
     return SizedBox(
       width: size,
@@ -213,7 +213,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
     );
   }
 
-  /// 顶部操作栏
+  /// 顶部操作�?
   Widget _buildTopBar() {
     return SafeArea(
       child: Padding(
@@ -231,7 +231,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
             ),
             const Expanded(
               child: Text(
-                '扫描二维码',
+                '扫描二维�?,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
@@ -240,7 +240,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 ),
               ),
             ),
-            // 占位，保持标题居中
+            // 占位，保持标题居�?
             const SizedBox(width: 48),
           ],
         ),
@@ -248,7 +248,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
     );
   }
 
-  /// 底部控制栏
+  /// 底部控制�?
   Widget _buildBottomControls() {
     return Positioned(
       left: 0,
@@ -263,30 +263,30 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               end: Alignment.bottomCenter,
               colors: [
                 Colors.transparent,
-                Colors.black.withOpacity(0.7),
+                Colors.black.withValues(alpha: 0.7),
               ],
             ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // 手电筒
+              // 手电�?
               ValueListenableBuilder(
                 valueListenable: _cameraController,
                 builder: (context, state, child) {
                   final torchOn = state.torchState == TorchState.on;
                   return _buildControlButton(
                     icon: torchOn ? Icons.flash_on : Icons.flash_off,
-                    label: torchOn ? '关闭照明' : '开启照明',
+                    label: torchOn ? '关闭照明' : '开启照�?,
                     isActive: torchOn,
                     onTap: () => _cameraController.toggleTorch(),
                   );
                 },
               ),
-              // 切换摄像头
+              // 切换摄像�?
               _buildControlButton(
                 icon: Icons.cameraswitch_outlined,
-                label: '切换摄像头',
+                label: '切换摄像�?,
                 isActive: false,
                 onTap: () => _cameraController.switchCamera(),
               ),
@@ -314,8 +314,8 @@ class _QrScannerScreenState extends State<QrScannerScreen>
             height: 56,
             decoration: BoxDecoration(
               color: isActive
-                  ? const Color(0xFF00BFA6).withOpacity(0.3)
-                  : Colors.white.withOpacity(0.15),
+                  ? const Color(0xFF00BFA6).withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.15),
               shape: BoxShape.circle,
               border: Border.all(
                 color: isActive
@@ -343,7 +343,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
     );
   }
 
-  /// 扫描成功覆盖层
+  /// 扫描成功覆盖�?
   Widget _buildSuccessOverlay() {
     return Container(
       color: Colors.black54,
@@ -355,7 +355,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: const Color(0xFF00BFA6).withOpacity(0.2),
+                color: const Color(0xFF00BFA6).withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -366,7 +366,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
             ),
             const SizedBox(height: 16),
             const Text(
-              '扫描成功！',
+              '扫描成功�?,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -380,7 +380,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
   }
 }
 
-/// 扫描线动画组件
+/// 扫描线动画组�?
 class _ScanLineWidget extends AnimatedWidget {
   final double scanAreaSize;
 
@@ -401,15 +401,15 @@ class _ScanLineWidget extends AnimatedWidget {
           gradient: LinearGradient(
             colors: [
               Colors.transparent,
-              const Color(0xFF00BFA6).withOpacity(0.8),
+              const Color(0xFF00BFA6).withValues(alpha: 0.8),
               const Color(0xFF6C63FF),
-              const Color(0xFF00BFA6).withOpacity(0.8),
+              const Color(0xFF00BFA6).withValues(alpha: 0.8),
               Colors.transparent,
             ],
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00BFA6).withOpacity(0.4),
+              color: const Color(0xFF00BFA6).withValues(alpha: 0.4),
               blurRadius: 8,
               spreadRadius: 2,
             ),
@@ -447,7 +447,7 @@ class _CornerPainter extends CustomPainter {
     final r = radius;
     final cl = cornerLength;
 
-    // 左上角
+    // 左上�?
     canvas.drawPath(
       Path()
         ..moveTo(0, cl)
@@ -457,7 +457,7 @@ class _CornerPainter extends CustomPainter {
       paint,
     );
 
-    // 右上角
+    // 右上�?
     canvas.drawPath(
       Path()
         ..moveTo(w - cl, 0)
@@ -467,7 +467,7 @@ class _CornerPainter extends CustomPainter {
       paint,
     );
 
-    // 左下角
+    // 左下�?
     canvas.drawPath(
       Path()
         ..moveTo(0, h - cl)
@@ -477,7 +477,7 @@ class _CornerPainter extends CustomPainter {
       paint,
     );
 
-    // 右下角
+    // 右下�?
     canvas.drawPath(
       Path()
         ..moveTo(w - cl, h)
