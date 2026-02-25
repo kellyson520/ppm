@@ -29,6 +29,9 @@
     <key>NSFaceIDUsageDescription</key>
     <string>This app uses Face ID to securely unlock your password vault.</string>
     
+    <!-- Camera for QR Code Scanning -->
+    <key>NSCameraUsageDescription</key>
+    <string>This app uses the camera to scan 2FA setup QR codes for adding authenticator entries.</string>
     <!-- Network -->
     <key>NSAppTransportSecurity</key>
     <dict>

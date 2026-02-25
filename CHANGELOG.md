@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.2.0] - 2026-02-25
+
+### ✨ 新功能：Authenticator 扫码导入 (QR Code Scanning)
+- **集成 `mobile_scanner` 引擎**：支持高性能相机流二维码实时识别与解析
+- **新增 `QrScannerScreen` 扫描界面**：提供沉浸式全屏扫描体验，具备双角对齐、实时扫描线动画及环境光适配功能
+- **重构 `AddAuthScreen` 业务流**：支持从 2FA 二维码一键导入并自动填充 otpauth 协议字段，简化用户操作
+- **平台兼容性支持**：
+  - Android 21+ 相机权限动态配置
+  - iOS NSCameraUsageDescription 合规描述
+
+### 🔧 优化
+- 优化 `AddAuthScreen` 的 Tab 切换逻辑，从 2 Tab 扩展至 3 Tab
+
+### 📦 依赖
+- 新增 `mobile_scanner: ^5.1.1`
+
+---
+
 ## [0.1.0] - 2026-02-25
 
 ### ✨ 重大重构：密码学模块化 (Crypto Modularization)

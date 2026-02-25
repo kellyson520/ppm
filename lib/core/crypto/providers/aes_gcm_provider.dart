@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:typed_data';
 import 'package:pointycastle/export.dart';
 import '../crypto_core.dart';

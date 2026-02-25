@@ -4,11 +4,13 @@ import '../../services/vault_service.dart';
 class SettingsScreen extends StatefulWidget {
   final VaultService vaultService;
   final VoidCallback onLockRequested;
+  final bool isEmbedded;
 
   const SettingsScreen({
     super.key,
     required this.vaultService,
     required this.onLockRequested,
+    this.isEmbedded = false,
   });
 
   @override
@@ -204,11 +206,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
-      body: ListView(
+    final body = ListView(
         children: [
           // Vault Statistics
           if (_stats != null)
@@ -376,7 +374,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 32),
         ],
+      );
+
+    if (widget.isEmbedded) {
+      return body;
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Settings'),
       ),
+      body: body,
     );
   }
 

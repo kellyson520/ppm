@@ -8,6 +8,7 @@
 /// 5. crypto_facade.dart   - 门面 API（业务层入口）
 /// 6. crypto_service.dart  - 兼容层（包装 CryptoFacade）
 /// 7. key_manager.dart     - 密钥管理
+library crypto;
 
 // 核心接口与数据格式
 export 'crypto_core.dart';
