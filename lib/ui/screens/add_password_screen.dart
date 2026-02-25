@@ -82,7 +82,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
   }
 
   void _generatePassword() {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$%^&*';
     final random = DateTime.now().millisecondsSinceEpoch;
     final password = List.generate(16, (index) {
       return chars[(random + index * 17) % chars.length];
