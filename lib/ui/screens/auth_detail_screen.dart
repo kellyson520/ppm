@@ -202,7 +202,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
             Text(
               '提示: 可使用其他验证器扫描此二维码导入',
               style: TextStyle(
-                  fontSize: 12, color: Colors.white.withOpacity(0.5)),
+                  fontSize: 12, color: Colors.white.withValues(alpha: 0.5)),
               textAlign: TextAlign.center,
             ),
           ],
@@ -264,7 +264,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.withOpacity(0.8),
+              backgroundColor: Colors.red.withValues(alpha: 0.8),
             ),
             child: const Text('删除'),
           ),
@@ -392,7 +392,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                       widget.payload.account,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                       ),
                     ),
                   const SizedBox(height: 20),
@@ -408,7 +408,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                         color: const Color(0xFF0F3460),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFF6C63FF).withOpacity(0.3),
+                          color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
                         ),
                       ),
                       child: Row(
@@ -428,7 +428,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                           const SizedBox(width: 16),
                           Icon(
                             Icons.copy_rounded,
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                           ),
                         ],
                       ),
@@ -474,7 +474,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                         '秒后刷新',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                         ),
                       ),
                     ],
@@ -543,7 +543,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
           _buildActionButton(
             icon: Icons.delete_forever,
             label: '删除此验证器',
-            color: Colors.red.withOpacity(0.8),
+            color: Colors.red.withValues(alpha: 0.8),
             onPressed: _deleteEntry,
           ),
           const SizedBox(height: 32),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -6,21 +7,32 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../models/models.dart';
 import '../crypto/crypto_service.dart';
 import '../events/event_store.dart';
+import '../diagnostics/crash_report_service.dart';
 
 /// Database Service for ZTD Password Manager
-/// 
+///
 /// Manages SQLCipher-encrypted SQLite database
 /// Provides:
 /// - Password card storage with blind indexes
 /// - Event sourcing storage
 /// - Encrypted search capabilities
 class DatabaseService {
-  static Database? _db;
+  // 单例实例：避免多实例共享同一数据库连接
+  static DatabaseService? _instance;
+  factory DatabaseService({CryptoService? cryptoService}) {
+    _instance ??= DatabaseService._internal(
+      cryptoService: cryptoService ?? CryptoService(),
+    );
+    return _instance!;
+  }
+
+  DatabaseService._internal({required CryptoService cryptoService})
+      : _cryptoService = cryptoService;
+
+  // 实例变量（原来的 static 会导致跨实例共享内部状态）
+  Database? _db;
   final CryptoService _cryptoService;
   EventStore? _eventStore;
-
-  DatabaseService({CryptoService? cryptoService})
-      : _cryptoService = cryptoService ?? CryptoService();
 
   /// Get database instance
   Database get db {
@@ -108,18 +120,25 @@ class DatabaseService {
     // Handle future migrations
   }
 
+  /// Run operations in a transaction
+  Future<T> transaction<T>(Future<T> Function(Transaction txn) action) async {
+    return await db.transaction(action);
+  }
+
   // ==================== Password Card Operations ====================
 
   /// Insert or update a password card
-  Future<void> saveCard(PasswordCard card) async {
-    await db.insert(
+  Future<void> saveCard(PasswordCard card, {Transaction? txn}) async {
+    final executor = txn ?? db;
+
+    await executor.insert(
       'password_cards',
       card.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
     // Update blind index entries
-    await _updateBlindIndexes(card);
+    await _updateBlindIndexes(card, txn: txn);
   }
 
   /// Get card by ID
@@ -159,8 +178,11 @@ class DatabaseService {
       ''',
       whereArgs: [
         hlc.physicalTime,
-        hlc.physicalTime, hlc.logicalCounter,
-        hlc.physicalTime, hlc.logicalCounter, hlc.deviceId,
+        hlc.physicalTime,
+        hlc.logicalCounter,
+        hlc.physicalTime,
+        hlc.logicalCounter,
+        hlc.deviceId,
       ],
       orderBy: 'updated_at_physical DESC, updated_at_logical DESC',
     );
@@ -169,23 +191,26 @@ class DatabaseService {
   }
 
   /// Delete a card (soft delete with tombstone)
-  Future<void> deleteCard(String cardId, String deviceId, String eventId) async {
+  Future<void> deleteCard(String cardId, String deviceId, String eventId,
+      {Transaction? txn}) async {
     final card = await getCard(cardId);
     if (card == null) return;
 
     final deletedCard = card.markDeleted(deviceId, eventId);
-    await saveCard(deletedCard);
+    await saveCard(deletedCard, txn: txn);
   }
 
   /// Permanently delete a card (hard delete)
-  Future<void> permanentlyDeleteCard(String cardId) async {
-    await db.delete(
+  Future<void> permanentlyDeleteCard(String cardId, {Transaction? txn}) async {
+    final executor = txn ?? db;
+
+    await executor.delete(
       'blind_index_entries',
       where: 'card_id = ?',
       whereArgs: [cardId],
     );
 
-    await db.delete(
+    await executor.delete(
       'password_cards',
       where: 'card_id = ?',
       whereArgs: [cardId],
@@ -203,7 +228,7 @@ class DatabaseService {
   // ==================== Search Operations ====================
 
   /// Search cards using blind indexes
-  /// 
+  ///
   /// [searchHashes]: List of HMAC hashes from search query
   /// Returns cards that match any of the search hashes
   Future<List<PasswordCard>> searchByBlindIndexes(
@@ -213,7 +238,7 @@ class DatabaseService {
 
     // Build IN clause
     final placeholders = List.filled(searchHashes.length, '?').join(',');
-    
+
     // Find matching card IDs
     final indexResult = await db.rawQuery('''
       SELECT DISTINCT card_id FROM blind_index_entries
@@ -235,7 +260,7 @@ class DatabaseService {
   }
 
   /// Full text search (requires decryption)
-  /// 
+  ///
   /// This is less efficient but can search decrypted content
   /// Should be used only when necessary
   Future<List<PasswordCard>> searchByDecryptedContent(
@@ -252,8 +277,12 @@ class DatabaseService {
         if (decrypted.toLowerCase().contains(lowerQuery)) {
           results.add(card);
         }
-      } on Exception {
-        // Skip cards that can't be decrypted
+      } on Exception catch (e, stack) {
+        // Skip cards that can't be decrypted after logging
+        CrashReportService.instance.reportZoneError(
+          'Failed to decrypt card ${card.cardId} during search: $e',
+          stack,
+        );
       }
     }
 
@@ -263,9 +292,12 @@ class DatabaseService {
   // ==================== Blind Index Operations ====================
 
   /// Update blind index entries for a card
-  Future<void> _updateBlindIndexes(PasswordCard card) async {
+  Future<void> _updateBlindIndexes(PasswordCard card,
+      {Transaction? txn}) async {
+    final executor = txn ?? db;
+
     // Delete existing entries
-    await db.delete(
+    await executor.delete(
       'blind_index_entries',
       where: 'card_id = ?',
       whereArgs: [card.cardId],
@@ -273,7 +305,7 @@ class DatabaseService {
 
     // Insert new entries
     if (card.blindIndexes.isNotEmpty && !card.isDeleted) {
-      final batch = db.batch();
+      final batch = executor.batch();
       for (final indexHash in card.blindIndexes) {
         batch.insert(
           'blind_index_entries',
@@ -295,7 +327,7 @@ class DatabaseService {
     Uint8List searchKey,
   ) async {
     final indexes = _cryptoService.generateBlindIndexes(plaintext, searchKey);
-    
+
     final card = await getCard(cardId);
     if (card == null) return;
 
@@ -323,26 +355,34 @@ class DatabaseService {
   Future<int> getDatabaseSize() async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final path = join(documentsDirectory.path, 'ztd_vault.db');
-    final file = await File(path).stat();
-    return file.size;
+    try {
+      return await File(path).length();
+    } on Object {
+      return 0;
+    }
   }
 
   /// Export database for backup
-  Future<String> exportDatabase() async {
+  ///
+  /// [encryptionKey] 须与初始化时接受的 encryptionKey 一致，用于和密图库重新建立连接。
+  Future<String> exportDatabase(String encryptionKey) async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final dbPath = join(documentsDirectory.path, 'ztd_vault.db');
-    
+
     final backupDir = await getTemporaryDirectory();
-    final backupPath = join(backupDir.path, 'ztd_backup_${DateTime.now().millisecondsSinceEpoch}.db');
-    
-    await db.close();
-    
+    final backupPath = join(backupDir.path,
+        'ztd_backup_${DateTime.now().millisecondsSinceEpoch}.db');
+
+    await _db!.close();
+    _db = null;
+    _eventStore = null;
+
     final dbFile = File(dbPath);
     await dbFile.copy(backupPath);
-    
-    // Reopen database
-    await initialize(await _getEncryptionKey());
-    
+
+    // 重新打开数据库
+    await initialize(encryptionKey);
+
     return backupPath;
   }
 
@@ -350,24 +390,28 @@ class DatabaseService {
   Future<void> importDatabase(String backupPath) async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final dbPath = join(documentsDirectory.path, 'ztd_vault.db');
-    
+
     await db.close();
     _db = null;
     _eventStore = null;
-    
+
     final backupFile = File(backupPath);
     await backupFile.copy(dbPath);
-    
+
     // Database will be reopened on next access
   }
 
   /// Clear all data (DANGER)
+  ///
+  /// 使用 transaction 保证原子性，避免部分删除导致数据不一致
   Future<void> clearAllData() async {
-    await db.delete('blind_index_entries');
-    await db.delete('password_cards');
-    await db.delete('password_events');
-    await db.delete('snapshots');
-    await db.delete('sync_state');
+    await db.transaction((txn) async {
+      await txn.delete('blind_index_entries');
+      await txn.delete('password_cards');
+      await txn.delete('password_events');
+      await txn.delete('snapshots');
+      await txn.delete('sync_state');
+    });
   }
 
   /// Close database
@@ -378,36 +422,4 @@ class DatabaseService {
       _eventStore = null;
     }
   }
-
-  // Helper method (should be replaced with actual key retrieval)
-  Future<String> _getEncryptionKey() async {
-    // This should be implemented based on your key management strategy
-    throw UnimplementedError('Encryption key retrieval not implemented');
-  }
-}
-
-// File class for database operations
-class File {
-  final String path;
-  
-  File(this.path);
-  
-  Future<FileStat> stat() async {
-    // Simplified implementation
-    return FileStat(size: 0);
-  }
-  
-  Future<void> copy(String newPath) async {
-    // Simplified implementation
-  }
-  
-  static Future<File> fromPath(String path) async {
-    return File(path);
-  }
-}
-
-class FileStat {
-  final int size;
-  
-  FileStat({required this.size});
 }

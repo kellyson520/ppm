@@ -263,7 +263,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               end: Alignment.bottomCenter,
               colors: [
                 Colors.transparent,
-                Colors.black.withOpacity(0.7),
+                Colors.black.withValues(alpha: 0.7),
               ],
             ),
           ),
@@ -314,8 +314,8 @@ class _QrScannerScreenState extends State<QrScannerScreen>
             height: 56,
             decoration: BoxDecoration(
               color: isActive
-                  ? const Color(0xFF00BFA6).withOpacity(0.3)
-                  : Colors.white.withOpacity(0.15),
+                  ? const Color(0xFF00BFA6).withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.15),
               shape: BoxShape.circle,
               border: Border.all(
                 color: isActive ? const Color(0xFF00BFA6) : Colors.white30,
@@ -353,7 +353,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: const Color(0xFF00BFA6).withOpacity(0.2),
+                color: const Color(0xFF00BFA6).withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -399,15 +399,15 @@ class _ScanLineWidget extends AnimatedWidget {
           gradient: LinearGradient(
             colors: [
               Colors.transparent,
-              const Color(0xFF00BFA6).withOpacity(0.8),
+              const Color(0xFF00BFA6).withValues(alpha: 0.8),
               const Color(0xFF6C63FF),
-              const Color(0xFF00BFA6).withOpacity(0.8),
+              const Color(0xFF00BFA6).withValues(alpha: 0.8),
               Colors.transparent,
             ],
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00BFA6).withOpacity(0.4),
+              color: const Color(0xFF00BFA6).withValues(alpha: 0.4),
               blurRadius: 8,
               spreadRadius: 2,
             ),

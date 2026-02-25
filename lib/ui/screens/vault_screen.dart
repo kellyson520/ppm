@@ -326,7 +326,7 @@ class _VaultScreenState extends State<VaultScreen> {
         color: const Color(0xFF16213E),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -388,7 +388,7 @@ class _VaultScreenState extends State<VaultScreen> {
           vertical: 8,
         ),
         decoration: BoxDecoration(
-          color: isActive ? color.withOpacity(0.15) : Colors.transparent,
+          color: isActive ? color.withValues(alpha: 0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -457,14 +457,14 @@ class _VaultScreenState extends State<VaultScreen> {
           Icon(
             Icons.lock_outline,
             size: 80,
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
           ),
           const SizedBox(height: 16),
           Text(
             _searchController.text.isEmpty ? '暂无密码' : '未找到匹配项',
             style: TextStyle(
               fontSize: 18,
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 8),
@@ -473,7 +473,7 @@ class _VaultScreenState extends State<VaultScreen> {
               '点击右下角 + 按钮添加第一个密码',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.4),
+                color: Colors.white.withValues(alpha: 0.4),
               ),
             ),
         ],

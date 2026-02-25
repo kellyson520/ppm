@@ -204,177 +204,174 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  /// 功能未实现时的统一提示
+  void _showComingSoon() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('此功能即将推出，敬请期待 🚀'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final body = ListView(
-        children: [
-          // Vault Statistics
-          if (_stats != null)
-            _buildSection(
-              title: 'Vault Statistics',
-              children: [
-                _buildStatTile(
-                  'Passwords',
-                  '${_stats!.cardCount}',
-                  Icons.password,
-                ),
-                _buildStatTile(
-                  'Total Events',
-                  '${_stats!.eventCount}',
-                  Icons.history,
-                ),
-                _buildStatTile(
-                  'Pending Sync',
-                  '${_stats!.pendingSyncCount}',
-                  Icons.sync,
-                ),
-                _buildStatTile(
-                  'Snapshots',
-                  '${_stats!.snapshotCount}',
-                  Icons.backup,
-                ),
-              ],
+      children: [
+        // Vault Statistics
+        if (_stats != null)
+          _buildSection(
+            title: 'Vault Statistics',
+            children: [
+              _buildStatTile(
+                'Passwords',
+                '${_stats!.cardCount}',
+                Icons.password,
+              ),
+              _buildStatTile(
+                'Total Events',
+                '${_stats!.eventCount}',
+                Icons.history,
+              ),
+              _buildStatTile(
+                'Pending Sync',
+                '${_stats!.pendingSyncCount}',
+                Icons.sync,
+              ),
+              _buildStatTile(
+                'Snapshots',
+                '${_stats!.snapshotCount}',
+                Icons.backup,
+              ),
+            ],
+          ),
+
+        // Security
+        _buildSection(
+          title: 'Security',
+          children: [
+            ListTile(
+              leading: const Icon(Icons.lock_outline),
+              title: const Text('Change Master Password'),
+              subtitle: const Text('Update your vault password'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _changePassword,
             ),
+            ListTile(
+              leading: const Icon(Icons.emergency_outlined),
+              title: const Text('Export Emergency Kit'),
+              subtitle: const Text('Backup your encryption keys'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _exportEmergencyKit,
+            ),
+            ListTile(
+              leading: const Icon(Icons.fingerprint),
+              title: const Text('Biometric Authentication'),
+              subtitle: const Text('Use Face ID / Touch ID'),
+              trailing: const Switch(
+                // 生物识别功能尚未实现，禁用 Switch 避免用户开启无效的开关
+                value: false,
+                onChanged: null,
+              ),
+              onTap: _showComingSoon,
+            ),
+          ],
+        ),
 
-          // Security
-          _buildSection(
-            title: 'Security',
-            children: [
-              ListTile(
-                leading: const Icon(Icons.lock_outline),
-                title: const Text('Change Master Password'),
-                subtitle: const Text('Update your vault password'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _changePassword,
-              ),
-              ListTile(
-                leading: const Icon(Icons.emergency_outlined),
-                title: const Text('Export Emergency Kit'),
-                subtitle: const Text('Backup your encryption keys'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _exportEmergencyKit,
-              ),
-              ListTile(
-                leading: const Icon(Icons.fingerprint),
-                title: const Text('Biometric Authentication'),
-                subtitle: const Text('Use Face ID / Touch ID'),
-                trailing: Switch(
-                  value: false, // TODO: Implement
-                  onChanged: (value) {
-                    // TODO: Implement
-                  },
-                ),
-              ),
-            ],
-          ),
+        // Sync
+        _buildSection(
+          title: 'Synchronization',
+          children: [
+            ListTile(
+              leading: const Icon(Icons.cloud_sync_outlined),
+              title: const Text('WebDAV Nodes'),
+              subtitle: const Text('Configure sync destinations'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _showComingSoon,
+            ),
+            ListTile(
+              leading: const Icon(Icons.sync),
+              title: const Text('Manual Sync'),
+              subtitle: const Text('Sync now with all nodes'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _showComingSoon,
+            ),
+          ],
+        ),
 
-          // Sync
-          _buildSection(
-            title: 'Synchronization',
-            children: [
-              ListTile(
-                leading: const Icon(Icons.cloud_sync_outlined),
-                title: const Text('WebDAV Nodes'),
-                subtitle: const Text('Configure sync destinations'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // TODO: Navigate to WebDAV settings
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.sync),
-                title: const Text('Manual Sync'),
-                subtitle: const Text('Sync now with all nodes'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // TODO: Trigger sync
-                  _showSuccess('Sync started');
-                },
-              ),
-            ],
-          ),
+        // Storage
+        _buildSection(
+          title: 'Storage',
+          children: [
+            ListTile(
+              leading: const Icon(Icons.compress),
+              title: const Text('Compact Storage'),
+              subtitle: const Text('Compress event history'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _compactStorage,
+            ),
+            ListTile(
+              leading: const Icon(Icons.download_outlined),
+              title: const Text('Export Backup'),
+              subtitle: const Text('Create encrypted backup file'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _showComingSoon,
+            ),
+            ListTile(
+              leading: const Icon(Icons.upload_outlined),
+              title: const Text('Import Backup'),
+              subtitle: const Text('Restore from backup file'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _showComingSoon,
+            ),
+          ],
+        ),
 
-          // Storage
-          _buildSection(
-            title: 'Storage',
-            children: [
-              ListTile(
-                leading: const Icon(Icons.compress),
-                title: const Text('Compact Storage'),
-                subtitle: const Text('Compress event history'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _compactStorage,
-              ),
-              ListTile(
-                leading: const Icon(Icons.download_outlined),
-                title: const Text('Export Backup'),
-                subtitle: const Text('Create encrypted backup file'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // TODO: Export backup
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.upload_outlined),
-                title: const Text('Import Backup'),
-                subtitle: const Text('Restore from backup file'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // TODO: Import backup
-                },
-              ),
-            ],
-          ),
+        // About
+        _buildSection(
+          title: 'About',
+          children: [
+            const ListTile(
+              leading: Icon(Icons.info_outline),
+              title: Text('Version'),
+              subtitle: Text('1.0.0'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.description_outlined),
+              title: const Text('Documentation'),
+              trailing: const Icon(Icons.open_in_new, size: 18),
+              onTap: _showComingSoon,
+            ),
+            ListTile(
+              leading: const Icon(Icons.code),
+              title: const Text('Source Code'),
+              trailing: const Icon(Icons.open_in_new, size: 18),
+              onTap: _showComingSoon,
+            ),
+          ],
+        ),
 
-          // About
-          _buildSection(
-            title: 'About',
-            children: [
-              const ListTile(
-                leading: Icon(Icons.info_outline),
-                title: Text('Version'),
-                subtitle: Text('1.0.0'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.description_outlined),
-                title: const Text('Documentation'),
-                trailing: const Icon(Icons.open_in_new, size: 18),
-                onTap: () {
-                  // TODO: Open documentation
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.code),
-                title: const Text('Source Code'),
-                trailing: const Icon(Icons.open_in_new, size: 18),
-                onTap: () {
-                  // TODO: Open GitHub
-                },
-              ),
-            ],
-          ),
-
-          // Lock Vault
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: ElevatedButton.icon(
-              onPressed: () {
-                widget.onLockRequested();
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.lock),
-              label: const Text('Lock Vault'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.withOpacity(0.8),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 50),
-              ),
+        // Lock Vault
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: ElevatedButton.icon(
+            onPressed: () {
+              widget.onLockRequested();
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.lock),
+            label: const Text('Lock Vault'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.withValues(alpha: 0.8),
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 50),
             ),
           ),
-          const SizedBox(height: 32),
-        ],
-      );
+        ),
+        const SizedBox(height: 32),
+      ],
+    );
 
     if (widget.isEmbedded) {
       return body;

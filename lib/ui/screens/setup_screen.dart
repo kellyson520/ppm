@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../services/vault_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/diagnostics/crash_report_service.dart';
+import '../../blocs/vault/vault_bloc.dart';
 
 class SetupScreen extends StatefulWidget {
-  final VaultService vaultService;
-  final VoidCallback onSetupComplete;
-
-  const SetupScreen({
-    super.key,
-    required this.vaultService,
-    required this.onSetupComplete,
-  });
+  const SetupScreen({super.key});
 
   @override
   State<SetupScreen> createState() => _SetupScreenState();
@@ -19,7 +14,7 @@ class _SetupScreenState extends State<SetupScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
   final _pageController = PageController();
-  
+
   int _currentPage = 0;
   bool _isLoading = false;
   String _errorMessage = '';
@@ -35,14 +30,14 @@ class _SetupScreenState extends State<SetupScreen> {
 
   void _calculatePasswordStrength(String password) {
     double strength = 0;
-    
+
     if (password.length >= 8) strength += 0.2;
     if (password.length >= 12) strength += 0.2;
     if (password.contains(RegExp(r'[A-Z]'))) strength += 0.15;
     if (password.contains(RegExp(r'[a-z]'))) strength += 0.15;
     if (password.contains(RegExp(r'[0-9]'))) strength += 0.15;
     if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) strength += 0.15;
-    
+
     setState(() {
       _passwordStrength = strength.clamp(0, 1);
     });
@@ -99,47 +94,52 @@ class _SetupScreenState extends State<SetupScreen> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
-    });
-
-    try {
-      await widget.vaultService.initialize(_passwordController.text);
-      widget.onSetupComplete();
-    } on Exception catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to initialize vault: $e';
-        _isLoading = false;
-      });
-    }
+    context.read<VaultBloc>().add(
+          VaultInitializeRequested(_passwordController.text),
+        );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Progress indicator
-            LinearProgressIndicator(
-              value: (_currentPage + 1) / 3,
-              backgroundColor: Colors.white10,
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
-            ),
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
+    return BlocListener<VaultBloc, VaultState>(
+      listener: (context, state) {
+        if (state.status == VaultStatus.error) {
+          setState(() {
+            _errorMessage = state.errorMessage ?? 'Unknown error';
+          });
+        }
+      },
+      child: BlocBuilder<VaultBloc, VaultState>(
+        builder: (context, state) {
+          final isLoading = state.status == VaultStatus.loading;
+
+          return Scaffold(
+            body: SafeArea(
+              child: Column(
                 children: [
-                  _buildWelcomePage(),
-                  _buildPasswordPage(),
-                  _buildConfirmPage(),
+                  // Progress indicator
+                  LinearProgressIndicator(
+                    value: (_currentPage + 1) / 3,
+                    backgroundColor: Colors.white10,
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
+                  ),
+                  Expanded(
+                    child: PageView(
+                      controller: _pageController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        _buildWelcomePage(),
+                        _buildPasswordPage(),
+                        _buildConfirmPage(isLoading),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -209,7 +209,7 @@ class _SetupScreenState extends State<SetupScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF6C63FF).withOpacity(0.2),
+            color: const Color(0xFF6C63FF).withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: const Color(0xFF6C63FF)),
@@ -282,7 +282,8 @@ class _SetupScreenState extends State<SetupScreen> {
                 child: LinearProgressIndicator(
                   value: _passwordStrength,
                   backgroundColor: Colors.white10,
-                  valueColor: AlwaysStoppedAnimation<Color>(_getStrengthColor()),
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(_getStrengthColor()),
                   minHeight: 6,
                   borderRadius: BorderRadius.circular(3),
                 ),
@@ -325,7 +326,7 @@ class _SetupScreenState extends State<SetupScreen> {
 
   Widget _buildPasswordRequirements() {
     final password = _passwordController.text;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -361,7 +362,7 @@ class _SetupScreenState extends State<SetupScreen> {
           Icon(
             met ? Icons.check_circle : Icons.circle_outlined,
             size: 16,
-            color: met ? Colors.green : Colors.white.withOpacity(0.4),
+            color: met ? Colors.green : Colors.white.withValues(alpha: 0.4),
           ),
           const SizedBox(width: 8),
           Text(
@@ -376,7 +377,7 @@ class _SetupScreenState extends State<SetupScreen> {
     );
   }
 
-  Widget _buildConfirmPage() {
+  Widget _buildConfirmPage(bool isLoading) {
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
@@ -413,7 +414,7 @@ class _SetupScreenState extends State<SetupScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.2),
+                color: Colors.red.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -443,14 +444,15 @@ class _SetupScreenState extends State<SetupScreen> {
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _completeSetup,
-                  child: _isLoading
+                  onPressed: isLoading ? null : _completeSetup,
+                  child: isLoading
                       ? const SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : const Text('Create Vault'),

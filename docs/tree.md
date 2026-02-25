@@ -1,6 +1,6 @@
 # TG ONE Project Structure
 
-> Updated: 2026-02-25 18:22
+> Updated: 2026-02-25 19:09
 
 ---
 
@@ -62,8 +62,12 @@ TG ONE/
 │   │   ├── spec.md
 │   │   └── todo.md
 │   └── 20260225_Automate_Releases
+│       ├── report.md
 │       └── todo.md
 ├── Workstream_Core
+│   ├── 20260225_CrashLogSystem
+│   │   ├── report.md
+│   │   └── todo.md
 │   └── 20260225_FixAndroidSDK35
 │       ├── report.md
 │       └── todo.md
@@ -79,5 +83,6 @@ TG ONE/
 │       └── todo.md
 ├── crypto_modularization
 │   └── architecture.md
-└── process.md
+├── process.md
+└── tree.md
 ```

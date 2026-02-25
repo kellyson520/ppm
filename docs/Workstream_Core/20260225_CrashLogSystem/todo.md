@@ -31,6 +31,6 @@
 - [x] 不破坏现有 AppNavigator 逻辑
 
 ### Phase 4: 验证
-- [ ] flutter analyze 零 error
-- [ ] 手动触发崩溃 (debug 模式测试)
-- [ ] 更新 docs/tree.md
+- [x] flutter analyze 零 error
+- [x] 手动触发崩溃 (debug 模式测试)
+- [x] 更新 docs/tree.md

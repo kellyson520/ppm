@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../core/diagnostics/crash_report_service.dart';
 import '../../services/auth_service.dart';
 import '../../core/models/auth_card.dart';
 import 'qr_scanner_screen.dart';
 
 /// 添加验证器页面
-/// 
+///
 /// 支持导入方式：
 /// 1. 手动输入 - 填写发行方、账号、密钥等
 /// 2. URI 导入 - 粘贴 otpauth:// URI
@@ -36,16 +37,16 @@ class _AddAuthScreenState extends State<AddAuthScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
-  
+
   // 手动输入字段
   final _issuerController = TextEditingController();
   final _accountController = TextEditingController();
   final _secretController = TextEditingController();
   final _notesController = TextEditingController();
-  
+
   // URI 导入字段
   final _uriController = TextEditingController();
-  
+
   String _algorithm = 'SHA1';
   int _digits = 6;
   int _period = 30;
@@ -56,7 +57,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    
+
     if (widget.editPayload != null) {
       _loadExistingData();
     }
@@ -103,11 +104,13 @@ class _AddAuthScreenState extends State<AddAuthScreen>
         _digits = payload.digits;
         _period = payload.period;
       });
-      
+
       // 切换到手动输入 tab 让用户确认
       _tabController.animateTo(0);
       _showSuccess('URI 解析成功，请确认信息');
-    } on Exception catch (e) {
+    } on Exception catch (e, stack) {
+      CrashReportService.instance
+          .reportError(e, stack, source: 'AddAuthScreen:parseUri');
       _showError('URI 解析失败: $e');
     }
   }
@@ -144,11 +147,13 @@ class _AddAuthScreenState extends State<AddAuthScreen>
           _period = payload.period;
           _uriController.text = result;
         });
-        
+
         // 切换到手动输入 tab 让用户确认/编辑
         _tabController.animateTo(0);
         _showSuccess('二维码解析成功，请确认信息');
-      } on Exception catch (e) {
+      } on Exception catch (e, stack) {
+        CrashReportService.instance
+            .reportError(e, stack, source: 'AddAuthScreen:openQrScanner');
         _showError('二维码解析失败: $e');
       }
     }
@@ -157,7 +162,9 @@ class _AddAuthScreenState extends State<AddAuthScreen>
   /// 保存
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    if (widget.dek == null || widget.searchKey == null || widget.deviceId == null) {
+    if (widget.dek == null ||
+        widget.searchKey == null ||
+        widget.deviceId == null) {
       _showError('加密密钥未就绪');
       return;
     }
@@ -170,7 +177,10 @@ class _AddAuthScreenState extends State<AddAuthScreen>
       final payload = AuthPayload(
         issuer: _issuerController.text.trim(),
         account: _accountController.text.trim(),
-        secret: _secretController.text.trim().toUpperCase().replaceAll(RegExp(r'\s'), ''),
+        secret: _secretController.text
+            .trim()
+            .toUpperCase()
+            .replaceAll(RegExp(r'\s'), ''),
         algorithm: _algorithm,
         digits: _digits,
         period: _period,
@@ -179,6 +189,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
             : _notesController.text.trim(),
       );
 
+      // createCard/updateCard 是同步方法，数据存入内存 _cards 列表
       if (widget.editCard != null) {
         widget.authService.updateCard(
           cardId: widget.editCard!.cardId,
@@ -199,7 +210,9 @@ class _AddAuthScreenState extends State<AddAuthScreen>
       if (mounted) {
         Navigator.pop(context, true);
       }
-    } on Exception catch (e) {
+    } on Exception catch (e, stack) {
+      CrashReportService.instance
+          .reportError(e, stack, source: 'AddAuthScreen:save');
       setState(() {
         _isLoading = false;
       });
@@ -215,7 +228,9 @@ class _AddAuthScreenState extends State<AddAuthScreen>
       _showError('请输入内容');
       return;
     }
-    if (widget.dek == null || widget.searchKey == null || widget.deviceId == null) {
+    if (widget.dek == null ||
+        widget.searchKey == null ||
+        widget.deviceId == null) {
       _showError('加密密钥未就绪');
       return;
     }
@@ -295,7 +310,9 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                 tabs: const [
                   Tab(text: '手动输入', icon: Icon(Icons.edit, size: 18)),
                   Tab(text: 'URI 导入', icon: Icon(Icons.link, size: 18)),
-                  Tab(text: '扫码导入', icon: Icon(Icons.qr_code_scanner, size: 18)),
+                  Tab(
+                      text: '扫码导入',
+                      icon: Icon(Icons.qr_code_scanner, size: 18)),
                 ],
               ),
       ),
@@ -379,7 +396,8 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               return '请输入密钥';
             }
             // 基本的 Base32 验证
-            final cleaned = value.trim().toUpperCase().replaceAll(RegExp(r'\s'), '');
+            final cleaned =
+                value.trim().toUpperCase().replaceAll(RegExp(r'\s'), '');
             if (!RegExp(r'^[A-Z2-7=]+$').hasMatch(cleaned)) {
               return '密钥格式无效（仅支持 Base32 字符）';
             }
@@ -404,11 +422,13 @@ class _AddAuthScreenState extends State<AddAuthScreen>
             children: [
               // 算法选择
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     const Expanded(
-                      child: Text('哈希算法', style: TextStyle(color: Colors.white70)),
+                      child:
+                          Text('哈希算法', style: TextStyle(color: Colors.white70)),
                     ),
                     SegmentedButton<String>(
                       segments: const [
@@ -434,11 +454,13 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               ),
               // 位数
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     const Expanded(
-                      child: Text('验证码位数', style: TextStyle(color: Colors.white70)),
+                      child: Text('验证码位数',
+                          style: TextStyle(color: Colors.white70)),
                     ),
                     SegmentedButton<int>(
                       segments: const [
@@ -460,11 +482,13 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               ),
               // 周期
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     const Expanded(
-                      child: Text('刷新周期', style: TextStyle(color: Colors.white70)),
+                      child:
+                          Text('刷新周期', style: TextStyle(color: Colors.white70)),
                     ),
                     SegmentedButton<int>(
                       segments: const [
@@ -523,8 +547,8 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               children: [
                 Row(
                   children: [
-                    Icon(Icons.info_outline, 
-                         color: Color(0xFF6C63FF), size: 20),
+                    Icon(Icons.info_outline,
+                        color: Color(0xFF6C63FF), size: 20),
                     SizedBox(width: 8),
                     Text(
                       '导入方式',
@@ -615,15 +639,15 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    const Color(0xFF6C63FF).withOpacity(0.15),
-                    const Color(0xFF00BFA6).withOpacity(0.15),
+                    const Color(0xFF6C63FF).withValues(alpha: 0.15),
+                    const Color(0xFF00BFA6).withValues(alpha: 0.15),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(28),
                 border: Border.all(
-                  color: const Color(0xFF6C63FF).withOpacity(0.3),
+                  color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
                   width: 2,
                 ),
               ),
@@ -634,7 +658,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               ),
             ),
             const SizedBox(height: 32),
-            
+
             const Text(
               '扫描 2FA 设置二维码',
               style: TextStyle(
@@ -649,12 +673,12 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 height: 1.5,
               ),
             ),
             const SizedBox(height: 40),
-            
+
             // 开始扫描按钮
             SizedBox(
               width: double.infinity,
@@ -685,7 +709,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F3460).withOpacity(0.5),
+                color: const Color(0xFF0F3460).withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Column(

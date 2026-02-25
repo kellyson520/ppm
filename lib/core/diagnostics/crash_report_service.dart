@@ -1,6 +1,5 @@
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart';
 
 /// 崩溃信息数据类
 class CrashInfo {
@@ -90,6 +89,11 @@ class CrashReportService {
     _report(error: error, stack: stack, source: 'Zone');
   }
 
+  /// 手动上报业务错误
+  void reportError(Object error, StackTrace stack, {String source = 'App'}) {
+    _report(error: error, stack: stack, source: source);
+  }
+
   /// 内部统一上报入口
   void _report({
     required Object error,
@@ -97,7 +101,8 @@ class CrashReportService {
     required String source,
   }) {
     final now = DateTime.now();
-    final timestamp = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+    final timestamp =
+        now.toIso8601String().replaceFirst('T', ' ').substring(0, 19);
 
     final info = CrashInfo(
       errorMessage: error.toString(),
@@ -106,13 +111,20 @@ class CrashReportService {
       source: source,
     );
 
-    // 如果 handler 已注入则触发 UI 弹窗；否则仅在调试模式打印
+    // Debug 模式下在控制台打印原始错误，便于调试
+    // Release 模式下跳过以避免格式化逻辑的性能消耗
+    if (kDebugMode) {
+      debugPrint('\n--- [CRASH REPORT] ---');
+      debugPrint('Source: $source');
+      debugPrint('Time:   $timestamp');
+      debugPrint('Error:  $error');
+      debugPrint('Stack:  $stack');
+      debugPrint('----------------------\n');
+    }
+
+    // 如果 handler 已注入则触发 UI 弹窗
     if (_handler != null) {
       _handler!(info);
-    } else {
-      if (kDebugMode) {
-        debugPrint('[CrashReportService] [$source] $error\n$stack');
-      }
     }
   }
 }

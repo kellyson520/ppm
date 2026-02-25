@@ -5,7 +5,7 @@ import '../models/models.dart';
 import '../crypto/crypto_service.dart';
 
 /// Event Store for Event Sourcing
-/// 
+///
 /// Stores immutable event log in SQLCipher-encrypted SQLite
 /// Supports:
 /// - Event append-only storage
@@ -15,7 +15,7 @@ import '../crypto/crypto_service.dart';
 class EventStore {
   final Database _db;
   final CryptoService _cryptoService;
-  
+
   // Table names
   static const String _eventsTable = 'password_events';
   static const String _snapshotsTable = 'snapshots';
@@ -98,20 +98,24 @@ class EventStore {
   // ==================== Event Operations ====================
 
   /// Append a new event to the log
-  Future<void> appendEvent(PasswordEvent event) async {
-    await _db.insert(
+  Future<void> appendEvent(PasswordEvent event, {Transaction? txn}) async {
+    final executor = txn ?? _db;
+
+    await executor.insert(
       _eventsTable,
       event.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    
+
     // Update pending count
-    await _incrementPendingCount();
+    await _incrementPendingCount(txn: txn);
   }
 
   /// Append multiple events
-  Future<void> appendEvents(List<PasswordEvent> events) async {
-    final batch = _db.batch();
+  Future<void> appendEvents(List<PasswordEvent> events,
+      {Transaction? txn}) async {
+    final executor = txn ?? _db;
+    final batch = executor.batch();
     for (final event in events) {
       batch.insert(
         _eventsTable,
@@ -120,9 +124,9 @@ class EventStore {
       );
     }
     await batch.commit(noResult: true);
-    
+
     // Update pending count
-    await _updatePendingCount(events.length);
+    await _updatePendingCount(events.length, txn: txn);
   }
 
   /// Get event by ID
@@ -133,7 +137,7 @@ class EventStore {
       whereArgs: [eventId],
       limit: 1,
     );
-    
+
     if (result.isEmpty) return null;
     return PasswordEvent.fromMap(result.first);
   }
@@ -146,7 +150,7 @@ class EventStore {
       whereArgs: [cardId],
       orderBy: 'hlc_physical, hlc_logical, hlc_device',
     );
-    
+
     return result.map((r) => PasswordEvent.fromMap(r)).toList();
   }
 
@@ -156,7 +160,7 @@ class EventStore {
       _eventsTable,
       orderBy: 'hlc_physical, hlc_logical, hlc_device',
     );
-    
+
     return result.map((r) => PasswordEvent.fromMap(r)).toList();
   }
 
@@ -171,12 +175,15 @@ class EventStore {
       ''',
       whereArgs: [
         hlc.physicalTime,
-        hlc.physicalTime, hlc.logicalCounter,
-        hlc.physicalTime, hlc.logicalCounter, hlc.deviceId,
+        hlc.physicalTime,
+        hlc.logicalCounter,
+        hlc.physicalTime,
+        hlc.logicalCounter,
+        hlc.deviceId,
       ],
       orderBy: 'hlc_physical, hlc_logical, hlc_device',
     );
-    
+
     return result.map((r) => PasswordEvent.fromMap(r)).toList();
   }
 
@@ -187,13 +194,15 @@ class EventStore {
       where: 'is_synced = 0',
       orderBy: 'hlc_physical, hlc_logical, hlc_device',
     );
-    
+
     return result.map((r) => PasswordEvent.fromMap(r)).toList();
   }
 
   /// Mark events as synced
-  Future<void> markEventsAsSynced(List<String> eventIds) async {
-    final batch = _db.batch();
+  Future<void> markEventsAsSynced(List<String> eventIds,
+      {Transaction? txn}) async {
+    final executor = txn ?? _db;
+    final batch = executor.batch();
     for (final eventId in eventIds) {
       batch.update(
         _eventsTable,
@@ -206,9 +215,9 @@ class EventStore {
       );
     }
     await batch.commit(noResult: true);
-    
+
     // Recalculate pending count
-    await _recalculatePendingCount();
+    await _recalculatePendingCount(txn: txn);
   }
 
   /// Get latest HLC from events
@@ -219,7 +228,7 @@ class EventStore {
       orderBy: 'hlc_physical DESC, hlc_logical DESC, hlc_device DESC',
       limit: 1,
     );
-    
+
     if (result.isEmpty) return null;
     return HLC.fromJson({
       'physicalTime': result.first['hlc_physical'] as int,
@@ -244,7 +253,7 @@ class EventStore {
       whereArgs: [type.name],
       orderBy: 'hlc_physical, hlc_logical, hlc_device',
     );
-    
+
     return result.map((r) => PasswordEvent.fromMap(r)).toList();
   }
 
@@ -259,8 +268,11 @@ class EventStore {
       ''',
       whereArgs: [
         hlc.physicalTime,
-        hlc.physicalTime, hlc.logicalCounter,
-        hlc.physicalTime, hlc.logicalCounter, hlc.deviceId,
+        hlc.physicalTime,
+        hlc.logicalCounter,
+        hlc.physicalTime,
+        hlc.logicalCounter,
+        hlc.deviceId,
       ],
     );
   }
@@ -277,11 +289,12 @@ class EventStore {
   }) async {
     final stateString = jsonEncode(stateJson);
     final checksum = _cryptoService.sha256String(stateString);
-    
-    final snapshotId = _cryptoService.generateRandomBytes(16)
+
+    final snapshotId = _cryptoService
+        .generateRandomBytes(16)
         .map((b) => b.toRadixString(16).padLeft(2, '0'))
         .join();
-    
+
     await _db.insert(_snapshotsTable, {
       'snapshot_id': snapshotId,
       'version': version,
@@ -304,7 +317,7 @@ class EventStore {
       orderBy: 'version DESC',
       limit: 1,
     );
-    
+
     if (result.isEmpty) return null;
     return Snapshot.fromMap(result.first);
   }
@@ -317,7 +330,7 @@ class EventStore {
       whereArgs: [version],
       limit: 1,
     );
-    
+
     if (result.isEmpty) return null;
     return Snapshot.fromMap(result.first);
   }
@@ -328,7 +341,7 @@ class EventStore {
       _snapshotsTable,
       orderBy: 'version DESC',
     );
-    
+
     return result.map((r) => Snapshot.fromMap(r)).toList();
   }
 
@@ -336,7 +349,7 @@ class EventStore {
   Future<void> pruneSnapshots(int keepCount) async {
     final snapshots = await getAllSnapshots();
     if (snapshots.length <= keepCount) return;
-    
+
     final toDelete = snapshots.sublist(keepCount);
     final batch = _db.batch();
     for (final snapshot in toDelete) {
@@ -377,11 +390,11 @@ class EventStore {
       where: 'id = 1',
       limit: 1,
     );
-    
+
     if (result.isEmpty) return null;
     final row = result.first;
     if (row['last_sync_hlc_physical'] == null) return null;
-    
+
     return HLC.fromJson({
       'physicalTime': row['last_sync_hlc_physical'] as int,
       'logicalCounter': row['last_sync_hlc_logical'] as int,
@@ -397,36 +410,39 @@ class EventStore {
       where: 'id = 1',
       limit: 1,
     );
-    
+
     if (result.isEmpty) return 0;
     return (result.first['pending_count'] as int?) ?? 0;
   }
 
   // ==================== Private Methods ====================
 
-  Future<void> _incrementPendingCount() async {
-    await _db.rawUpdate('''
+  Future<void> _incrementPendingCount({Transaction? txn}) async {
+    final executor = txn ?? _db;
+    await executor.rawUpdate('''
       UPDATE $_syncStateTable 
       SET pending_count = pending_count + 1 
       WHERE id = 1
     ''');
   }
 
-  Future<void> _updatePendingCount(int delta) async {
-    await _db.rawUpdate('''
+  Future<void> _updatePendingCount(int delta, {Transaction? txn}) async {
+    final executor = txn ?? _db;
+    await executor.rawUpdate('''
       UPDATE $_syncStateTable 
       SET pending_count = pending_count + ? 
       WHERE id = 1
     ''', [delta]);
   }
 
-  Future<void> _recalculatePendingCount() async {
-    final result = await _db.rawQuery('''
+  Future<void> _recalculatePendingCount({Transaction? txn}) async {
+    final executor = txn ?? _db;
+    final result = await executor.rawQuery('''
       SELECT COUNT(*) as count FROM $_eventsTable WHERE is_synced = 0
     ''');
     final count = (result.first['count'] as int?) ?? 0;
-    
-    await _db.update(
+
+    await executor.update(
       _syncStateTable,
       {'pending_count': count},
       where: 'id = 1',
@@ -472,7 +488,8 @@ class Snapshot {
         'logicalCounter': map['timestamp_logical'] as int,
         'deviceId': map['timestamp_device'] as String,
       }),
-      stateJson: jsonDecode(map['state_json'] as String) as Map<String, dynamic>,
+      stateJson:
+          jsonDecode(map['state_json'] as String) as Map<String, dynamic>,
       eventRangeStart: HLC.fromJson(
         jsonDecode(map['event_range_start'] as String) as Map<String, dynamic>,
       ),

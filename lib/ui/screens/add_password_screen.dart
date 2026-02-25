@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../core/diagnostics/crash_report_service.dart';
 import '../../services/vault_service.dart';
 import '../../core/models/models.dart';
 
@@ -24,7 +25,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
   final _passwordController = TextEditingController();
   final _urlController = TextEditingController();
   final _notesController = TextEditingController();
-  
+
   bool _obscurePassword = true;
   bool _isLoading = false;
   double _passwordStrength = 0;
@@ -62,14 +63,14 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
 
   void _calculatePasswordStrength(String password) {
     double strength = 0;
-    
+
     if (password.length >= 8) strength += 0.2;
     if (password.length >= 12) strength += 0.2;
     if (password.contains(RegExp(r'[A-Z]'))) strength += 0.15;
     if (password.contains(RegExp(r'[a-z]'))) strength += 0.15;
     if (password.contains(RegExp(r'[0-9]'))) strength += 0.15;
     if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) strength += 0.15;
-    
+
     setState(() {
       _passwordStrength = strength.clamp(0, 1);
     });
@@ -82,17 +83,18 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
   }
 
   void _generatePassword() {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$%^&*';
+    const chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$%^&*';
     final random = DateTime.now().millisecondsSinceEpoch;
     final password = List.generate(16, (index) {
       return chars[(random + index * 17) % chars.length];
     }).join();
-    
+
     setState(() {
       _passwordController.text = password;
       _calculatePasswordStrength(password);
     });
-    
+
     HapticFeedback.lightImpact();
   }
 
@@ -125,7 +127,9 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
       if (mounted) {
         Navigator.pop(context, true);
       }
-    } on Exception catch (e) {
+    } on Exception catch (e, stack) {
+      CrashReportService.instance
+          .reportError(e, stack, source: 'AddPasswordScreen');
       setState(() {
         _isLoading = false;
       });
@@ -190,7 +194,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
-            
+
             // Username
             TextFormField(
               controller: _usernameController,
@@ -208,7 +212,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
-            
+
             // Password
             TextFormField(
               controller: _passwordController,
@@ -251,7 +255,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
               },
             ),
             const SizedBox(height: 8),
-            
+
             // Password strength indicator
             Row(
               children: [
@@ -281,7 +285,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // URL
             TextFormField(
               controller: _urlController,
@@ -294,7 +298,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
-            
+
             // Notes
             TextFormField(
               controller: _notesController,
