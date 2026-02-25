@@ -252,7 +252,7 @@ class DatabaseService {
         if (decrypted.toLowerCase().contains(lowerQuery)) {
           results.add(card);
         }
-      } catch (e) {
+      } on Exception {
         // Skip cards that can't be decrypted
       }
     }

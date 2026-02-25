@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../services/vault_service.dart';
 
 class SetupScreen extends StatefulWidget {
@@ -108,7 +107,7 @@ class _SetupScreenState extends State<SetupScreen> {
     try {
       await widget.vaultService.initialize(_passwordController.text);
       widget.onSetupComplete();
-    } catch (e) {
+    } on Exception catch (e) {
       setState(() {
         _errorMessage = 'Failed to initialize vault: $e';
         _isLoading = false;
@@ -362,7 +361,7 @@ class _SetupScreenState extends State<SetupScreen> {
           Icon(
             met ? Icons.check_circle : Icons.circle_outlined,
             size: 16,
-            color: met ? Colors.green : Colors.white.withValues(alpha: 0.4),
+            color: met ? Colors.green : Colors.white.withOpacity(0.4),
           ),
           const SizedBox(width: 8),
           Text(

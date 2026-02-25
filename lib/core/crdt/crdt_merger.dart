@@ -70,7 +70,7 @@ class CrdtMerger {
         return PasswordCard(
           cardId: event.cardId,
           encryptedPayload: event.payload.ciphertext,
-          blindIndexes: [], // Will be populated separately
+          blindIndexes: const [], // Will be populated separately
           createdAt: event.hlc,
           updatedAt: event.hlc,
           currentEventId: event.eventId,
@@ -83,7 +83,7 @@ class CrdtMerger {
           return PasswordCard(
             cardId: event.cardId,
             encryptedPayload: event.payload.ciphertext,
-            blindIndexes: [],
+            blindIndexes: const [],
             createdAt: event.hlc,
             updatedAt: event.hlc,
             currentEventId: event.eventId,
@@ -106,7 +106,7 @@ class CrdtMerger {
           return PasswordCard(
             cardId: event.cardId,
             encryptedPayload: '',
-            blindIndexes: [],
+            blindIndexes: const [],
             createdAt: event.hlc,
             updatedAt: event.hlc,
             currentEventId: event.eventId,

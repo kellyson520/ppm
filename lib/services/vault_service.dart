@@ -228,7 +228,7 @@ class VaultService {
     final event = PasswordEvent.create(
       type: EventType.cardDeleted,
       cardId: cardId,
-      payload: EncryptedPayload(
+      payload: const EncryptedPayload(
         ciphertext: '',
         iv: '',
         authTag: '',
@@ -286,7 +286,7 @@ class VaultService {
       return PasswordPayload.fromJson(
         jsonDecode(decrypted) as Map<String, dynamic>,
       );
-    } catch (e) {
+    } on Exception {
       return null;
     }
   }

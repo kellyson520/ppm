@@ -127,7 +127,7 @@ class _AppNavigatorState extends State<AppNavigator> {
       setState(() {
         _appState = isInitialized ? AppState.locked : AppState.setup;
       });
-    } catch (e) {
+    } on Exception {
       setState(() {
         _appState = AppState.error;
       });

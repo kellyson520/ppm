@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../services/vault_service.dart';
 import '../../core/models/models.dart';
 import '../widgets/password_card_item.dart';
@@ -55,7 +54,7 @@ class _VaultScreenState extends State<VaultScreen> {
         _stats = stats;
         _isLoading = false;
       });
-    } catch (e) {
+    } on Exception {
       setState(() {
         _isLoading = false;
       });

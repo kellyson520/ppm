@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:io';
-import 'package:http/http.dart' as http;
 import 'package:webdav_client/webdav_client.dart' as webdav;
 import '../models/models.dart';
 import '../events/event_store.dart';
@@ -23,7 +21,6 @@ import '../crdt/crdt_merger.dart';
 class WebDavSyncManager {
   final List<WebDavNode> _nodes;
   final EventStore _eventStore;
-  final CrdtMerger _crdtMerger;
   
   // Sync state
   bool _isSyncing = false;
@@ -34,8 +31,7 @@ class WebDavSyncManager {
     required EventStore eventStore,
     CrdtMerger? crdtMerger,
   })  : _nodes = nodes,
-        _eventStore = eventStore,
-        _crdtMerger = crdtMerger ?? CrdtMerger();
+        _eventStore = eventStore;
 
   /// Sync progress stream
   Stream<SyncProgress> get syncProgress => _syncController.stream;
@@ -69,7 +65,7 @@ class WebDavSyncManager {
     final results = <String, NodeSyncResult>{};
     var totalDownloaded = 0;
     var totalUploaded = 0;
-    var conflicts = <Conflict>[];
+    final conflicts = <Conflict>[];
 
     try {
       // Sync with each node
@@ -112,7 +108,7 @@ class WebDavSyncManager {
         totalUploaded: totalUploaded,
         conflicts: conflicts,
       );
-    } catch (e) {
+    } on Exception catch (e) {
       _syncController.add(SyncProgress(
         status: SyncStatus.failed,
         message: 'Sync failed: $e',
@@ -138,7 +134,7 @@ class WebDavSyncManager {
       final remoteManifest = await _getRemoteManifest(client);
       
       // Get local state
-      final localHlc = await _eventStore.getLatestHlc();
+      final _ = await _eventStore.getLatestHlc();
       final unsyncedEvents = await _eventStore.getUnsyncedEvents();
 
       // Download remote events
@@ -187,7 +183,7 @@ class WebDavSyncManager {
         uploadedCount: uploadedCount,
         conflicts: conflicts,
       );
-    } catch (e) {
+    } on Exception catch (e) {
       return NodeSyncResult(
         nodeName: node.name,
         success: false,
@@ -217,7 +213,7 @@ class WebDavSyncManager {
     for (final path in paths) {
       try {
         await client.mkdir(path);
-      } catch (e) {
+      } on Exception {
         // Directory might already exist
       }
     }
@@ -231,7 +227,7 @@ class WebDavSyncManager {
       );
       final json = jsonDecode(utf8.decode(response)) as Map<String, dynamic>;
       return SyncManifest.fromJson(json);
-    } catch (e) {
+    } on Exception {
       return null;
     }
   }
@@ -273,12 +269,12 @@ class WebDavSyncManager {
             );
             final json = jsonDecode(utf8.decode(content)) as Map<String, dynamic>;
             events.add(PasswordEvent.fromJson(json));
-          } catch (e) {
+          } on Exception {
             // Skip invalid event files
           }
         }
       }
-    } catch (e) {
+    } on Exception {
       // Error listing or reading events
     }
 
@@ -302,7 +298,7 @@ class WebDavSyncManager {
           utf8.encode(content),
         );
         uploaded++;
-      } catch (e) {
+      } on Exception {
         // Failed to upload event
       }
     }
@@ -325,7 +321,7 @@ class WebDavSyncManager {
           'ztd-password-manager/snapshots/$snapshotName',
           Uint8List.fromList(content),
         );
-      } catch (e) {
+      } on Exception {
         // Failed to upload snapshot to this node
       }
     }

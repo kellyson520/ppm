@@ -1,47 +1,52 @@
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
-import 'package:crypto/crypto.dart';
-import 'package:pointycastle/export.dart';
+import 'crypto_core.dart';
+import 'crypto_facade.dart';
 
-/// Cryptographic Service for ZTD Password Manager
-/// Implements:
-/// - Argon2id KDF for key derivation
-/// - AES-256-GCM for encryption
-/// - HKDF-SHA256 for key stretching
-/// - Constant-time comparison for side-channel resistance
+/// Cryptographic Service for ZTD Password Manager (向后兼容层)
+/// 
+/// **已重构**：此类现在是 [CryptoFacade] 的薄包装层。
+/// 所有加密算法通过可插拔的 Provider 注册表加载，
+/// 不再硬编码具体算法实现。
+/// 
+/// 新代码应直接使用 [CryptoFacade]。
+/// 此类保留是为了已有业务代码（KeyManager, EventStore, 
+/// DatabaseService, VaultService）的平滑过渡。
+/// 
+/// 架构层次：
+/// - CryptoService (此类, 兼容层)
+///   -> CryptoFacade (门面层)
+///     -> CryptoRegistry + CryptoPolicyEngine (注册/策略)
+///       -> Provider 实现 (aes_gcm, pbkdf2, hkdf...)
 class CryptoService {
   static final CryptoService _instance = CryptoService._internal();
   factory CryptoService() => _instance;
-  CryptoService._internal();
 
-  // Secure random number generator
-  final _secureRandom = SecureRandom('Fortuna')
-    ..seed(KeyParameter(Uint8List.fromList(
-      List.generate(32, (_) => Random.secure().nextInt(256))
-    )));
+  late final CryptoFacade _facade;
 
-  /// Generate cryptographically secure random bytes
-  Uint8List generateRandomBytes(int length) {
-    return _secureRandom.nextBytes(length);
+  CryptoService._internal() {
+    _facade = CryptoFacade();
   }
 
-  // ==================== Argon2id KDF ====================
+  /// 获取底层 CryptoFacade（新代码推荐直接使用）
+  CryptoFacade get facade => _facade;
 
-  /// Argon2id parameters
-  static const int defaultMemoryKB = 65536; // 64 MB
+  // ==================== 随机数生成 ====================
+
+  /// 生成密码学安全随机字节
+  Uint8List generateRandomBytes(int length) {
+    return _facade.generateRandomBytes(length);
+  }
+
+  // ==================== Argon2id / KDF ====================
+
+  /// Argon2id 参数（兼容旧接口）
+  static const int defaultMemoryKB = 65536;
   static const int defaultIterations = 3;
   static const int defaultParallelism = 4;
   static const int defaultHashLength = 32;
 
-  /// Derive KEK (Key Encryption Key) from master password using Argon2id
-  /// 
-  /// Parameters:
-  /// - [password]: User's master password
-  /// - [salt]: Random 32-byte salt
-  /// - [memoryKB]: Memory cost in KB (default 64MB)
-  /// - [iterations]: Number of iterations (default 3)
-  /// - [parallelism]: Parallelism factor (default 4)
+  /// 从主密码派生 KEK（兼容旧签名）
   Uint8List deriveKEK(
     String password,
     Uint8List salt, {
@@ -49,291 +54,146 @@ class CryptoService {
     int iterations = defaultIterations,
     int parallelism = defaultParallelism,
   }) {
-    // Note: Full Argon2id implementation requires argon2 package
-    // This is a simplified implementation using PBKDF2 as fallback
-    // In production, use the argon2 package
-    
-    final passwordBytes = utf8.encode(password);
-    final derivator = PBKDF2KeyDerivator(
-      HMac(SHA256Digest(), 64),
-    );
-    
-    derivator.init(Pbkdf2Parameters(
+    return _facade.deriveKEK(
+      password,
       salt,
-      iterations * 1000, // Scale up for PBKDF2
-      defaultHashLength,
-    ));
-    
-    return derivator.process(Uint8List.fromList(passwordBytes));
+      params: KdfParams(
+        kdfId: _facade.defaultSuite.kdfId,
+        memoryKB: memoryKB,
+        iterations: iterations,
+        parallelism: parallelism,
+      ),
+    );
   }
 
-  /// Benchmark device to determine optimal Argon2id parameters
-  /// Returns recommended parameters based on device capability
+  /// 基准测试设备（兼容旧接口，返回 Argon2Parameters）
   Argon2Parameters benchmarkDevice() {
-    final stopwatch = Stopwatch()..start();
-    
-    // Test with minimal parameters
-    final testSalt = generateRandomBytes(32);
-    final testPassword = 'benchmark_test';
-    
-    deriveKEK(testPassword, testSalt, 
-      memoryKB: 16384, 
-      iterations: 1, 
-      parallelism: 1
+    final kdfParams = _facade.calibrateKdf();
+    return Argon2Parameters(
+      memoryKB: kdfParams.memoryKB,
+      iterations: kdfParams.iterations,
+      parallelism: kdfParams.parallelism,
     );
-    
-    final elapsedMs = stopwatch.elapsedMilliseconds;
-    stopwatch.stop();
-    
-    // Determine parameters based on performance
-    // Target: 500ms - 1000ms for key derivation
-    if (elapsedMs < 50) {
-      // High-end device
-      return Argon2Parameters(
-        memoryKB: 131072,  // 128 MB
-        iterations: 4,
-        parallelism: 4,
-      );
-    } else if (elapsedMs < 200) {
-      // Mid-range device
-      return Argon2Parameters(
-        memoryKB: 65536,   // 64 MB
-        iterations: 3,
-        parallelism: 4,
-      );
-    } else {
-      // Low-end device
-      return Argon2Parameters(
-        memoryKB: 32768,   // 32 MB
-        iterations: 2,
-        parallelism: 2,
-      );
-    }
   }
 
-  // ==================== AES-256-GCM Encryption ====================
+  // ==================== AES-256-GCM （兼容旧接口）====================
 
-  /// Generate a random 256-bit Data Encryption Key (DEK)
-  Uint8List generateDEK() => generateRandomBytes(32);
+  /// 生成随机 DEK
+  Uint8List generateDEK() => _facade.generateDEK();
 
-  /// Encrypt data using AES-256-GCM
-  /// 
-  /// Returns: EncryptedData containing ciphertext, IV, and auth tag
+  /// AES-256-GCM 加密（兼容旧 EncryptedData 格式）
   EncryptedData encryptAESGCM(Uint8List plaintext, Uint8List key) {
-    final iv = generateRandomBytes(12); // 96-bit IV for GCM
-    
-    final gcm = GCMBlockCipher(AESEngine())
-      ..init(
-        true, // encrypt
-        AEADParameters(
-          KeyParameter(key),
-          128, // auth tag size in bits
-          iv,
-          Uint8List(0), // no additional authenticated data
-        ),
-      );
-    
-    final ciphertext = gcm.process(plaintext);
-    
-    // Extract auth tag (last 16 bytes)
-    final authTag = ciphertext.sublist(ciphertext.length - 16);
-    final actualCiphertext = ciphertext.sublist(0, ciphertext.length - 16);
-    
+    final box = _facade.encryptAESGCM(plaintext, key);
     return EncryptedData(
-      ciphertext: actualCiphertext,
-      iv: iv,
-      authTag: authTag,
+      ciphertext: box.ciphertext,
+      iv: box.nonce,
+      authTag: box.authTag,
     );
   }
 
-  /// Decrypt data using AES-256-GCM
+  /// AES-256-GCM 解密（兼容旧 EncryptedData 格式）
   Uint8List decryptAESGCM(EncryptedData encryptedData, Uint8List key) {
-    final gcm = GCMBlockCipher(AESEngine())
-      ..init(
-        false, // decrypt
-        AEADParameters(
-          KeyParameter(key),
-          128,
-          encryptedData.iv,
-          Uint8List(0),
-        ),
-      );
-    
-    // Combine ciphertext and auth tag
-    final combined = Uint8List.fromList([
-      ...encryptedData.ciphertext,
-      ...encryptedData.authTag,
-    ]);
-    
-    return gcm.process(combined);
+    final box = EncryptedBox(
+      ciphertext: encryptedData.ciphertext,
+      nonce: encryptedData.iv,
+      authTag: encryptedData.authTag,
+    );
+    return _facade.decryptAESGCM(box, key);
   }
 
-  /// Encrypt string data
+  /// 加密字符串（兼容旧接口）
   EncryptedData encryptString(String plaintext, Uint8List key) {
-    return encryptAESGCM(utf8.encode(plaintext), key);
+    return encryptAESGCM(Uint8List.fromList(utf8.encode(plaintext)), key);
   }
 
-  /// Decrypt to string
+  /// 解密字符串（兼容旧接口）
   String decryptString(EncryptedData encryptedData, Uint8List key) {
     final decrypted = decryptAESGCM(encryptedData, key);
     return utf8.decode(decrypted);
   }
 
-  // ==================== HKDF Key Derivation ====================
+  // ==================== HKDF ====================
 
-  /// Derive key using HKDF-SHA256
-  /// 
-  /// [ikm]: Input keying material
-  /// [salt]: Salt value (optional, can be empty)
-  /// [info]: Context/application specific info
-  /// [length]: Desired output length in bytes
+  /// HKDF-SHA256 密钥拉伸
   Uint8List hkdfSha256(
     Uint8List ikm, {
     Uint8List? salt,
     Uint8List? info,
     int length = 32,
   }) {
-    final hkdf = HKDFKeyDerivator(SHA256Digest());
-    
-    hkdf.init(HkdfParameters(
-      ikm,
-      length,
-      salt ?? Uint8List(0),
-      info ?? Uint8List(0),
-    ));
-    
-    return hkdf.process(Uint8List(0));
+    return _facade.hkdfSha256(ikm, salt: salt, info: info, length: length);
   }
 
   // ==================== HMAC ====================
 
-  /// Calculate HMAC-SHA256
+  /// HMAC-SHA256
   Uint8List hmacSha256(Uint8List key, Uint8List data) {
-    final hmac = HMac(SHA256Digest(), 64)
-      ..init(KeyParameter(key));
-    return hmac.process(data);
+    return _facade.hmacSha256(key, data);
   }
 
-  /// Calculate HMAC-SHA256 for string data
+  /// HMAC-SHA256（字符串版本）
   String hmacSha256String(String key, String data) {
-    final keyBytes = utf8.encode(key);
-    final dataBytes = utf8.encode(data);
-    final result = hmacSha256(
-      Uint8List.fromList(keyBytes),
-      Uint8List.fromList(dataBytes),
-    );
-    return base64Encode(result);
+    return _facade.hmacSha256String(key, data);
   }
 
-  // ==================== Constant-Time Operations ====================
+  // ==================== 常量时间操作 ====================
 
-  /// Constant-time comparison to prevent timing attacks
-  /// Returns true if arrays are equal, false otherwise
+  /// 常量时间比较
   bool constantTimeEquals(Uint8List a, Uint8List b) {
-    if (a.length != b.length) return false;
-    
-    int result = 0;
-    for (int i = 0; i < a.length; i++) {
-      result |= a[i] ^ b[i]; // XOR, no branching
-    }
-    return result == 0;
+    return _facade.constantTimeEquals(a, b);
   }
 
-  /// Constant-time comparison for hex strings
+  /// 常量时间比较（十六进制字符串）
   bool constantTimeEqualsHex(String a, String b) {
-    if (a.length != b.length) return false;
-    
-    int result = 0;
-    for (int i = 0; i < a.length; i++) {
-      result |= a.codeUnitAt(i) ^ b.codeUnitAt(i);
-    }
-    return result == 0;
+    return _facade.constantTimeEqualsHex(a, b);
   }
 
-  // ==================== Hash Functions ====================
+  // ==================== 哈希 ====================
 
-  /// Calculate SHA256 hash
+  /// SHA256 哈希
   Uint8List sha256Hash(Uint8List data) {
-    return sha256.convert(data).bytes as Uint8List;
+    return _facade.sha256Hash(data);
   }
 
-  /// Calculate SHA256 hash of string
+  /// SHA256 哈希（字符串版本）
   String sha256String(String data) {
-    return sha256.convert(utf8.encode(data)).toString();
+    return _facade.sha256String(data);
   }
 
-  // ==================== Blind Index Generation ====================
+  // ==================== 盲索引 ====================
 
-  /// Generate blind indexes for search
-  /// These allow searching encrypted data without revealing content
+  /// 生成搜索盲索引
   List<String> generateBlindIndexes(
     String plaintext,
     Uint8List searchKey, {
     int minTokenLength = 2,
   }) {
-    // Tokenize the plaintext
-    final tokens = _tokenize(plaintext.toLowerCase(), minTokenLength);
-    
-    // Generate HMAC for each token
-    return tokens.map((token) {
-      final hmac = hmacSha256(searchKey, utf8.encode(token));
-      return base64Encode(hmac);
-    }).toList();
+    return _facade.generateBlindIndexes(
+      plaintext,
+      searchKey,
+      minTokenLength: minTokenLength,
+    );
   }
 
-  /// Tokenize text into searchable tokens
-  List<String> _tokenize(String text, int minLength) {
-    final tokens = <String>[];
-    
-    // Split by common delimiters
-    final words = text.split(RegExp(r'[\s\-_\.@]+'));
-    
-    for (final word in words) {
-      if (word.length >= minLength) {
-        tokens.add(word);
-        
-        // Add n-grams for partial matching
-        if (word.length > minLength) {
-          for (int i = 0; i <= word.length - minLength; i++) {
-            for (int len = minLength; 
-                 len <= min(word.length - i, minLength + 3); 
-                 len++) {
-              tokens.add(word.substring(i, i + len));
-            }
-          }
-        }
-      }
-    }
-    
-    return tokens.toSet().toList(); // Remove duplicates
-  }
+  // ==================== 工具函数 ====================
 
-  // ==================== Utility Functions ====================
-
-  /// Convert bytes to hex string
+  /// 字节转十六进制
   String bytesToHex(Uint8List bytes) {
-    return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    return _facade.bytesToHex(bytes);
   }
 
-  /// Convert hex string to bytes
+  /// 十六进制转字节
   Uint8List hexToBytes(String hex) {
-    final result = Uint8List(hex.length ~/ 2);
-    for (int i = 0; i < hex.length; i += 2) {
-      result[i ~/ 2] = int.parse(hex.substring(i, i + 2), radix: 16);
-    }
-    return result;
+    return _facade.hexToBytes(hex);
   }
 
-  /// Clear sensitive data from memory (best effort)
+  /// 安全清除内存
   void clearBuffer(Uint8List buffer) {
-    // DoD 5220.22-M simplified standard
-    buffer.fillRange(0, buffer.length, 0x00);
-    buffer.fillRange(0, buffer.length, 0xFF);
-    buffer.fillRange(0, buffer.length, 0x00);
+    _facade.clearBuffer(buffer);
   }
 }
 
-/// Argon2id parameters
+/// Argon2id 参数（兼容旧代码）
 class Argon2Parameters {
   final int memoryKB;
   final int iterations;
@@ -358,9 +218,19 @@ class Argon2Parameters {
       parallelism: json['parallelism'] as int,
     );
   }
+
+  /// 转换为新的 KdfParams 格式
+  KdfParams toKdfParams() => KdfParams(
+    kdfId: 'pbkdf2-hmac-sha256',
+    memoryKB: memoryKB,
+    iterations: iterations,
+    parallelism: parallelism,
+  );
 }
 
-/// Encrypted data container
+/// 加密数据容器（兼容旧代码）
+/// 
+/// 新代码应使用 [CiphertextEnvelope] 替代（包含算法元数据）。
 class EncryptedData {
   final Uint8List ciphertext;
   final Uint8List iv;
@@ -372,7 +242,7 @@ class EncryptedData {
     required this.authTag,
   });
 
-  /// Serialize to JSON-compatible format
+  /// 从旧格式 JSON 反序列化
   Map<String, String> toJson() => {
     'ciphertext': base64Encode(ciphertext),
     'iv': base64Encode(iv),
@@ -387,7 +257,7 @@ class EncryptedData {
     );
   }
 
-  /// Serialize to single string
+  /// 序列化为单个字符串
   String serialize() {
     return base64Encode(utf8.encode(jsonEncode(toJson())));
   }
@@ -396,5 +266,29 @@ class EncryptedData {
     final decoded = utf8.decode(base64Decode(data));
     final json = jsonDecode(decoded) as Map<String, dynamic>;
     return EncryptedData.fromJson(json);
+  }
+
+  /// 转换为新的 CiphertextEnvelope 格式
+  CiphertextEnvelope toEnvelope({
+    String suiteId = 'ZTDPM_LEGACY_V1',
+    String aeadId = 'aes-256-gcm',
+  }) {
+    return CiphertextEnvelope(
+      schemaVersion: 1,
+      suiteId: suiteId,
+      aeadId: aeadId,
+      nonce: iv,
+      ciphertext: ciphertext,
+      authTag: authTag,
+    );
+  }
+
+  /// 从 CiphertextEnvelope 转换回来（兼容旧代码）
+  factory EncryptedData.fromEnvelope(CiphertextEnvelope envelope) {
+    return EncryptedData(
+      ciphertext: envelope.ciphertext,
+      iv: envelope.nonce,
+      authTag: envelope.authTag,
+    );
   }
 }

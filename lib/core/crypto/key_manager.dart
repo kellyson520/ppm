@@ -144,7 +144,7 @@ class KeyManager {
       _cryptoService.clearBuffer(kek);
       
       return true;
-    } catch (e) {
+    } on Exception {
       return false;
     }
   }
@@ -233,7 +233,7 @@ class KeyManager {
       _cryptoService.clearBuffer(newKek);
       
       return true;
-    } catch (e) {
+    } on Exception {
       return false;
     }
   }
@@ -291,7 +291,7 @@ class KeyManager {
       _cryptoService.clearBuffer(oldDek);
       
       return newDek;
-    } catch (e) {
+    } on Exception {
       return null;
     }
   }
@@ -350,7 +350,7 @@ class KeyManager {
       };
       
       return jsonEncode(kit);
-    } catch (e) {
+    } on Exception {
       return null;
     }
   }
@@ -379,7 +379,7 @@ class KeyManager {
       await _secureStorage.write(key: _deviceIdKeyName, value: deviceId);
       
       return true;
-    } catch (e) {
+    } on Exception {
       return false;
     }
   }

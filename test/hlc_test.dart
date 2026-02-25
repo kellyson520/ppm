@@ -12,24 +12,24 @@ void main() {
     });
 
     test('HLC comparison - happened before', () {
-      final hlc1 = HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'A');
-      final hlc2 = HLC(physicalTime: 2000, logicalCounter: 0, deviceId: 'B');
+      const hlc1 = HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'A');
+      const hlc2 = HLC(physicalTime: 2000, logicalCounter: 0, deviceId: 'B');
       
       expect(hlc1.happenedBefore(hlc2), isTrue);
       expect(hlc2.happenedBefore(hlc1), isFalse);
     });
 
     test('HLC comparison - same physical time', () {
-      final hlc1 = HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'A');
-      final hlc2 = HLC(physicalTime: 1000, logicalCounter: 1, deviceId: 'B');
+      const hlc1 = HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'A');
+      const hlc2 = HLC(physicalTime: 1000, logicalCounter: 1, deviceId: 'B');
       
       expect(hlc1.compareTo(hlc2), lessThan(0));
       expect(hlc2.compareTo(hlc1), greaterThan(0));
     });
 
     test('HLC merge', () {
-      final local = HLC(physicalTime: 1000, logicalCounter: 5, deviceId: 'A');
-      final remote = HLC(physicalTime: 2000, logicalCounter: 3, deviceId: 'B');
+      const local = HLC(physicalTime: 1000, logicalCounter: 5, deviceId: 'A');
+      const remote = HLC(physicalTime: 2000, logicalCounter: 3, deviceId: 'B');
       
       final merged = local.merge(remote);
       
@@ -38,7 +38,7 @@ void main() {
     });
 
     test('HLC increment', () {
-      final hlc = HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'A');
+      const hlc = HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'A');
       final incremented = hlc.increment();
       
       expect(incremented.physicalTime, equals(hlc.physicalTime));
@@ -47,7 +47,7 @@ void main() {
     });
 
     test('HLC JSON serialization', () {
-      final hlc = HLC(physicalTime: 1000, logicalCounter: 5, deviceId: 'A');
+      const hlc = HLC(physicalTime: 1000, logicalCounter: 5, deviceId: 'A');
       final json = hlc.toJson();
       final restored = HLC.fromJson(json);
       
@@ -59,8 +59,8 @@ void main() {
 
   group('HLCUtils Tests', () {
     test('max returns latest HLC', () {
-      final hlc1 = HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'A');
-      final hlc2 = HLC(physicalTime: 2000, logicalCounter: 0, deviceId: 'B');
+      const hlc1 = HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'A');
+      const hlc2 = HLC(physicalTime: 2000, logicalCounter: 0, deviceId: 'B');
       
       final max = HLCUtils.max(hlc1, hlc2);
       
@@ -68,7 +68,7 @@ void main() {
     });
 
     test('isCausallyOrdered returns true for ordered list', () {
-      final hlcs = [
+      const hlcs = [
         HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'A'),
         HLC(physicalTime: 2000, logicalCounter: 0, deviceId: 'B'),
         HLC(physicalTime: 3000, logicalCounter: 0, deviceId: 'C'),
@@ -78,7 +78,7 @@ void main() {
     });
 
     test('isCausallyOrdered returns false for unordered list', () {
-      final hlcs = [
+      const hlcs = [
         HLC(physicalTime: 2000, logicalCounter: 0, deviceId: 'A'),
         HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'B'),
         HLC(physicalTime: 3000, logicalCounter: 0, deviceId: 'C'),

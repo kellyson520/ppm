@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.1.0] - 2026-02-25
+
+### ✨ 重大重构：密码学模块化 (Crypto Modularization)
+- **解耦单体 `CryptoService`** 为六层可插拔架构：接口层 (`crypto_core.dart`) → 实现层 (`providers/`) → 注册层 (`crypto_registry.dart`) → 策略层 (`crypto_policy.dart`) → 门面层 (`crypto_facade.dart`) → 兼容层 (`crypto_service.dart`)
+  - 定义 `Kdf` / `AeadCipher` / `KeyWrap` / `Signer` / `Rng` 五大抽象接口
+  - 实现 `AesGcmProvider` (AES-256-GCM AEAD)、`Pbkdf2Provider` (PBKDF2-HMAC-SHA256)、`HkdfProvider` (HKDF-SHA256) 三个默认 Provider
+- **引入自描述密文格式 `CiphertextEnvelope`**：包含 `schemaVersion`、`suiteId`、`aeadId`、`kdfParams`、`nonce`、`ciphertext`、`authTag`、`aadMeta` 等字段，支持防剪切/重放攻击
+- **实现防降级策略引擎 `CryptoPolicy`**：通过 `AllowedSuites` 集合 + `SecurityLevel` 最低安全等级门槛，拒绝解密不受信任的算法套件
+- **向后兼容**：`CryptoService` 保留所有旧方法签名，`EncryptedData` ↔ `CiphertextEnvelope` 互转，`KeyManager` / `VaultService` / `EventStore` 无需改动
+
+### 🔧 修复
+- 修复 `flutter analyze` 报告的全部错误与警告（跨 18 个文件），包括：
+  - 清理未使用 import (`add_password_screen.dart`, `vault_screen.dart` 等)
+  - 移除不当 `const` 构造函数调用 (`lock_screen.dart`, `setup_screen.dart`)
+  - 修复 `crdt_merger.dart` 中的类型推断与未使用变量
+  - 修复 `webdav_sync.dart` 中的方法签名与 null-safety 问题
+  - 修复 `settings_screen.dart` 中的枚举引用错误
+- 修复 `analysis_options.yaml` 中的无效 lint 规则引用
+
+### 📦 依赖
+- 新增 `synchronized: ^3.1.0` 用于并发安全控制
+
+### 📝 文档
+- 新增 `docs/crypto_modularization/architecture.md` 架构文档
+- 新增 `AGENTS.md` 项目智能体配置
+
 ## [0.0.1] - 2026-02-24
 
 ### Added

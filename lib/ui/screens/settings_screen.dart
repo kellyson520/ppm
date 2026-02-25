@@ -17,7 +17,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   VaultStats? _stats;
-  bool _isLoading = true;
 
   @override
   void initState() {
@@ -29,7 +28,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final stats = await widget.vaultService.getStats();
     setState(() {
       _stats = stats;
-      _isLoading = false;
     });
   }
 
@@ -177,10 +175,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
 
     if (confirmed == true) {
-      setState(() {
-        _isLoading = true;
-      });
-
       await widget.vaultService.createSnapshot();
       await _loadStats();
 
@@ -397,10 +391,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
           child: Text(
             title.toUpperCase(),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF6C63FF),
+              color: Color(0xFF6C63FF),
               letterSpacing: 1,
             ),
           ),

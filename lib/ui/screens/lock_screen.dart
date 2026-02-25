@@ -64,7 +64,7 @@ class _LockScreenState extends State<LockScreen>
       } else {
         _handleFailedAttempt();
       }
-    } catch (e) {
+    } on Exception {
       setState(() {
         _errorMessage = 'An error occurred. Please try again.';
         _isLoading = false;

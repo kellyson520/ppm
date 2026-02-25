@@ -32,7 +32,7 @@ void main() {
 
     test('string encryption and decryption', () {
       final key = cryptoService.generateRandomBytes(32);
-      final plaintext = 'Secret message';
+      const plaintext = 'Secret message';
       
       final encrypted = cryptoService.encryptString(plaintext, key);
       final decrypted = cryptoService.decryptString(encrypted, key);
@@ -94,7 +94,7 @@ void main() {
 
     test('blind index generation', () {
       final searchKey = cryptoService.generateRandomBytes(32);
-      final plaintext = 'test password entry';
+      const plaintext = 'test password entry';
       
       final indexes = cryptoService.generateBlindIndexes(plaintext, searchKey);
       
@@ -110,7 +110,7 @@ void main() {
     });
 
     test('hex to bytes conversion', () {
-      final hex = 'abcdef';
+      const hex = 'abcdef';
       final bytes = cryptoService.hexToBytes(hex);
       
       expect(bytes, equals(Uint8List.fromList([0xAB, 0xCD, 0xEF])));

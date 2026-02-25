@@ -125,10 +125,11 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
       if (mounted) {
         Navigator.pop(context, true);
       }
-    } catch (e) {
+    } on Exception catch (e) {
       setState(() {
         _isLoading = false;
       });
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to save: $e'),

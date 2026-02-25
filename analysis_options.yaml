@@ -24,7 +24,6 @@ linter:
     
     # Performance
     avoid_unnecessary_containers: true
-    avoid_widget_to_instance_variable: true
 
 analyzer:
   exclude:
