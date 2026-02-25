@@ -7,3 +7,4 @@
 | 20260225_Localization_Skills | 技能系统架构适配 (Flutter/Dart/SQLCipher/WebDAV CRDT) | 2026-02-25 | 2026-02-25 | 100% | [📂 Check](./Workstream_SkillLocalization/20260225_Localization_Skills/) |
 | 20260225_PushAllCode | Push all code to the repository | 2026-02-25 | 2026-02-25 | 100% | [📂 Check](./Workstream_Git/20260225_PushAllCode/) |
 | 20260225_FixAndroidSDK35 | Fix Android SDK 35 compatibility | 2026-02-25 | 2026-02-25 | 100% | [📂 Check](./Workstream_Core/20260225_FixAndroidSDK35/) |
+| 20260225_Automate_Releases | Automate GitHub Releases in CI | 2026-02-25 | | 50% | [📂 Check](./Workstream_CI/20260225_Automate_Releases/) |

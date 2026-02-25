@@ -11,6 +11,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -64,3 +66,19 @@ jobs:
         with:
           name: web-build
           path: build/web/
+
+      - name: Archive Web Build for Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: zip -r web-build.zip build/web/
+
+      - name: Create Release and Upload Assets
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+            web-build.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false

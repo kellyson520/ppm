@@ -57,9 +57,11 @@ TG ONE/
 │       ├── spec.md
 │       └── todo.md
 ├── Workstream_CI
-│   └── 20260224_Cloud_CI_Setup
-│       ├── report.md
-│       ├── spec.md
+│   ├── 20260224_Cloud_CI_Setup
+│   │   ├── report.md
+│   │   ├── spec.md
+│   │   └── todo.md
+│   └── 20260225_Automate_Releases
 │       └── todo.md
 ├── Workstream_Core
 │   └── 20260225_FixAndroidSDK35
