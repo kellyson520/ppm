@@ -59,7 +59,8 @@ class CrashReportScreen extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: const Color(0xFFFF4C5B).withValues(alpha: 0.15),
+            // ignore: deprecated_member_use
+            color: const Color(0xFFFF4C5B).withOpacity(0.15),
             borderRadius: BorderRadius.circular(14),
           ),
           child: const Icon(
@@ -104,7 +105,8 @@ class CrashReportScreen extends StatelessWidget {
         color: const Color(0xFF1A1A2E),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0xFFFF4C5B).withValues(alpha: 0.25),
+          // ignore: deprecated_member_use
+          color: const Color(0xFFFF4C5B).withOpacity(0.25),
         ),
       ),
       child: Column(
@@ -250,7 +252,8 @@ class CrashReportScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        // ignore: deprecated_member_use
+        color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -327,7 +330,8 @@ class _ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: color.withValues(alpha: 0.12),
+      // ignore: deprecated_member_use
+      color: color.withOpacity(0.12),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         key: Key(id),
@@ -337,7 +341,8 @@ class _ActionButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: color.withValues(alpha: 0.35)),
+            // ignore: deprecated_member_use
+            border: Border.all(color: color.withOpacity(0.35)),
           ),
           child: Column(
             children: [
