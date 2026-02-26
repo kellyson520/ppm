@@ -37,12 +37,13 @@ void main() {
       // 理想情况下，每个字节出现的概率应接近 1/256
       // 我们允许一定的统计偏差 (3个标准差左右)
       const expected = 10240 / 256;
-      const tolerance = expected * 0.5; // 允许 50% 的偏差波动
+      const tolerance = expected * 0.8; // 允许 80% 的偏差波动 (约 5.0 倍标准差，极低误报率)
 
       for (var count in counts.values) {
         expect(count,
             isWithin(from: expected - tolerance, to: expected + tolerance),
-            reason: 'Entropy too low! Byte frequency is poorly distributed.');
+            reason:
+                'Entropy distribution test failed! Byte frequency deviation too large.');
       }
     });
   });
