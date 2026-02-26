@@ -16,3 +16,4 @@
 | 20260226_FixPasswordBlocTest | 修复 PasswordBloc 测试错误 | 2026-02-26 | 2026-02-26 | 100% | [📂 Check](./Workstream_Core/20260226_FixPasswordBlocTest/) |
 | 20260226_FixLintingIssues | 修复 Flutter 严格代码规范 (Linting) | 2026-02-26 | 2026-02-26 | 100% | [📂 Check](./Workstream_Core/20260226_FixLintingIssues/) |
 | 20260226_FixEntropyTestFailure | 修复加密熵值校验测试失败 | 2026-02-26 | 2026-02-26 | 100% | [📂 Check](./Workstream_Crypto/20260226_FixEntropyTestFailure/) |
+| 20260226_UpgradeAndroidSDK36 | 升级 Android SDK 至 36 (兼容 sqlcipher) | 2026-02-26 | 2026-02-26 | 100% | [📂 Check](./Workstream_Core/20260226_UpgradeAndroidSDK36/) |

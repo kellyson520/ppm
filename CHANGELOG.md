@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.8] - 2026-02-26
+
+### 🔧 修复 (Fixes)
+- **Android SDK 升级**：将 `compileSdk` 和 `targetSdk` 升级至 36，以满足 `sqflite_sqlcipher` 插件的最低版本要求。
+- **环境适配**：解决编译期间 SDK 版本不足导致的兼容性警告。
+
 ## [0.2.7] - 2026-02-26
 
 ### 🔧 修复 (Fixes)
