@@ -3,6 +3,7 @@
 /// CRDT 有严格的数学不变式（幂等、交换、结合），此测试基于这些数学属性。
 /// 通用性：只要 CRDT 语义不变，哪怕内部数据结构完全重写，这些测试都不需改动。
 ///         属性测试风格（Property-Based），比 example-based 更抗重构。
+library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ztd_password_manager/core/crdt/crdt_merger.dart';
 import 'package:ztd_password_manager/core/models/models.dart';
@@ -42,9 +43,9 @@ void main() {
         cardId: kTestCardId1,
         updatedAt: makeHLC(physicalTime: 1500, deviceId: 'dev-c'),
       );
-      final ab_c = CrdtMerger.mergeCards(CrdtMerger.mergeCards(a, b), c);
-      final a_bc = CrdtMerger.mergeCards(a, CrdtMerger.mergeCards(b, c));
-      expect(ab_c, equals(a_bc));
+      final abC = CrdtMerger.mergeCards(CrdtMerger.mergeCards(a, b), c);
+      final aBc = CrdtMerger.mergeCards(a, CrdtMerger.mergeCards(b, c));
+      expect(abC, equals(aBc));
     });
 
     test('LWW 语义：更新时间更晚的获胜', () {

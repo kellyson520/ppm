@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.6] - 2026-02-26
+
+### 🔧 修复 (Fixes)
+- **代码规范修复**：全面修复 27 项 `flutter analyze` 警告，解决 CI 构建失败风险
+  - 重构 `AuthBloc`, `PasswordBloc`, `VaultBloc` 及其测试工具，将通配 `catch (e)` 升级为 `on Object catch (e)` (`avoid_catches_without_on_clauses`)
+  - 移除 `KeyManager` 中弃用的 `encryptedSharedPreferences` 参数 (`deprecated_member_use`)
+  - 清理 `LockScreen` 与 `SetupScreen` 中冗余的 `_isLoading` 字段，交由 BLoC 状态管理 (`unused_field`)
+  - 修复 `test_matchers.dart` 文档注释中的 HTML 解析歧义问题 (`unintended_html_in_doc_comment`)
+- **CI 优化**：暂时禁用 GitHub Actions 的 Flutter 缓存 (`cache: false`) 以确保构建环境纯净，并优化 YAML 缩进
+
 ## [0.2.5] - 2026-02-26
 
 ### 🔧 修复 (Fixes)

@@ -13,7 +13,6 @@ class LockScreen extends StatefulWidget {
 class _LockScreenState extends State<LockScreen>
     with SingleTickerProviderStateMixin {
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
   bool _obscurePassword = true;
   String _errorMessage = '';
   int _failedAttempts = 0;
@@ -54,7 +53,6 @@ class _LockScreenState extends State<LockScreen>
     HapticFeedback.heavyImpact();
 
     setState(() {
-      _isLoading = false;
       if (_failedAttempts >= 5) {
         _errorMessage = 'Too many failed attempts. Please wait.';
       } else {

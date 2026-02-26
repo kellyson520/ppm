@@ -3,6 +3,7 @@
 /// 策略：测试所有模型的 "round-trip" (序列化 → 反序列化 = 原始值)
 /// 通用性：只要模型保持 fromJson/toJson 或 fromMap/toMap 的契约，
 ///         即使内部字段增删改，这些测试只需更新 test_fixtures.dart 即可适配。
+library;
 import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/test_helpers.dart';
 import 'package:ztd_password_manager/core/models/models.dart';

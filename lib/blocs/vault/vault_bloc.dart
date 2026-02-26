@@ -31,7 +31,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
       } else {
         emit(state.copyWith(status: VaultStatus.locked));
       }
-    } catch (e) {
+    } on Object catch (e) {
       emit(state.copyWith(
         status: VaultStatus.error,
         errorMessage: e.toString(),
@@ -47,7 +47,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
     try {
       await _vaultService.initialize(event.masterPassword);
       emit(state.copyWith(status: VaultStatus.unlocked));
-    } catch (e) {
+    } on Object catch (e) {
       emit(state.copyWith(
         status: VaultStatus.error,
         errorMessage: e.toString(),
@@ -70,7 +70,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
           errorMessage: 'Invalid master password',
         ));
       }
-    } catch (e) {
+    } on Object catch (e) {
       emit(state.copyWith(
         status: VaultStatus.error,
         errorMessage: e.toString(),
@@ -105,7 +105,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
               'Failed to change password. Please verify current password.',
         ));
       }
-    } catch (e) {
+    } on Object catch (e) {
       emit(state.copyWith(
         status: VaultStatus.unlocked,
         errorMessage: e.toString(),

@@ -4,9 +4,11 @@
 /// 当内部实现变化（如换加密算法）时，只要契约不变，测试就不会断裂。
 ///
 /// 使用方式：
-///   expect(result, isSerializable<PasswordCard>(PasswordCard.fromMap, PasswordCard.toMap));
+///   expect(result, `isSerializable<PasswordCard>(PasswordCard.fromMap, PasswordCard.toMap)`);
 ///   expect(encrypted, isValidEncryptedData);
 ///   expect(hlcList, isCausallyOrdered);
+library;
+
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ztd_password_manager/core/models/models.dart';
@@ -49,7 +51,7 @@ class _SerializableEncryptedDataMatcher extends Matcher {
       return _uint8ListEquals(item.ciphertext, deserialized.ciphertext) &&
           _uint8ListEquals(item.iv, deserialized.iv) &&
           _uint8ListEquals(item.authTag, deserialized.authTag);
-    } catch (_) {
+    } on Object catch (_) {
       return false;
     }
   }
@@ -75,7 +77,7 @@ class EncryptionRoundTripMatcher extends Matcher {
       final encrypted = cryptoService.encryptString(item, key);
       final decrypted = cryptoService.decryptString(encrypted, key);
       return decrypted == item;
-    } catch (e) {
+    } on Object catch (e) {
       matchState['error'] = e;
       return false;
     }
@@ -168,7 +170,7 @@ class _PasswordCardSerializableMatcher extends Matcher {
       final map = item.toMap();
       final restored = PasswordCard.fromMap(map);
       return item == restored;
-    } catch (e) {
+    } on Object catch (e) {
       matchState['error'] = e;
       return false;
     }
@@ -193,7 +195,7 @@ class _PasswordPayloadSerializableMatcher extends Matcher {
       final json = item.toJson();
       final restored = PasswordPayload.fromJson(json);
       return item == restored;
-    } catch (e) {
+    } on Object catch (e) {
       matchState['error'] = e;
       return false;
     }
@@ -221,7 +223,7 @@ class _PasswordEventSerializableMatcher extends Matcher {
           item.cardId == restored.cardId &&
           item.type == restored.type &&
           item.deviceId == restored.deviceId;
-    } catch (e) {
+    } on Object catch (e) {
       matchState['error'] = e;
       return false;
     }
@@ -246,7 +248,7 @@ class _PasswordEventJsonSerializableMatcher extends Matcher {
       final json = item.toJson();
       final restored = PasswordEvent.fromJson(json);
       return item == restored;
-    } catch (e) {
+    } on Object catch (e) {
       matchState['error'] = e;
       return false;
     }
@@ -270,7 +272,7 @@ class _AuthPayloadSerializableMatcher extends Matcher {
       final json = item.toJson();
       final restored = AuthPayload.fromJson(json);
       return item == restored;
-    } catch (e) {
+    } on Object catch (e) {
       matchState['error'] = e;
       return false;
     }
@@ -293,7 +295,7 @@ class CrdtIdempotentMatcher extends Matcher {
     try {
       final merged = CrdtMerger.mergeCards(item, item);
       return merged == item;
-    } catch (e) {
+    } on Object catch (e) {
       matchState['error'] = e;
       return false;
     }
@@ -318,7 +320,7 @@ class CrdtCommutativeMatcher extends Matcher {
       final ab = CrdtMerger.mergeCards(item, other);
       final ba = CrdtMerger.mergeCards(other, item);
       return ab == ba;
-    } catch (e) {
+    } on Object catch (e) {
       matchState['error'] = e;
       return false;
     }

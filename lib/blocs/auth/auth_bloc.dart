@@ -30,7 +30,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final cards = _authService.getActiveCards();
       emit(AuthLoaded(cards: cards));
-    } catch (e) {
+    } on Object catch (e) {
       emit(AuthError(e.toString()));
     }
   }
@@ -55,7 +55,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       // Actually, let's assume search is handled elsewhere or we add searchKey to event.
       final cards = _authService.getActiveCards();
       emit(AuthLoaded(cards: cards, query: event.query));
-    } catch (e) {
+    } on Object catch (e) {
       emit(AuthError(e.toString()));
     }
   }
@@ -73,7 +73,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         deviceId: event.deviceId,
       );
       add(AuthLoadRequested());
-    } catch (e) {
+    } on Object catch (e) {
       emit(AuthError(e.toString()));
     }
   }
@@ -92,7 +92,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         deviceId: event.deviceId,
       );
       add(AuthLoadRequested());
-    } catch (e) {
+    } on Object catch (e) {
       emit(AuthError(e.toString()));
     }
   }
@@ -105,7 +105,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       _authService.deleteCard(event.cardId, event.deviceId);
       add(AuthLoadRequested());
-    } catch (e) {
+    } on Object catch (e) {
       emit(AuthError(e.toString()));
     }
   }

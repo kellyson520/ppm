@@ -34,7 +34,6 @@ class KeyManager {
   })  : _secureStorage = secureStorage ??
             const FlutterSecureStorage(
               aOptions: AndroidOptions(
-                encryptedSharedPreferences: true,
                 keyCipherAlgorithm: KeyCipherAlgorithm.RSA_ECB_PKCS1Padding,
                 storageCipherAlgorithm:
                     StorageCipherAlgorithm.AES_GCM_NoPadding,

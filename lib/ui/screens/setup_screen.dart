@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../core/diagnostics/crash_report_service.dart';
 import '../../blocs/vault/vault_bloc.dart';
 
 class SetupScreen extends StatefulWidget {
@@ -16,7 +15,6 @@ class _SetupScreenState extends State<SetupScreen> {
   final _pageController = PageController();
 
   int _currentPage = 0;
-  bool _isLoading = false;
   String _errorMessage = '';
   double _passwordStrength = 0;
 

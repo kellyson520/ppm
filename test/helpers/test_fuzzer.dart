@@ -1,6 +1,7 @@
 /// 极端数据模糊生成器 (Fuzzer)
 ///
 /// 目标：生成能够触发解析崩溃、越界或溢出的边界数据。
+library;
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -29,7 +30,7 @@ class TestFuzzer {
   static String _unicodeString(int len) {
     const emojis = '😀😃😄😁😆😅😂🤣😇😉😊😋😌😍🥰😘';
     const cjk = '你好我是测试数据密码管理器こんにちはनमस्ते';
-    final all = emojis + cjk;
+    const all = emojis + cjk;
     return List.generate(len, (i) => all[_random.nextInt(all.length)]).join();
   }
 

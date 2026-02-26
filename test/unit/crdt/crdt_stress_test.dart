@@ -2,9 +2,9 @@
 ///
 /// 模拟 A、B 两台设备在几乎同一时刻对同一份数据进行不同修改。
 /// 验证：合并结果是否满足强一致性（Strong Eventual Consistency）。
+library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ztd_password_manager/core/crdt/crdt_merger.dart';
-import 'package:ztd_password_manager/core/models/models.dart';
 import '../../helpers/test_helpers.dart';
 
 void main() {
