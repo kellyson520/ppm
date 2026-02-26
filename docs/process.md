@@ -13,3 +13,4 @@
 | 20260225_FixReleaseAutomation | Fix GitHub Release automation not pushing artifacts | 2026-02-25 | | Active | [📂 Check](./Workstream_CI/20260225_FixReleaseAutomation/) |
 | 20260225_ExceptionAndBoundaryHandling | 2026-02-25 | 2026-02-25 | 100% | [📂 Check](./Workstream_Core/20260225_ExceptionAndBoundaryHandling/) |
 | 20260225_FixTestSyntaxErrors | 修复测试文件语法错误 | 2026-02-25 | 2026-02-25 | 100% | [📂 Check](./Workstream_Core/20260225_FixTestSyntaxErrors/) |
+| 20260226_FixPasswordBlocTest | 修复 PasswordBloc 测试错误 | 2026-02-26 | 2026-02-26 | 100% | [📂 Check](./Workstream_Core/20260226_FixPasswordBlocTest/) |

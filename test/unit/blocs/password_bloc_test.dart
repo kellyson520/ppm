@@ -1,16 +1,6 @@
 /// PasswordBloc 状态机测试
-///
-/// 策略：用 BLoC 状态测试代替 Widget 测试 —— 比 Widget 测试更快、
-///       更稳健，且能精确捕捉所有 UI 状态转换。
-/// 消除：按钮无效（事件未发出）、加载状态丢失、错误静默等 UI 漏检。
-///
-/// 覆盖点：
-///   [1] 加载数据 (PasswordLoadRequested) → Loading → Loaded
-///   [2] 搜索 (PasswordSearchRequested) → Loading → Loaded(with query)
-///   [3] 新增 (PasswordAddRequested) → OperationInProgress → Loaded
-///   [4] 更新 (PasswordUpdateRequested) → OperationInProgress → Loaded
-///   [5] 删除 (PasswordDeleteRequested) → OperationInProgress → Loaded
-///   [6] 任意操作失败 → PasswordError
+library;
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -19,10 +9,9 @@ import 'package:ztd_password_manager/blocs/password/password_bloc.dart';
 import 'package:ztd_password_manager/services/vault_service.dart';
 import 'package:ztd_password_manager/core/models/models.dart';
 import '../../helpers/test_helpers.dart';
-
-@GenerateMocks([VaultService])
 import 'password_bloc_test.mocks.dart';
 
+@GenerateMocks([VaultService])
 void main() {
   late MockVaultService mockVaultService;
   late PasswordBloc passwordBloc;
@@ -214,12 +203,12 @@ void main() {
       '删除成功 → OperationInProgress → Loading → Loaded(空列表)',
       build: () {
         when(mockVaultService.deleteCard(kTestCardId1))
-            .thenAnswer((_) async => {});
+            .thenAnswer((_) async => true);
         when(mockVaultService.getAllCards())
             .thenAnswer((_) async => remainingCards);
         return passwordBloc;
       },
-      act: (b) => b.add(PasswordDeleteRequested(kTestCardId1)),
+      act: (b) => b.add(const PasswordDeleteRequested(kTestCardId1)),
       expect: () => [
         isA<PasswordOperationInProgress>(),
         isA<PasswordLoading>(),
@@ -239,7 +228,7 @@ void main() {
             .thenThrow(Exception('DB write failed'));
         return passwordBloc;
       },
-      act: (b) => b.add(PasswordDeleteRequested(kTestCardId1)),
+      act: (b) => b.add(const PasswordDeleteRequested(kTestCardId1)),
       expect: () => [
         isA<PasswordOperationInProgress>(),
         isA<PasswordError>(),
