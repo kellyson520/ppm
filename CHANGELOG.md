@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5] - 2026-02-26
+
+### 🔧 修复 (Fixes)
+- **测试修复**：修复 `PasswordBloc` 单元测试中的静态分析错误、Mockito 生成位置及类型不匹配问题
+- **CI 升级**：升级 GitHub Actions 的 Flutter 版本至 `3.41.2` 以支持 `Color.withValues` API
+- **文档更新**：同步任务报告并完成 Workstream 归档准备
+
 ## [0.2.4] - 2026-02-25
 
 ### ✨ 新功能 (Features)
