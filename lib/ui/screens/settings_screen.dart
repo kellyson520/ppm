@@ -296,9 +296,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           '${tempDir.path}/ztd_vault_export_${DateTime.now().millisecondsSinceEpoch}.json');
       await file.writeAsString(jsonStr);
 
-      final result = await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: l10n.exportBackup,
+      final result = await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: l10n.exportBackup,
+        ),
       );
 
       if (result.status == ShareResultStatus.success) {

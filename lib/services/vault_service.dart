@@ -459,7 +459,7 @@ class VaultService {
             final payload = PasswordPayload.fromJson(item);
             await createCard(payload);
             importedCount++;
-          } catch (e) {
+          } on Exception catch (_) {
             // Skip invalid items
             continue;
           }
