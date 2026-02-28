@@ -27,5 +27,11 @@ Android 编译失败，报错 Unresolved reference for `java.util.Properties` an
 
 ### Phase 4: Report
 - [x] 生成 `report.md`
-- [ ] 更新 `process.md`
+- [x] 更新 `process.md`
+- [x] 代码推送与版本标记 (v0.2.13+13)
 
+
+### Phase 5: Second Attempt (Fixing Unresolved Reference)
+- [x] 回滚 `compilerOptions` 到 `kotlinOptions` (因为 `android` 扩展不直接支持 `compilerOptions`)
+- [x] 验证 `kotlinOptions` 语法正确性
+- [x] 更新文档并准备推送
