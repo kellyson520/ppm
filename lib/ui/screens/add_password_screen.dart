@@ -149,171 +149,240 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
     final l10n = AppLocalizations.of(context)!;
     final isEditing = widget.editCard != null;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? l10n.editPassword : l10n.addPassword),
-        actions: [
-          if (_isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+    final content = Container(
+      decoration: BoxDecoration(
+          color:
+              const Color(0xFF16213E).withValues(alpha: 0.95), // Xcode 风格暗黑玻璃
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border(
+              top: BorderSide(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 0.5,
+          ))),
+      child: Column(
+        children: [
+          // 悬浮在顶部的拖拽胶囊指示器
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 5,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // 定制的无界限标题栏
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    isEditing ? l10n.editPassword : l10n.addPassword,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ),
-            )
-          else
-            TextButton(
-              onPressed: _save,
-              child: Text(l10n.save),
-            ),
-        ],
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Title
-            TextFormField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                labelText: l10n.titleWithAsterisk,
-                hintText: l10n.titleHint,
-                prefixIcon: const Icon(Icons.label_outline),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return l10n.titleRequired;
-                }
-                return null;
-              },
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 16),
-
-            // Username
-            TextFormField(
-              controller: _usernameController,
-              decoration: InputDecoration(
-                labelText: l10n.usernameWithAsterisk,
-                hintText: l10n.usernameHint,
-                prefixIcon: const Icon(Icons.person_outline),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return l10n.usernameRequired;
-                }
-                return null;
-              },
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 16),
-
-            // Password
-            TextFormField(
-              controller: _passwordController,
-              obscureText: _obscurePassword,
-              onChanged: _calculatePasswordStrength,
-              decoration: InputDecoration(
-                labelText: l10n.passwordWithAsterisk,
-                prefixIcon: const Icon(Icons.lock_outline),
-                suffixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
+                Row(
                   children: [
-                    IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                    if (_isLoading)
+                      const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    else
+                      TextButton(
+                        onPressed: _save,
+                        style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xFF6C63FF),
+                            textStyle: const TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 17)),
+                        child: Text(l10n.save),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
+                    // 给模态框加一个关闭按钮
                     IconButton(
-                      icon: const Icon(Icons.refresh),
-                      onPressed: _generatePassword,
-                      tooltip: l10n.generatePassword,
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                      color: Colors.white54,
                     ),
                   ],
                 ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return l10n.passwordRequired;
-                }
-                if (value.length < 6) {
-                  return l10n.passwordTooShortShort;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 8),
-
-            // Password strength indicator
-            Row(
-              children: [
-                Expanded(
-                  child: LinearProgressIndicator(
-                    value: _passwordStrength,
-                    backgroundColor: Colors.white10,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      _getStrengthColor(),
-                    ),
-                    minHeight: 4,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  _passwordStrength < 0.4
-                      ? l10n.weak
-                      : _passwordStrength < 0.7
-                          ? l10n.medium
-                          : l10n.strong,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: _getStrengthColor(),
-                  ),
-                ),
               ],
             ),
-            const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                children: [
+                  // Title
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      labelText: l10n.titleWithAsterisk,
+                      hintText: l10n.titleHint,
+                      prefixIcon: const Icon(Icons.label_outline),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.titleRequired;
+                      }
+                      return null;
+                    },
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: 16),
 
-            // URL
-            TextFormField(
-              controller: _urlController,
-              decoration: InputDecoration(
-                labelText: l10n.websiteURL,
-                hintText: 'https://example.com',
-                prefixIcon: const Icon(Icons.link),
-              ),
-              keyboardType: TextInputType.url,
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 16),
+                  // Username
+                  TextFormField(
+                    controller: _usernameController,
+                    decoration: InputDecoration(
+                      labelText: l10n.usernameWithAsterisk,
+                      hintText: l10n.usernameHint,
+                      prefixIcon: const Icon(Icons.person_outline),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.usernameRequired;
+                      }
+                      return null;
+                    },
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: 16),
 
-            // Notes
-            TextFormField(
-              controller: _notesController,
-              decoration: InputDecoration(
-                labelText: l10n.notes,
-                hintText: l10n.notesHint,
-                prefixIcon: const Icon(Icons.notes),
-                alignLabelWithHint: true,
+                  // Password
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    onChanged: _calculatePasswordStrength,
+                    decoration: InputDecoration(
+                      labelText: l10n.passwordWithAsterisk,
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.refresh),
+                            onPressed: _generatePassword,
+                            tooltip: l10n.generatePassword,
+                          ),
+                        ],
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return l10n.passwordRequired;
+                      }
+                      if (value.length < 6) {
+                        return l10n.passwordTooShortShort;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Password strength indicator
+                  Row(
+                    children: [
+                      Expanded(
+                        child: LinearProgressIndicator(
+                          value: _passwordStrength,
+                          backgroundColor: Colors.white10,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            _getStrengthColor(),
+                          ),
+                          minHeight: 4,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        _passwordStrength < 0.4
+                            ? l10n.weak
+                            : _passwordStrength < 0.7
+                                ? l10n.medium
+                                : l10n.strong,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _getStrengthColor(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // URL
+                  TextFormField(
+                    controller: _urlController,
+                    decoration: InputDecoration(
+                      labelText: l10n.websiteURL,
+                      hintText: 'https://example.com',
+                      prefixIcon: const Icon(Icons.link),
+                    ),
+                    keyboardType: TextInputType.url,
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Notes
+                  TextFormField(
+                    controller: _notesController,
+                    decoration: InputDecoration(
+                      labelText: l10n.notes,
+                      hintText: l10n.notesHint,
+                      prefixIcon: const Icon(Icons.notes),
+                      alignLabelWithHint: true,
+                    ),
+                    maxLines: 3,
+                    textInputAction: TextInputAction.done,
+                  ),
+                  const SizedBox(height: 64), // Safe space for scrolling
+                ],
               ),
-              maxLines: 3,
-              textInputAction: TextInputAction.done,
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Align(
+        alignment: Alignment.bottomCenter,
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.9,
+          width: double.infinity,
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            child: content,
+          ),
         ),
       ),
     );

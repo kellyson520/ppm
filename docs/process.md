@@ -21,3 +21,5 @@
 | 20260228_FixAddAuthScreenL10n | 修复 AddAuthScreen 本地化缺失 | 2026-02-28 | 2026-02-28 | 100% | [📂 Check](./Workstream_Authenticator/FixAddAuthScreenError/) |
 | 20260228_FixPlaceholderImplementation | 梳理和实现应用中残留的关键业务占位符(标题显示/URL/指纹) | 2026-02-28 | 2026-02-28 | 100% | [📂 Check](./Workstream_Core/20260228_FixPlaceholderImplementation/) |
 | 20260228_RefineUI_And_ImportExport | 完善导出导入与UI美化 | 2026-02-28 | 2026-02-28 | 100% | [📂 Check](./Workstream_UI/20260228_RefineUI_And_ImportExport/) |
+| 20260228_ResponsiveStrategy | 多尺寸与平板横屏响应式适配 | 2026-02-28 | | DONE | [📂 Check](./Workstream_UI/20260228_ResponsiveStrategy/) |
+| 20260228_FixAppUpgradeSignature | 修复 Android CI 自动发布覆盖安装提示签名不一致的问题 | 2026-02-28 | 2026-02-28 | 100% | [📂 Check](./Workstream_CI/20260228_FixAppUpgradeSignature/) |

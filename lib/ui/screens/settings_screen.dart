@@ -339,231 +339,327 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final body = ListView(
-      children: [
+
+    final content = CustomScrollView(
+      slivers: [
+        SliverAppBar.large(
+          backgroundColor: Colors.transparent,
+          expandedHeight: 140,
+          collapsedHeight: 64,
+          pinned: true,
+          flexibleSpace: FlexibleSpaceBar(
+            titlePadding: const EdgeInsets.only(left: 24, bottom: 16),
+            title: Text(
+              l10n.settings,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+            background: Container(color: Colors.transparent),
+          ),
+        ),
+
         // Vault Statistics
         if (_stats != null)
-          _buildSection(
-            title: l10n.vaultStatistics,
-            children: [
-              _buildStatTile(
-                l10n.passwords,
-                '${_stats!.cardCount}',
-                Icons.password,
-              ),
-              _buildStatTile(
-                l10n.totalEvents,
-                '${_stats!.eventCount}',
-                Icons.history,
-              ),
-              _buildStatTile(
-                l10n.pendingSync,
-                '${_stats!.pendingSyncCount}',
-                Icons.sync,
-              ),
-              _buildStatTile(
-                l10n.snapshots,
-                '${_stats!.snapshotCount}',
-                Icons.backup,
-              ),
-            ],
+          SliverToBoxAdapter(
+            child: _buildSection(
+              title: l10n.vaultStatistics,
+              children: [
+                _buildStatTile(l10n.passwords, '${_stats!.cardCount}',
+                    Icons.password_rounded),
+                _buildDivider(),
+                _buildStatTile(l10n.totalEvents, '${_stats!.eventCount}',
+                    Icons.history_rounded),
+                _buildDivider(),
+                _buildStatTile(l10n.pendingSync, '${_stats!.pendingSyncCount}',
+                    Icons.sync_rounded),
+                _buildDivider(),
+                _buildStatTile(l10n.snapshots, '${_stats!.snapshotCount}',
+                    Icons.backup_rounded),
+              ],
+            ),
           ),
 
         // Security
-        _buildSection(
-          title: l10n.security,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.lock_outline),
-              title: Text(l10n.changeMasterPassword),
-              subtitle: Text(l10n.updateVaultPassword),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _changePassword,
-            ),
-            ListTile(
-              leading: const Icon(Icons.emergency_outlined),
-              title: Text(l10n.exportEmergencyKit),
-              subtitle: Text(l10n.exportEmergencyKitDesc.split('.')[0]),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _exportEmergencyKit,
-            ),
-            ListTile(
-              leading: const Icon(Icons.fingerprint),
-              title: Text(l10n.biometricAuth),
-              subtitle: Text(l10n.useFaceTouchID),
-              trailing: Switch(
+        SliverToBoxAdapter(
+          child: _buildSection(
+            title: l10n.security,
+            children: [
+              _buildListTile(
+                icon: Icons.lock_open_rounded,
+                title: l10n.changeMasterPassword,
+                subtitle: l10n.updateVaultPassword,
+                onTap: _changePassword,
+              ),
+              _buildDivider(),
+              _buildListTile(
+                icon: Icons.emergency_share_rounded,
+                title: l10n.exportEmergencyKit,
+                subtitle: l10n.exportEmergencyKitDesc.split('.')[0],
+                onTap: _exportEmergencyKit,
+              ),
+              _buildDivider(),
+              _buildSwitchTile(
+                icon: Icons.fingerprint_rounded,
+                title: l10n.biometricAuth,
+                subtitle: l10n.useFaceTouchID,
                 value: _isBiometricEnabled,
                 onChanged: _toggleBiometrics,
               ),
-              onTap: () => _toggleBiometrics(!_isBiometricEnabled),
-            ),
-          ],
+            ],
+          ),
         ),
 
         // Sync
-        _buildSection(
-          title: l10n.synchronization,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.cloud_sync_outlined),
-              title: Text(l10n.webdavNodes),
-              subtitle: Text(l10n.configureSyncDestinations),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const WebDavSettingsScreen()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.sync),
-              title: Text(l10n.manualSync),
-              subtitle: Text(l10n.syncNowWithNodes),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                context.read<SyncBloc>().add(SyncStarted());
-                _showSuccess(l10n.syncStarted);
-              },
-            ),
-          ],
+        SliverToBoxAdapter(
+          child: _buildSection(
+            title: l10n.synchronization,
+            children: [
+              _buildListTile(
+                icon: Icons.cloud_done_rounded,
+                title: l10n.webdavNodes,
+                subtitle: l10n.configureSyncDestinations,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const WebDavSettingsScreen()),
+                  );
+                },
+              ),
+              _buildDivider(),
+              _buildListTile(
+                icon: Icons.sync_rounded,
+                title: l10n.manualSync,
+                subtitle: l10n.syncNowWithNodes,
+                onTap: () {
+                  context.read<SyncBloc>().add(SyncStarted());
+                  _showSuccess(l10n.syncStarted);
+                },
+              ),
+            ],
+          ),
         ),
 
         // Storage
-        _buildSection(
-          title: l10n.storage,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.compress),
-              title: Text(l10n.compactStorage),
-              subtitle: Text(l10n.compressEventHistory),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _compactStorage,
-            ),
-            ListTile(
-              leading: const Icon(Icons.download_outlined),
-              title: Text(l10n.exportBackup),
-              subtitle: Text(l10n.createEncryptedBackup),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _exportBackup,
-            ),
-            ListTile(
-              leading: const Icon(Icons.upload_outlined),
-              title: Text(l10n.importBackup),
-              subtitle: Text(l10n.restoreFromBackup),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _importBackup,
-            ),
-          ],
+        SliverToBoxAdapter(
+          child: _buildSection(
+            title: l10n.storage,
+            children: [
+              _buildListTile(
+                icon: Icons.compress_rounded,
+                title: l10n.compactStorage,
+                subtitle: l10n.compressEventHistory,
+                onTap: _compactStorage,
+              ),
+              _buildDivider(),
+              _buildListTile(
+                icon: Icons.download_rounded,
+                title: l10n.exportBackup,
+                subtitle: l10n.createEncryptedBackup,
+                onTap: _exportBackup,
+              ),
+              _buildDivider(),
+              _buildListTile(
+                icon: Icons.upload_rounded,
+                title: l10n.importBackup,
+                subtitle: l10n.restoreFromBackup,
+                onTap: _importBackup,
+              ),
+            ],
+          ),
         ),
 
         // About
-        _buildSection(
-          title: l10n.about,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: Text(l10n.version),
-              subtitle: const Text('1.0.0'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.description_outlined),
-              title: Text(l10n.documentation),
-              trailing: const Icon(Icons.open_in_new, size: 18),
-              onTap: _showComingSoon,
-            ),
-            ListTile(
-              leading: const Icon(Icons.code),
-              title: Text(l10n.sourceCode),
-              trailing: const Icon(Icons.open_in_new, size: 18),
-              onTap: _showComingSoon,
-            ),
-          ],
+        SliverToBoxAdapter(
+          child: _buildSection(
+            title: l10n.about,
+            children: [
+              _buildInfoTile(Icons.info_outline_rounded, l10n.version, '1.0.0'),
+              _buildDivider(),
+              _buildListTile(
+                icon: Icons.description_outlined,
+                title: l10n.documentation,
+                onTap: _showComingSoon,
+                showArrow: true,
+              ),
+              _buildDivider(),
+              _buildListTile(
+                icon: Icons.code_rounded,
+                title: l10n.sourceCode,
+                onTap: _showComingSoon,
+                showArrow: true,
+              ),
+            ],
+          ),
         ),
 
-        // Lock Vault
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: ElevatedButton.icon(
-            onPressed: () {
-              widget.onLockRequested();
-              if (!widget.isEmbedded) {
-                Navigator.pop(context);
-              }
-            },
-            icon: const Icon(Icons.lock),
-            label: Text(l10n.lockVaultFull),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.withValues(alpha: 0.8),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 50),
+        // Lock Action
+        SliverToBoxAdapter(
+          child: Padding(
+            padding:
+                const EdgeInsets.fromLTRB(24, 32, 24, 32 + 80), // 为 Dock 留白
+            child: ElevatedButton.icon(
+              onPressed: () {
+                widget.onLockRequested();
+                if (!widget.isEmbedded) Navigator.pop(context);
+              },
+              icon: const Icon(Icons.lock_rounded, size: 20),
+              label: Text(l10n.lockVaultFull),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.withValues(alpha: 0.15),
+                foregroundColor: Colors.redAccent,
+                elevation: 0,
+                minimumSize: const Size(double.infinity, 56),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 32),
       ],
     );
 
-    if (widget.isEmbedded) {
-      return body;
-    }
+    if (widget.isEmbedded) return content;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.settings),
-      ),
-      body: body,
+      backgroundColor: const Color(0xFF101018),
+      body: content,
     );
   }
 
-  Widget _buildSection({
-    required String title,
-    required List<Widget> children,
-  }) {
+  Widget _buildSection(
+      {required String title, required List<Widget> children}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+          padding: const EdgeInsets.fromLTRB(28, 24, 24, 12),
           child: Text(
             title.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF6C63FF),
-              letterSpacing: 1,
+              color: Colors.white.withValues(alpha: 0.4),
+              letterSpacing: 1.2,
             ),
           ),
         ),
-        Card(
-          elevation: 0,
-          color: const Color(0xFF16213E),
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.03)),
           ),
-          child: Column(
-            children: children,
-          ),
+          child: Column(children: children),
         ),
       ],
+    );
+  }
+
+  Widget _buildDivider() {
+    return Divider(
+        height: 1,
+        indent: 56,
+        endIndent: 16,
+        color: Colors.white.withValues(alpha: 0.05));
+  }
+
+  Widget _buildListTile({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    required VoidCallback onTap,
+    bool showArrow = true,
+  }) {
+    return ListTile(
+      onTap: onTap,
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(8)),
+        child: Icon(icon, color: const Color(0xFF6C63FF), size: 18),
+      ),
+      title: Text(title,
+          style: const TextStyle(
+              fontSize: 15, fontWeight: FontWeight.w500, color: Colors.white)),
+      subtitle: subtitle != null
+          ? Text(subtitle,
+              style: TextStyle(
+                  fontSize: 12, color: Colors.white.withValues(alpha: 0.4)))
+          : null,
+      trailing: showArrow
+          ? Icon(Icons.chevron_right_rounded,
+              color: Colors.white.withValues(alpha: 0.2))
+          : null,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    );
+  }
+
+  Widget _buildSwitchTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(8)),
+        child: Icon(icon, color: const Color(0xFF6C63FF), size: 18),
+      ),
+      title: Text(title,
+          style: const TextStyle(
+              fontSize: 15, fontWeight: FontWeight.w500, color: Colors.white)),
+      subtitle: Text(subtitle,
+          style: TextStyle(
+              fontSize: 12, color: Colors.white.withValues(alpha: 0.4))),
+      trailing: Switch.adaptive(
+        value: value,
+        onChanged: onChanged,
+        activeTrackColor: const Color(0xFF6C63FF),
+        activeThumbColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildInfoTile(IconData icon, String label, String value) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(8)),
+        child: Icon(icon, color: const Color(0xFF6C63FF), size: 18),
+      ),
+      title: Text(label,
+          style: const TextStyle(fontSize: 15, color: Colors.white)),
+      trailing: Text(value,
+          style: TextStyle(
+              fontSize: 14, color: Colors.white.withValues(alpha: 0.4))),
     );
   }
 
   Widget _buildStatTile(String label, String value, IconData icon) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF6C63FF)),
-      title: Text(label),
-      trailing: Text(
-        value,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(8)),
+        child: Icon(icon, color: const Color(0xFF00BFA6), size: 18),
       ),
+      title: Text(label,
+          style: const TextStyle(fontSize: 15, color: Colors.white)),
+      trailing: Text(value,
+          style: const TextStyle(
+              fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
     );
   }
 }

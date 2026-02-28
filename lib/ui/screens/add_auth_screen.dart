@@ -283,62 +283,100 @@ class _AddAuthScreenState extends State<AddAuthScreen>
     final l10n = AppLocalizations.of(context)!;
     final isEditing = widget.editCard != null;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? l10n.editAuthenticator : l10n.addAuthenticator),
-        actions: [
-          if (_isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                ),
-              ),
-            )
-          else
-            TextButton(
-              onPressed: _save,
-              child: Text(l10n.save),
-            ),
-        ],
-        bottom: isEditing
-            ? null
-            : TabBar(
-                controller: _tabController,
-                indicatorColor: const Color(0xFF6C63FF),
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.white60,
-                tabs: [
-                  Tab(
-                      text: l10n.manualInput,
-                      icon: const Icon(Icons.edit, size: 18)),
-                  Tab(
-                      text: l10n.uriImport,
-                      icon: const Icon(Icons.link, size: 18)),
-                  Tab(
-                      text: l10n.qrScanImport,
-                      icon: const Icon(Icons.qr_code_scanner, size: 18)),
-                ],
-              ),
+    final content = Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      decoration: BoxDecoration(
+        color: const Color(0xFF161622),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
-      body: Form(
-        key: _formKey,
-        child: isEditing
-            ? _buildManualInputForm(l10n)
-            : TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildManualInputForm(l10n),
-                  _buildUriImportForm(l10n),
-                  _buildQrScanTab(l10n),
-                ],
-              ),
+      child: Column(
+        children: [
+          // Drag Handle
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Custom Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  isEditing ? l10n.editAuthenticator : l10n.addAuthenticator,
+                  style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+                if (_isLoading)
+                  const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2))
+                else
+                  TextButton(
+                    onPressed: _save,
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF6C63FF),
+                      textStyle: const TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 16),
+                    ),
+                    child: Text(l10n.save),
+                  ),
+              ],
+            ),
+          ),
+
+          if (!isEditing)
+            TabBar(
+              controller: _tabController,
+              indicatorColor: const Color(0xFF6C63FF),
+              indicatorSize: TabBarIndicatorSize.label,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white.withValues(alpha: 0.4),
+              dividerColor: Colors.transparent,
+              tabs: [
+                Tab(text: l10n.manualInput),
+                Tab(text: l10n.uriImport),
+                Tab(text: l10n.qrScanImport),
+              ],
+            ),
+
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: isEditing
+                  ? _buildManualInputForm(l10n)
+                  : TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildManualInputForm(l10n),
+                        _buildUriImportForm(l10n),
+                        _buildQrScanTab(l10n),
+                      ],
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // If used as modal, return just the content
+    return Material(
+      color: Colors.transparent,
+      child: Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: content,
       ),
     );
   }

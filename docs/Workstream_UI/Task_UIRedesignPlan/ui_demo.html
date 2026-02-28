@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PPM UI Redesign Demo</title>
+  <style>
+    /* 核心色彩与毛玻璃变量 */
+    :root {
+      --bg-color: #111118; /* 极深的暗态底色 */
+      --primary-color: #6C63FF;
+      --text-main: #FFFFFF;
+      --text-secondary: rgba(255, 255, 255, 0.55);
+      --glass-border: rgba(255, 255, 255, 0.08); /* 极细边框 */
+      --glass-bg: rgba(30, 30, 40, 0.65); /* 悬浮层底板 */
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      /* 抑制安卓/iOS原生触控黑色半透明遮罩,实现无感排版 */
+      -webkit-tap-highlight-color: transparent; 
+    }
+
+    body {
+      background-color: #000;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      /* 营造一个极微弱的背景主色调光晕 */
+      background: radial-gradient(circle at top right, rgba(108, 99, 255, 0.15) 0%, #000 70%);
+    }
+
+    /* 模拟手机屏幕 */
+    .device-mockup {
+      width: 390px;
+      height: 844px;
+      background-color: var(--bg-color);
+      border-radius: 45px;
+      box-shadow: 0 0 0 12px #222, 0 30px 60px rgba(0,0,0,0.6);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* 状态栏模拟 */
+    .status-bar {
+      height: 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 28px;
+      font-size: 15px;
+      font-weight: 600;
+      position: absolute;
+      top: 0;
+      width: 100%;
+      z-index: 50;
+    }
+
+    .notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 32px;
+      background: #222;
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+
+    /* 核心包裹层，用于配合底板做三维拉伸动画 */
+    .main-wrapper {
+      transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), border-radius 0.5s;
+      height: 100%;
+      width: 100%;
+      background: var(--bg-color);
+      /* 核心：极其微落的光效背景 */
+      background: radial-gradient(150% 100% at 50% 0%, rgba(108, 99, 255, 0.08) 0%, transparent 50%);
+    }
+    
+    /* 当底部弹窗唤起时的沉降效果 */
+    .main-wrapper.shrink {
+      transform: scale(0.92) translateY(-25px);
+      border-radius: 40px;
+      overflow: hidden;
+      opacity: 0.6; /* 降低亮度 */
+    }
+
+    .content {
+      height: 100%;
+      overflow-y: auto;
+      padding: 60px 24px 100px 24px; /* 为状态栏留空 */
+    }
+    .content::-webkit-scrollbar { display: none; }
+
+    /* Apple HIG 特性：大标题 */
+    .large-title {
+      font-size: 34px;
+      font-weight: 700;
+      margin-top: 24px;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+      transition: all 0.2s linear;
+    }
+
+    /* 透明流体搜索框 */
+    .search-bar {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 28px;
+      /* Backdrop Filter for Vibrancy */
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 0.5px solid var(--glass-border);
+    }
+    .search-bar svg {
+      fill: var(--text-secondary);
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+    }
+    .search-bar input {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 16px;
+      width: 100%;
+      outline: none;
+    }
+    .search-bar input::placeholder { color: var(--text-secondary); }
+
+    /* 无包裹的列表设计 */
+    .vault-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 0.5px solid rgba(255,255,255,0.06);
+      /* 核心精髓：极度顺滑的物理弹簧缩放过渡 */
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s;
+      cursor: pointer;
+    }
+    .vault-item:last-child { border-bottom: none; }
+
+    /* 点击下陷反馈：0.95 比例，带来真实触控压感 */
+    .vault-item:active {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+
+    .item-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px; /* iOS 连续圆角 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+      font-weight: bold;
+      margin-right: 16px;
+      /* 隐隐发光的微边界 */
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+    }
+
+    /* 示例图标颜色 */
+    .icon-apple { background: linear-gradient(135deg, #434343, #000000); }
+    .icon-google { background: linear-gradient(135deg, #1A1A2E, #25254A); color: #4285F4; border: 1px solid rgba(66, 133, 244, 0.3); }
+    .icon-twitter { background: #000; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2); }
+    
+    .item-details { flex: 1; }
+    .item-title {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .item-subtitle { font-size: 14px; color: var(--text-secondary); }
+
+    /* 底部悬浮控制岛 (Floating Glass Dock) */
+    .dock-container {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 68px;
+      background: rgba(30, 30, 42, 0.6);
+      backdrop-filter: blur(30px) saturate(150%);
+      -webkit-backdrop-filter: blur(30px) saturate(150%);
+      border-radius: 34px;
+      border: 0.5px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 8px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
+    }
+
+    .dock-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s;
+      cursor: pointer;
+      width: 54px;
+      height: 54px;
+      border-radius: 27px;
+    }
+    .dock-item.active {
+      color: var(--primary-color);
+      background: rgba(108, 99, 255, 0.1); /* 点击时的微光底板 */
+    }
+    .dock-item:active { transform: scale(0.85); }
+    .dock-item svg {
+      width: 26px;
+      height: 26px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .dock-indicator {
+      width: 4px;
+      height: 4px;
+      background: var(--primary-color);
+      border-radius: 50%;
+      margin-top: 4px;
+      position: absolute;
+      bottom: 2px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .dock-item.active .dock-indicator { opacity: 1; }
+
+    /* 苹果生态特色：底部弹性模态层 Bottom Sheet */
+    .modal-sheet-demo {
+      position: absolute;
+      bottom: -100%;
+      left: 0;
+      width: 100%;
+      height: 88%;
+      background: rgba(28, 28, 38, 0.85);
+      backdrop-filter: blur(45px) saturate(120%);
+      -webkit-backdrop-filter: blur(45px) saturate(120%);
+      border-top-left-radius: 36px;
+      border-top-right-radius: 36px;
+      border-top: 0.5px solid rgba(255,255,255,0.15);
+      transition: bottom 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+      padding: 16px 24px 24px 24px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-sheet-demo.active { bottom: 0; }
+    
+    .sheet-handle {
+      width: 40px;
+      height: 5px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 3px;
+      margin: 0 auto 24px auto;
+    }
+    
+    .sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .sheet-header h2 { font-size: 22px; font-weight: 700; margin: 0; }
+    .sheet-header button {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* 示例：密码详情输入域 */
+    .info-group {
+      margin-bottom: 24px;
+    }
+    .info-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      margin-left: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .info-value {
+      background: rgba(255,255,255,0.05);
+      padding: 18px 20px;
+      border-radius: 16px;
+      font-size: 17px;
+      display: flex;
+      justify-content: space-between;
+      border: 0.5px solid rgba(255,255,255,0.05);
+    }
+    .info-value span { font-weight: 500;}
+    .info-value .hint { color: var(--text-secondary);}
+
+  </style>
+</head>
+<body>
+
+  <div class="device-mockup">
+    <div class="status-bar">
+      <span>19:49</span>
+      <div class="notch"></div>
+    </div>
+
+    <!-- 底部拉出时主界面会缩放沉降 -->
+    <div class="main-wrapper" id="main-layer">
+      <div class="content" id="scroll-content">
+        
+        <h1 class="large-title" id="page-title">Vault</h1>
+
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24"><path d="M10 2a8 8 0 015.293 13.707l5 5a1 1 0 01-1.414 1.414l-5-5A8 8 0 1110 2zm0 2a6 6 0 100 12 6 6 0 000-12z" fill="currentColor"/></svg>
+          <input type="text" placeholder="Search accounts...">
+        </div>
+
+        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; margin-top: 10px; font-weight: 600;">RECENT</div>
+        
+        <!-- 点击此项目召唤 iOS Bottom Sheet -->
+        <div class="vault-item" onclick="toggleSheet()">
+          <div class="item-icon icon-apple"></div>
+          <div class="item-details">
+            <div class="item-title">Apple ID</div>
+            <div class="item-subtitle">steve@icloud.com</div>
+          </div>
+        </div>
+
+        <div class="vault-item" onclick="toggleSheet()">
+          <div class="item-icon icon-google">G</div>
+          <div class="item-details">
+            <div class="item-title">Google Services</div>
+            <div class="item-subtitle">developer@gmail.com</div>
+          </div>
+        </div>
+        
+        <div class="vault-item" onclick="toggleSheet()">
+          <div class="item-icon icon-twitter">𝕏</div>
+          <div class="item-details">
+            <div class="item-title">X (Twitter)</div>
+            <div class="item-subtitle">@elonmusk</div>
+          </div>
+        </div>
+
+        <!-- 填充以产生滚动 -->
+        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; margin-top: 24px; font-weight: 600;">OTHERS</div>
+        <div class="vault-item"><div class="item-icon" style="background:#2C3E50;">G</div><div class="item-details"><div class="item-title">GitHub</div><div class="item-subtitle">repo_master</div></div></div>
+        <div class="vault-item"><div class="item-icon" style="background:#E74C3C;">N</div><div class="item-details"><div class="item-title">Netflix</div><div class="item-subtitle">family_plan</div></div></div>
+        <div class="vault-item"><div class="item-icon" style="background:#F39C12;">A</div><div class="item-details"><div class="item-title">Amazon</div><div class="item-subtitle">prime_user</div></div></div>
+      </div>
+    </div> <!-- end main-wrapper -->
+
+    <!-- 高毛玻璃悬浮 Dock -->
+    <div class="dock-container" id="dock">
+      <div class="dock-item active">
+        <!-- Shield/Key Icon -->
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div class="dock-indicator"></div>
+      </div>
+      <div class="dock-item">
+        <!-- Auth Icon -->
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <div class="dock-indicator"></div>
+      </div>
+      <div class="dock-item">
+        <!-- Settings Icon -->
+        <svg viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+        <div class="dock-indicator"></div>
+      </div>
+    </div>
+
+    <!-- 弹出的详情控制面板 -->
+    <div class="modal-sheet-demo" id="bottom-sheet">
+      <div class="sheet-handle"></div>
+      
+      <div class="sheet-header">
+        <h2>Apple ID</h2>
+        <button onclick="toggleSheet()">Done</button>
+      </div>
+      
+      <div class="info-group">
+        <div class="info-label">Account</div>
+        <div class="info-value">
+          <span>steve@icloud.com</span>
+          <span class="hint">Copy</span>
+        </div>
+      </div>
+
+      <div class="info-group">
+        <div class="info-label">Password</div>
+        <div class="info-value">
+          <span style="letter-spacing: 4px;">••••••••••••</span>
+          <span style="color: var(--primary-color); font-weight: 600;">Reveal</span>
+        </div>
+      </div>
+      
+      <div class="info-group">
+        <div class="info-label">Authenticator (TOTP)</div>
+        <div class="info-value">
+          <span style="letter-spacing: 2px; font-weight: 700; color: #4CAF50;">482 910</span>
+          <span class="hint">24s</span>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <script>
+    // 模拟苹果的大标题拉伸折叠效果
+    const scrollContent = document.getElementById('scroll-content');
+    const title = document.getElementById('page-title');
+    
+    scrollContent.addEventListener('scroll', () => {
+      const scrollY = scrollContent.scrollTop;
+      if(scrollY > 0) {
+        // 向下滑动，标题渐渐缩小变淡
+        title.style.transform = `translateY(${-scrollY/2}px)`;
+        title.style.opacity = Math.max(0, 1 - scrollY/60);
+      } else {
+        title.style.transform = `translateY(0)`;
+        title.style.opacity = 1;
+      }
+    });
+
+    // 面板交互逻辑
+    let isSheetOpen = false;
+    const sheet = document.getElementById('bottom-sheet');
+    const mainLayer = document.getElementById('main-layer');
+    const dock = document.getElementById('dock');
+
+    function toggleSheet() {
+      isSheetOpen = !isSheetOpen;
+      if (isSheetOpen) {
+        sheet.classList.add('active');
+        // 主背景沉降变暗模拟三维景深
+        mainLayer.classList.add('shrink');
+        // 隐藏Dock
+        dock.style.transform = 'translate(-50%, 150px)';
+        dock.style.opacity = '0';
+      } else {
+        sheet.classList.remove('active');
+        mainLayer.classList.remove('shrink');
+        dock.style.transform = 'translate(-50%, 0)';
+        dock.style.opacity = '1';
+      }
+    }
+
+    // Dock微交互
+    document.querySelectorAll('.dock-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.stopPropagation();
+        document.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

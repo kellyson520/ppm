@@ -159,14 +159,20 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
           ],
           theme: ThemeData(
             useMaterial3: true,
+            // 彻底移除 Material 按钮的水波纹和高亮点击反馈，为弹簧动画让路
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            hoverColor: Colors.transparent,
+            focusColor: Colors.transparent,
             colorScheme: ColorScheme.fromSeed(
               seedColor: const Color(0xFF6C63FF),
               brightness: Brightness.dark,
             ),
-            scaffoldBackgroundColor: const Color(0xFF1A1A2E),
-            cardColor: const Color(0xFF16213E),
+            // 修改为更深邃无垠的暗色底，为了毛玻璃做衬底
+            scaffoldBackgroundColor: const Color(0xFF101018),
+            cardColor: Colors.transparent, // 废弃传统实心 Card
             appBarTheme: const AppBarTheme(
-              backgroundColor: Color(0xFF1A1A2E),
+              backgroundColor: Colors.transparent,
               elevation: 0,
               centerTitle: true,
               titleTextStyle: TextStyle(
@@ -174,6 +180,23 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
+            ),
+            // Apple HIG 排版系统
+            textTheme: const TextTheme(
+              displayLarge: TextStyle(
+                  fontSize: 34,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5), // LargeTitle
+              titleLarge:
+                  TextStyle(fontSize: 22, fontWeight: FontWeight.w700), // Title
+              bodyLarge: TextStyle(
+                  fontSize: 17, fontWeight: FontWeight.w400), // Body/Action
+              bodyMedium: TextStyle(
+                  fontSize: 15, fontWeight: FontWeight.w400), // Secondary
+              labelSmall: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.5), // Caption
             ),
             inputDecorationTheme: InputDecorationTheme(
               filled: true,
@@ -203,17 +226,20 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16), // 稍微增加圆角
                 ),
                 textStyle: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 17,
                   fontWeight: FontWeight.w600,
                 ),
+                elevation: 0, // 去除硬朗的高光阴影
+                splashFactory: NoSplash.splashFactory, // 强杀涟漪
               ),
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
                 foregroundColor: const Color(0xFF6C63FF),
+                splashFactory: NoSplash.splashFactory, // 强杀涟漪
               ),
             ),
             iconTheme: const IconThemeData(

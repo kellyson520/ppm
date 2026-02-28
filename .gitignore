@@ -124,3 +124,9 @@ Thumbs.db
 secrets/
 .env
 .env.local
+
+# Keystores and sensitive build artifacts
+encoded_keystore.txt
+upload-keystore.jks
+*.jks
+*.keystore

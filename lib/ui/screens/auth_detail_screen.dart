@@ -22,6 +22,7 @@ class AuthDetailScreen extends StatefulWidget {
   final Uint8List? dek;
   final Uint8List? searchKey;
   final String? deviceId;
+  final bool isEmbedded;
 
   const AuthDetailScreen({
     super.key,
@@ -31,6 +32,7 @@ class AuthDetailScreen extends StatefulWidget {
     this.dek,
     this.searchKey,
     this.deviceId,
+    this.isEmbedded = false,
   });
 
   @override
@@ -266,290 +268,314 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.payload.issuer.isNotEmpty
-            ? widget.payload.issuer
-            : l10n.authenticatorDetails),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'edit':
-                  _editEntry();
-                  break;
-                case 'export_text':
-                  _exportAsText();
-                  break;
-                case 'export_qr':
-                  _exportAsQrCode();
-                  break;
-                case 'delete':
-                  _deleteEntry();
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'edit',
-                child: ListTile(
-                  leading: const Icon(Icons.edit, size: 20),
-                  title: Text(l10n.edit),
-                  dense: true,
-                ),
-              ),
-              PopupMenuItem(
-                value: 'export_text',
-                child: ListTile(
-                  leading: const Icon(Icons.text_snippet, size: 20),
-                  title: Text(l10n.exportAsFile),
-                  dense: true,
-                ),
-              ),
-              PopupMenuItem(
-                value: 'export_qr',
-                child: ListTile(
-                  leading: const Icon(Icons.qr_code, size: 20),
-                  title: Text(l10n.exportAsQrCode),
-                  dense: true,
-                ),
-              ),
-              const PopupMenuDivider(),
-              PopupMenuItem(
-                value: 'delete',
-                child: ListTile(
-                  leading:
-                      const Icon(Icons.delete, color: Colors.red, size: 20),
-                  title: Text(l10n.delete,
-                      style: const TextStyle(color: Colors.red)),
-                  dense: true,
-                ),
-              ),
-            ],
-          ),
-        ],
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF101018).withValues(alpha: 0.95),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+          width: 0.5,
+        ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // ====== 验证码区域 ======
-          Card(
-            elevation: 4,
-            color: const Color(0xFF1A2744),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: const BorderSide(color: Color(0xFF6C63FF), width: 1),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  // 发行方图标 + 名称
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF00BFA6), Color(0xFF6C63FF)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Icon(
-                      Icons.verified_user,
-                      color: Colors.white,
-                      size: 32,
-                    ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Column(
+            children: [
+              // 拖动手柄
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  width: 36,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(2.5),
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    widget.payload.issuer,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                  if (widget.payload.account.isNotEmpty)
-                    Text(
-                      widget.payload.account,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.5),
-                      ),
-                    ),
-                  const SizedBox(height: 20),
-                  // 验证码
-                  GestureDetector(
-                    onTap: () => _copyToClipboard(_currentCode, l10n.code),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0F3460),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
+                ),
+              ),
+              // 自定义头部
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 12, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        widget.payload.issuer.isNotEmpty
+                            ? widget.payload.issuer
+                            : l10n.authenticatorDetails,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
                         ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
+                    ),
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.more_horiz,
+                          color: Colors.white.withValues(alpha: 0.6)),
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'edit':
+                            _editEntry();
+                            break;
+                          case 'export_text':
+                            _exportAsText();
+                            break;
+                          case 'export_qr':
+                            _exportAsQrCode();
+                            break;
+                          case 'delete':
+                            _deleteEntry();
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: ListTile(
+                            leading: const Icon(Icons.edit, size: 20),
+                            title: Text(l10n.edit),
+                            dense: true,
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'export_text',
+                          child: ListTile(
+                            leading: const Icon(Icons.text_snippet, size: 20),
+                            title: Text(l10n.exportAsFile),
+                            dense: true,
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'export_qr',
+                          child: ListTile(
+                            leading: const Icon(Icons.qr_code, size: 20),
+                            title: Text(l10n.exportAsQrCode),
+                            dense: true,
+                          ),
+                        ),
+                        const PopupMenuDivider(),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: ListTile(
+                            leading: const Icon(Icons.delete,
+                                color: Colors.red, size: 20),
+                            title: Text(l10n.delete,
+                                style: const TextStyle(color: Colors.red)),
+                            dense: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close_rounded,
+                          color: Colors.white.withValues(alpha: 0.5)),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                  children: [
+                    // ====== 验证码展示卡片 ======
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.08),
+                        ),
+                      ),
+                      child: Column(
                         children: [
-                          Text(
-                            _formatCode(_currentCode),
-                            style: const TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 8,
-                              fontFamily: 'monospace',
-                              color: Colors.white,
+                          // 验证码
+                          GestureDetector(
+                            onTap: () =>
+                                _copyToClipboard(_currentCode, l10n.code),
+                            child: Column(
+                              children: [
+                                Text(
+                                  _formatCode(_currentCode),
+                                  style: const TextStyle(
+                                    fontSize: 48,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 4,
+                                    fontFamily: 'monospace',
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.copy_rounded,
+                                      size: 14,
+                                      color:
+                                          Colors.white.withValues(alpha: 0.4),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '点击复制',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color:
+                                            Colors.white.withValues(alpha: 0.4),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          Icon(
-                            Icons.copy_rounded,
-                            color: Colors.white.withValues(alpha: 0.5),
+                          const SizedBox(height: 24),
+                          // 进度条
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: LinearProgressIndicator(
+                                    value: 1.0 - _progress,
+                                    minHeight: 6,
+                                    backgroundColor:
+                                        Colors.white.withValues(alpha: 0.1),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      _remaining <= 5
+                                          ? Colors.red.withValues(alpha: 0.8)
+                                          : _remaining <= 10
+                                              ? Colors.orange
+                                                  .withValues(alpha: 0.8)
+                                              : const Color(0xFF00BFA6),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Text(
+                                '${_remaining}s',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: _remaining <= 5
+                                      ? Colors.red
+                                      : Colors.white60,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  // 倒计时
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            CircularProgressIndicator(
-                              value: 1.0 - _progress,
-                              strokeWidth: 3,
-                              backgroundColor: Colors.white10,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                _remaining <= 5
-                                    ? Colors.red
-                                    : _remaining <= 10
-                                        ? Colors.orange
-                                        : const Color(0xFF00BFA6),
-                              ),
-                            ),
-                            Text(
-                              '$_remaining',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    _remaining <= 5 ? Colors.red : Colors.white,
-                              ),
-                            ),
+                    const SizedBox(height: 32),
+
+                    // ====== 详情信息 ======
+                    _buildSectionTitle(l10n.detailsLabel),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildInfoTile(l10n.issuer, widget.payload.issuer,
+                              Icons.business),
+                          _buildDivider(),
+                          _buildInfoTile(l10n.account, widget.payload.account,
+                              Icons.person_outline),
+                          _buildDivider(),
+                          _buildInfoTile(l10n.algorithm,
+                              widget.payload.algorithm, Icons.settings),
+                          _buildDivider(),
+                          _buildInfoTile(
+                              l10n.digits,
+                              '${widget.payload.digits} ${l10n.digitSpan}',
+                              Icons.pin_outlined),
+                          _buildDivider(),
+                          _buildInfoTile(
+                            l10n.refreshPeriod,
+                            '${widget.payload.period} ${l10n.secondSpan}',
+                            Icons.timer_outlined,
+                          ),
+                          if (widget.payload.notes != null &&
+                              widget.payload.notes!.isNotEmpty) ...[
+                            _buildDivider(),
+                            _buildInfoTile(l10n.notes, widget.payload.notes!,
+                                Icons.notes_rounded),
                           ],
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.refreshInSeconds,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.white.withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // ====== 操作按钮 ======
+                    _buildSectionTitle(l10n.exportLabel),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildActionButton(
+                            icon: Icons.link_rounded,
+                            label: l10n.exportText,
+                            color: Colors.white.withValues(alpha: 0.1),
+                            onPressed: _exportAsText,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // ====== 详情信息 ======
-          _buildSectionTitle(l10n.detailsLabel),
-          Card(
-            elevation: 0,
-            color: const Color(0xFF16213E),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                _buildInfoTile(
-                    l10n.issuer, widget.payload.issuer, Icons.business),
-                _buildInfoTile(
-                    l10n.account, widget.payload.account, Icons.person_outline),
-                _buildInfoTile(
-                    l10n.algorithm, widget.payload.algorithm, Icons.settings),
-                _buildInfoTile(l10n.digits,
-                    '${widget.payload.digits} ${l10n.digitSpan}', Icons.pin),
-                _buildInfoTile(
-                  l10n.refreshPeriod,
-                  '${widget.payload.period} ${l10n.secondSpan}',
-                  Icons.timer,
-                ),
-                if (widget.payload.notes != null &&
-                    widget.payload.notes!.isNotEmpty)
-                  _buildInfoTile(
-                      l10n.notes, widget.payload.notes!, Icons.notes),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // ====== 导出按钮 ======
-          _buildSectionTitle(l10n.exportLabel),
-          Row(
-            children: [
-              Expanded(
-                child: _buildActionButton(
-                  icon: Icons.text_snippet_outlined,
-                  label: l10n.exportText,
-                  color: const Color(0xFF6C63FF),
-                  onPressed: _exportAsText,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildActionButton(
-                  icon: Icons.qr_code,
-                  label: l10n.exportQrCodeButton,
-                  color: const Color(0xFF00BFA6),
-                  onPressed: _exportAsQrCode,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildActionButton(
+                            icon: Icons.qr_code_rounded,
+                            label: l10n.exportQrCodeButton,
+                            color: Colors.white.withValues(alpha: 0.1),
+                            onPressed: _exportAsQrCode,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _buildActionButton(
+                      icon: Icons.delete_outline_rounded,
+                      label: l10n.deleteThisAuthenticator,
+                      color: Colors.red.withValues(alpha: 0.15),
+                      textColor: Colors.redAccent,
+                      onPressed: _deleteEntry,
+                    ),
+                    SizedBox(height: bottomPadding + 32),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-
-          // ====== 危险操作 ======
-          _buildSectionTitle(l10n.dangerZone),
-          _buildActionButton(
-            icon: Icons.delete_forever,
-            label: l10n.deleteThisAuthenticator,
-            color: Colors.red.withValues(alpha: 0.8),
-            onPressed: _deleteEntry,
-          ),
-          const SizedBox(height: 32),
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Divider(
+      height: 1,
+      indent: 56,
+      endIndent: 20,
+      color: Colors.white.withValues(alpha: 0.05),
     );
   }
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(left: 4, bottom: 12),
       child: Text(
         title.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF6C63FF),
-          letterSpacing: 1,
+          color: Colors.white.withValues(alpha: 0.4),
+          letterSpacing: 1.2,
         ),
       ),
     );
@@ -557,9 +583,17 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
 
   Widget _buildInfoTile(String label, String value, IconData icon) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF6C63FF), size: 20),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: const Color(0xFF6C63FF), size: 18),
+      ),
       title: Text(label,
-          style: const TextStyle(fontSize: 13, color: Colors.white60)),
+          style: TextStyle(
+              fontSize: 13, color: Colors.white.withValues(alpha: 0.5))),
       trailing: Text(
         value,
         style: const TextStyle(
@@ -575,6 +609,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
     required IconData icon,
     required String label,
     required Color color,
+    Color textColor = Colors.white,
     required VoidCallback onPressed,
   }) {
     return ElevatedButton.icon(
@@ -583,10 +618,11 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
       label: Text(label),
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        foregroundColor: textColor,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
     );

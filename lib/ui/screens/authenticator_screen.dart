@@ -5,6 +5,8 @@ import '../../services/auth_service.dart';
 import '../../services/vault_service.dart';
 import '../../core/models/auth_card.dart';
 import '../../core/crypto/totp_generator.dart';
+import '../widgets/responsive_layout.dart';
+import '../widgets/bouncing_widget.dart';
 import 'auth_detail_screen.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -20,6 +22,7 @@ class AuthenticatorScreen extends StatefulWidget {
   final Uint8List? dek;
   final Uint8List? searchKey;
   final String? deviceId;
+  final Function(bool)? onModalStateChanged;
 
   const AuthenticatorScreen({
     super.key,
@@ -28,6 +31,7 @@ class AuthenticatorScreen extends StatefulWidget {
     this.dek,
     this.searchKey,
     this.deviceId,
+    this.onModalStateChanged,
   });
 
   @override
@@ -39,6 +43,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
   final _searchController = TextEditingController();
   List<AuthCard> _cards = [];
   List<AuthCard> _filteredCards = [];
+  AuthCard? _selectedAuthCard;
   bool _isLoading = true;
 
   // TOTP 刷新
@@ -175,19 +180,32 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
     final entry = _decryptedEntries[card.cardId];
     if (entry == null) return;
 
-    final result = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AuthDetailScreen(
-          authService: widget.authService,
-          card: card,
-          payload: entry.payload,
-          dek: widget.dek,
-          searchKey: widget.searchKey,
-          deviceId: widget.deviceId,
-        ),
+    if (ResponsiveLayout.isExpanded(context)) {
+      setState(() {
+        _selectedAuthCard = card;
+      });
+      return;
+    }
+
+    // 触发父级 3D 缩放效果
+    widget.onModalStateChanged?.call(true);
+
+    final result = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.3),
+      builder: (context) => AuthDetailScreen(
+        authService: widget.authService,
+        card: card,
+        payload: entry.payload,
+        dek: widget.dek,
+        searchKey: widget.searchKey,
+        deviceId: widget.deviceId,
       ),
     );
+
+    widget.onModalStateChanged?.call(false);
 
     if (result == true) {
       _loadData();
@@ -198,68 +216,173 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Column(
-      children: [
-        // 搜索框
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: TextField(
-            controller: _searchController,
-            onChanged: _search,
-            decoration: InputDecoration(
-              hintText: l10n.searchAuthenticator,
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchController.clear();
-                        _search('');
-                      },
-                    )
-                  : null,
+
+    if (ResponsiveLayout.isExpanded(context)) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: _buildAuthListColumn(l10n),
+          ),
+          const VerticalDivider(width: 1, thickness: 1),
+          Expanded(
+            flex: 3,
+            child: _selectedAuthCard == null ||
+                    !_decryptedEntries.containsKey(_selectedAuthCard!.cardId)
+                ? Center(
+                    child: Text(
+                      l10n.noAuthenticators,
+                      style:
+                          TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                    ),
+                  )
+                : AuthDetailScreen(
+                    key: ValueKey(_selectedAuthCard!.cardId),
+                    authService: widget.authService,
+                    card: _selectedAuthCard!,
+                    payload:
+                        _decryptedEntries[_selectedAuthCard!.cardId]!.payload,
+                    dek: widget.dek,
+                    searchKey: widget.searchKey,
+                    deviceId: widget.deviceId,
+                    isEmbedded: true,
+                  ),
+          ),
+        ],
+      );
+    } else {
+      return _buildAuthListColumn(l10n);
+    }
+  }
+
+  Widget _buildAuthListColumn(AppLocalizations l10n) {
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar.large(
+          backgroundColor: Colors.transparent, // 避免背景颜色变差
+          expandedHeight: 140,
+          collapsedHeight: 64,
+          pinned: true,
+          flexibleSpace: FlexibleSpaceBar(
+            titlePadding: const EdgeInsets.only(left: 24, bottom: 16),
+            title: Text(
+              l10n.authenticator,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+            background: Container(
+              color: Colors.transparent, // iOS 扁平无色底
+            ),
+          ),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(60),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: _search,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  decoration: InputDecoration(
+                    hintText: l10n.searchAuthenticator,
+                    hintStyle:
+                        TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                    prefixIcon: Icon(Icons.search,
+                        color: Colors.white.withValues(alpha: 0.5)),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.clear,
+                                color: Colors.white.withValues(alpha: 0.5)),
+                            onPressed: () {
+                              _searchController.clear();
+                              _search('');
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
-        // 统计卡片
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              _buildStatChip(
-                Icons.verified_user,
-                '${_cards.length}',
-                l10n.authenticator,
-              ),
-              const SizedBox(width: 8),
-              _buildStatChip(
-                Icons.security,
-                'AES-GCM',
-                l10n.encryption,
-              ),
-            ],
+
+        // 顶层统计
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            child: Row(
+              children: [
+                Text('ACCOUNTS',
+                    style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white.withValues(alpha: 0.4),
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5)),
+                const Spacer(),
+                Text('${_cards.length} items',
+                    style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white.withValues(alpha: 0.4))),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 8),
+
         // 卡片列表
-        Expanded(
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _filteredCards.isEmpty
-                  ? _buildEmptyState(l10n)
-                  : RefreshIndicator(
-                      onRefresh: () async => _loadData(),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _filteredCards.length,
-                        itemBuilder: (context, index) {
-                          final card = _filteredCards[index];
-                          final entry = _decryptedEntries[card.cardId];
-                          return _buildAuthCardItem(card, entry, l10n);
-                        },
+        _isLoading
+            ? const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              )
+            : _filteredCards.isEmpty
+                ? SliverFillRemaining(child: _buildEmptyState(l10n))
+                : ResponsiveLayout.isMedium(context)
+                    ? SliverPadding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 8),
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 2.5,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final card = _filteredCards[index];
+                              final entry = _decryptedEntries[card.cardId];
+                              return _buildAuthCardItem(card, entry, l10n);
+                            },
+                            childCount: _filteredCards.length,
+                          ),
+                        ),
+                      )
+                    : SliverPadding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 8),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final card = _filteredCards[index];
+                              final entry = _decryptedEntries[card.cardId];
+                              return _buildAuthCardItem(card, entry, l10n);
+                            },
+                            childCount: _filteredCards.length,
+                          ),
+                        ),
                       ),
-                    ),
-        ),
+        const SliverPadding(padding: EdgeInsets.only(bottom: 120)), // 为悬浮栏留白
       ],
     );
   }
@@ -268,238 +391,231 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
       AuthCard card, _DecryptedEntry? entry, AppLocalizations l10n) {
     final isExpanded = entry != null;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: isExpanded ? const Color(0xFF1A2744) : const Color(0xFF16213E),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
+    return BouncingWidget(
+      onTap: () => _toggleCard(card),
+      onLongPress: isExpanded ? () => _navigateToAuthDetail(card) : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
           color: isExpanded
-              ? const Color(0xFF6C63FF).withValues(alpha: 0.5)
-              : Colors.white.withValues(alpha: 0.05),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isExpanded
-                ? const Color(0xFF6C63FF).withValues(alpha: 0.15)
-                : Colors.black.withValues(alpha: 0.2),
-            blurRadius: isExpanded ? 20 : 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _toggleCard(card),
-          onLongPress: isExpanded ? () => _navigateToAuthDetail(card) : null,
+              ? const Color(0xFF16213E).withValues(alpha: 0.8)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          border: Border.all(
+            color: isExpanded
+                ? const Color(0xFF6C63FF).withValues(alpha: 0.5)
+                : Colors.white.withValues(alpha: 0.05),
+            width: 1,
+          ),
+          // 仅在展开态添加细微高光发散阴影，否则扁平化
+          boxShadow: isExpanded
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF6C63FF).withValues(alpha: 0.15),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 头部：图标 + 名称 + 锁状态
+            Row(
               children: [
-                // 头部：图标 + 名称 + 锁状态
-                Row(
-                  children: [
-                    // 发行方图标
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: isExpanded
-                              ? [
-                                  const Color(0xFF00BFA6),
-                                  const Color(0xFF6C63FF)
-                                ]
-                              : [
-                                  const Color(0xFF6C63FF)
-                                      .withValues(alpha: 0.6),
-                                  const Color(0xFF00BFA6).withValues(alpha: 0.6)
-                                ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        isExpanded ? Icons.shield : Icons.lock,
-                        color: Colors.white,
-                        size: 24,
-                      ),
+                // 发行方图标
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isExpanded
+                          ? [const Color(0xFF00BFA6), const Color(0xFF6C63FF)]
+                          : [
+                              const Color(0xFF6C63FF).withValues(alpha: 0.6),
+                              const Color(0xFF00BFA6).withValues(alpha: 0.6)
+                            ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    const SizedBox(width: 16),
-                    // 名称信息
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isExpanded
-                                ? entry.payload.issuer.isNotEmpty
-                                    ? entry.payload.issuer
-                                    : entry.payload.account
-                                : l10n.clickToDecrypt,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: isExpanded ? Colors.white : Colors.white60,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (isExpanded && entry.payload.issuer.isNotEmpty)
-                            Text(
-                              entry.payload.account,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white.withValues(alpha: 0.5),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          if (!isExpanded)
-                            Text(
-                              'ID: ${card.cardId.substring(0, card.cardId.length > 12 ? 12 : card.cardId.length)}...',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.white.withValues(alpha: 0.3),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    // 解锁状态
-                    Icon(
-                      isExpanded ? Icons.lock_open : Icons.lock_outline,
-                      color: isExpanded
-                          ? const Color(0xFF00BFA6)
-                          : Colors.white.withValues(alpha: 0.3),
-                      size: 20,
-                    ),
-                  ],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    isExpanded ? Icons.shield : Icons.lock,
+                    color: Colors.white,
+                    size: 24,
+                  ),
                 ),
-
-                // 展开区域：TOTP 验证码
-                if (isExpanded) ...[
-                  const SizedBox(height: 16),
-                  // 分隔线
-                  Container(
-                    height: 1,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          const Color(0xFF6C63FF).withValues(alpha: 0.3),
-                          Colors.transparent,
-                        ],
+                const SizedBox(width: 16),
+                // 名称信息
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isExpanded
+                            ? entry.payload.issuer.isNotEmpty
+                                ? entry.payload.issuer
+                                : entry.payload.account
+                            : l10n.clickToDecrypt,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: isExpanded ? Colors.white : Colors.white60,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                      if (isExpanded && entry.payload.issuer.isNotEmpty)
+                        Text(
+                          entry.payload.account,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white.withValues(alpha: 0.5),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      if (!isExpanded)
+                        Text(
+                          'ID: ${card.cardId.substring(0, card.cardId.length > 12 ? 12 : card.cardId.length)}...',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.white.withValues(alpha: 0.3),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                // 解锁状态
+                Icon(
+                  isExpanded ? Icons.lock_open : Icons.lock_outline,
+                  color: isExpanded
+                      ? const Color(0xFF00BFA6)
+                      : Colors.white.withValues(alpha: 0.3),
+                  size: 20,
+                ),
+              ],
+            ),
+
+            // 展开区域：TOTP 验证码
+            if (isExpanded) ...[
+              const SizedBox(height: 16),
+              // 分隔线
+              Container(
+                height: 1,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.transparent,
+                      const Color(0xFF6C63FF).withValues(alpha: 0.3),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // 验证码区域
+              Row(
+                children: [
+                  // 倒计时环
+                  SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          value: 1.0 - entry.progress,
+                          strokeWidth: 3,
+                          backgroundColor: Colors.white10,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            entry.remaining <= 5
+                                ? Colors.red
+                                : entry.remaining <= 10
+                                    ? Colors.orange
+                                    : const Color(0xFF00BFA6),
+                          ),
+                        ),
+                        Text(
+                          '${entry.remaining}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: entry.remaining <= 5
+                                ? Colors.red
+                                : Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  // 验证码区域
-                  Row(
-                    children: [
-                      // 倒计时环
-                      SizedBox(
-                        width: 44,
-                        height: 44,
-                        child: Stack(
-                          alignment: Alignment.center,
+                  const SizedBox(width: 16),
+                  // 验证码
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _copyCode(entry.code),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F3460),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color:
+                                const Color(0xFF6C63FF).withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            CircularProgressIndicator(
-                              value: 1.0 - entry.progress,
-                              strokeWidth: 3,
-                              backgroundColor: Colors.white10,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                entry.remaining <= 5
-                                    ? Colors.red
-                                    : entry.remaining <= 10
-                                        ? Colors.orange
-                                        : const Color(0xFF00BFA6),
+                            Text(
+                              _formatCode(entry.code),
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 6,
+                                fontFamily: 'monospace',
+                                color: Colors.white,
                               ),
                             ),
-                            Text(
-                              '${entry.remaining}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: entry.remaining <= 5
-                                    ? Colors.red
-                                    : Colors.white,
-                              ),
+                            const SizedBox(width: 12),
+                            Icon(
+                              Icons.copy_rounded,
+                              color: Colors.white.withValues(alpha: 0.5),
+                              size: 20,
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      // 验证码
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => _copyCode(entry.code),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF0F3460),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFF6C63FF)
-                                    .withValues(alpha: 0.2),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  _formatCode(entry.code),
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 6,
-                                    fontFamily: 'monospace',
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Icon(
-                                  Icons.copy_rounded,
-                                  color: Colors.white.withValues(alpha: 0.5),
-                                  size: 20,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // 底部操作栏
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton.icon(
-                        onPressed: () => _navigateToAuthDetail(card),
-                        icon: const Icon(Icons.info_outline, size: 16),
-                        label: Text(l10n.details,
-                            style: const TextStyle(fontSize: 12)),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white60,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
-              ],
-            ),
-          ),
+              ),
+              const SizedBox(height: 8),
+              // 底部操作栏
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => _navigateToAuthDetail(card),
+                    icon: const Icon(Icons.info_outline, size: 16),
+                    label: Text(l10n.details,
+                        style: const TextStyle(fontSize: 12)),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white60,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -510,39 +626,6 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
     if (code.length <= 3) return code;
     final mid = code.length ~/ 2;
     return '${code.substring(0, mid)} ${code.substring(mid)}';
-  }
-
-  Widget _buildStatChip(IconData icon, String value, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F3460),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: const Color(0xFF00BFA6)),
-          const SizedBox(width: 4),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.white60,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildEmptyState(AppLocalizations l10n) {

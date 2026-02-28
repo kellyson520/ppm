@@ -11,8 +11,12 @@ class WebDavSettingsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
+      backgroundColor: const Color(0xFF101018),
       appBar: AppBar(
-        title: Text(l10n.webdavNodes),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(l10n.webdavNodes,
+            style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
       body: BlocBuilder<SyncBloc, SyncState>(
         builder: (context, state) {
@@ -25,14 +29,25 @@ class WebDavSettingsScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.cloud_off, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(l10n.noWebDavNodes),
-                  const SizedBox(height: 16),
+                  Icon(Icons.cloud_off_rounded,
+                      size: 80, color: Colors.white.withValues(alpha: 0.1)),
+                  const SizedBox(height: 24),
+                  Text(l10n.noWebDavNodes,
+                      style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.5))),
+                  const SizedBox(height: 32),
                   ElevatedButton.icon(
-                    onPressed: () => _showAddNodeDialog(context),
-                    icon: const Icon(Icons.add),
+                    onPressed: () => _showAddNodeBottomSheet(context),
+                    icon: const Icon(Icons.add_rounded),
                     label: Text(l10n.addNode),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF6C63FF),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                    ),
                   ),
                 ],
               ),
@@ -40,17 +55,43 @@ class WebDavSettingsScreen extends StatelessWidget {
           }
 
           return ListView.builder(
+            padding: const EdgeInsets.all(24),
             itemCount: state.nodes.length,
             itemBuilder: (context, index) {
               final node = state.nodes[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(20),
+                  border:
+                      Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                ),
                 child: ListTile(
-                  leading: const Icon(Icons.storage, color: Color(0xFF6C63FF)),
-                  title: Text(node.name),
-                  subtitle: Text(node.url),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF6C63FF).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.dns_rounded,
+                        color: Color(0xFF6C63FF), size: 24),
+                  ),
+                  title: Text(node.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, color: Colors.white)),
+                  subtitle: Text(
+                    node.url,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style:
+                        TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                  ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
+                    icon: Icon(Icons.delete_outline_rounded,
+                        color: Colors.red.withValues(alpha: 0.6)),
                     onPressed: () => context
                         .read<SyncBloc>()
                         .add(SyncNodeRemoved(node.name)),
@@ -62,98 +103,133 @@ class WebDavSettingsScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddNodeDialog(context),
-        child: const Icon(Icons.add),
+        onPressed: () => _showAddNodeBottomSheet(context),
+        backgroundColor: const Color(0xFF6C63FF),
+        child: const Icon(Icons.add_rounded, color: Colors.white),
       ),
     );
   }
 
-  void _showAddNodeDialog(BuildContext context) {
+  void _showAddNodeBottomSheet(BuildContext context) {
     final nameController = TextEditingController();
     final urlController = TextEditingController();
     final userController = TextEditingController();
     final passController = TextEditingController();
     final l10n = AppLocalizations.of(context)!;
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: const BorderSide(color: Color(0xFF2D2D44), width: 1),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        title: Text(
-          l10n.addWebDavNode,
-          style: const TextStyle(fontWeight: FontWeight.w600),
+        decoration: BoxDecoration(
+          color: const Color(0xFF161622),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
-        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-        content: SingleChildScrollView(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(28, 12, 28, 32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(labelText: l10n.nodeName),
-                textInputAction: TextInputAction.next,
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: urlController,
-                decoration: InputDecoration(labelText: l10n.urlHint),
-                keyboardType: TextInputType.url,
-                textInputAction: TextInputAction.next,
+              Text(
+                l10n.addWebDavNode,
+                style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
+              const SizedBox(height: 24),
+              _buildTextField(
+                  nameController, l10n.nodeName, Icons.label_outline_rounded,
+                  next: true),
               const SizedBox(height: 16),
-              TextField(
-                controller: userController,
-                decoration: InputDecoration(labelText: l10n.username),
-                textInputAction: TextInputAction.next,
-              ),
+              _buildTextField(urlController, l10n.urlHint, Icons.link_rounded,
+                  next: true, type: TextInputType.url),
               const SizedBox(height: 16),
-              TextField(
-                controller: passController,
-                obscureText: true,
-                decoration: InputDecoration(labelText: l10n.password),
-                textInputAction: TextInputAction.done,
+              _buildTextField(
+                  userController, l10n.username, Icons.person_outline_rounded,
+                  next: true),
+              const SizedBox(height: 16),
+              _buildTextField(
+                  passController, l10n.password, Icons.lock_outline_rounded,
+                  obscure: true),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () {
+                  if (nameController.text.isEmpty || urlController.text.isEmpty) {
+                    return;
+                  }
+                  final node = WebDavNode(
+                    name: nameController.text.trim(),
+                    url: urlController.text.trim(),
+                    username: userController.text.trim(),
+                    password: passController.text,
+                  );
+                  context.read<SyncBloc>().add(SyncNodeAdded(node));
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6C63FF),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
+                child: Text(l10n.add,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w600)),
               ),
             ],
           ),
         ),
-        actionsPadding:
-            const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              l10n.cancel,
-              style: const TextStyle(color: Colors.white70),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.isEmpty || urlController.text.isEmpty) {
-                return;
-              }
-              final node = WebDavNode(
-                name: nameController.text.trim(),
-                url: urlController.text.trim(),
-                username: userController.text.trim(),
-                password: passController.text,
-              );
-              context.read<SyncBloc>().add(SyncNodeAdded(node));
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(l10n.add),
-          ),
-        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    bool next = false,
+    bool obscure = false,
+    TextInputType type = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      keyboardType: type,
+      textInputAction: next ? TextInputAction.next : TextInputAction.done,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+        prefixIcon: Icon(icon,
+            size: 20, color: const Color(0xFF6C63FF).withValues(alpha: 0.7)),
+        filled: true,
+        fillColor: Colors.white.withValues(alpha: 0.05),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF6C63FF), width: 1),
+        ),
       ),
     );
   }

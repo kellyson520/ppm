@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,11 +10,13 @@ import '../../l10n/app_localizations.dart';
 class PasswordDetailScreen extends StatefulWidget {
   final VaultService vaultService;
   final PasswordCard card;
+  final bool isEmbedded;
 
   const PasswordDetailScreen({
     super.key,
     required this.vaultService,
     required this.card,
+    this.isEmbedded = false,
   });
 
   @override
@@ -104,114 +107,187 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return const Material(
+        color: Colors.transparent,
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_payload == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text(l10n.error)),
-        body: Center(
-          child: Text(l10n.failedToDecryptPassword),
+      return Material(
+        color: Colors.transparent,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(
+            child: Text(l10n.failedToDecryptPassword,
+                style: const TextStyle(color: Colors.white)),
+          ),
         ),
       );
     }
 
     final payload = _payload!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(payload.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: _editPassword,
-            tooltip: l10n.edit,
+    // Apple 风格的面包屑模态底板结构
+    final content = Container(
+      decoration: BoxDecoration(
+          color: const Color(0xFF16213E)
+              .withValues(alpha: 0.95), // 强制极黑且微量透明以支撑背后模糊
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border(
+              top: BorderSide(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 0.5,
+          ))),
+      child: Column(
+        children: [
+          // 悬浮在顶部的拖拽胶囊指示器 (Drag Handle)
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 5,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(3),
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: _deletePassword,
-            tooltip: l10n.delete,
+          const SizedBox(height: 16),
+          // 定制的无界限标题栏
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    payload.title,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined),
+                      onPressed: _editPassword,
+                      tooltip: l10n.edit,
+                      color: Colors.white,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: _deletePassword,
+                      tooltip: l10n.delete,
+                      color: Colors.redAccent,
+                    ),
+                    if (!widget.isEmbedded) // 给模态框加一个关闭按钮
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                        color: Colors.white54,
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              children: [
+                // Title card
+                _buildInfoCard(
+                  context: context,
+                  label: 'ACCOUNT', // 使用大写的英文字体做 HIG 副标题隔离
+                  value: payload.username,
+                  onCopy: () =>
+                      _copyToClipboard(payload.username, l10n.usernameLabel),
+                ),
+                const SizedBox(height: 24),
+
+                // Password card
+                _buildPasswordCard(payload.password, l10n),
+                const SizedBox(height: 24),
+
+                // URL card (if present)
+                if (payload.url != null && payload.url!.isNotEmpty) ...[
+                  _buildInfoCard(
+                    context: context,
+                    label: 'WEBSITE',
+                    value: payload.url!,
+                    onCopy: () => _copyToClipboard(payload.url!, l10n.website),
+                    onLaunch: () async {
+                      final uri = Uri.tryParse(payload.url!);
+                      if (uri != null) {
+                        try {
+                          await launchUrl(uri,
+                              mode: LaunchMode.externalApplication);
+                        } on Exception catch (e) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('${l10n.error}: $e')),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
+                // Notes card (if present)
+                if (payload.notes != null && payload.notes!.isNotEmpty) ...[
+                  _buildInfoCard(
+                    context: context,
+                    label: 'NOTES',
+                    value: payload.notes!,
+                    multiline: true,
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
+                // Metadata
+                _buildMetadataSection(l10n),
+                const SizedBox(height: 64), // Safe bottom area
+              ],
+            ),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Title card
-          _buildInfoCard(
-            context: context,
-            icon: Icons.label_outline,
-            label: l10n.title,
-            value: payload.title,
-            onCopy: () => _copyToClipboard(payload.title, l10n.title),
-          ),
-          const SizedBox(height: 12),
+    );
 
-          // Username card
-          _buildInfoCard(
-            context: context,
-            icon: Icons.person_outline,
-            label: l10n.usernameLabel,
-            value: payload.username,
-            onCopy: () =>
-                _copyToClipboard(payload.username, l10n.usernameLabel),
-          ),
-          const SizedBox(height: 12),
+    // 如果是被横屏嵌入的，直接显示内容；否则包裹成透明底准备做弹窗
+    if (widget.isEmbedded) {
+      return content;
+    }
 
-          // Password card
-          _buildPasswordCard(payload.password, l10n),
-          const SizedBox(height: 12),
-
-          // URL card (if present)
-          if (payload.url != null && payload.url!.isNotEmpty) ...[
-            _buildInfoCard(
-              context: context,
-              icon: Icons.link,
-              label: l10n.website,
-              value: payload.url!,
-              onCopy: () => _copyToClipboard(payload.url!, l10n.website),
-              onLaunch: () async {
-                final uri = Uri.tryParse(payload.url!);
-                if (uri != null) {
-                  try {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  } on Exception catch (e) {
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('${l10n.error}: $e')),
-                    );
-                  }
-                }
-              },
+    // Scaffold 的背景设置成完全透明，依赖外部调用的 showModalBottomSheet
+    // 如果不是从 bottom sheet 拉起，作为普通 push 时也是透明底悬空
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Align(
+        alignment: Alignment.bottomCenter,
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.9, // 占屏 90%
+          width: double.infinity,
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            child: BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+              child: content,
             ),
-            const SizedBox(height: 12),
-          ],
-
-          // Notes card (if present)
-          if (payload.notes != null && payload.notes!.isNotEmpty) ...[
-            _buildInfoCard(
-              context: context,
-              icon: Icons.notes,
-              label: l10n.notes,
-              value: payload.notes!,
-              multiline: true,
-            ),
-            const SizedBox(height: 12),
-          ],
-
-          // Metadata
-          const SizedBox(height: 24),
-          _buildMetadataSection(l10n),
-        ],
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildInfoCard({
     required BuildContext context,
-    required IconData icon,
+    IconData? icon,
     required String label,
     required String value,
     VoidCallback? onCopy,
@@ -221,24 +297,28 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     return Card(
       elevation: 0,
-      color: const Color(0xFF16213E),
+      color: Colors.transparent, // iOS 扁平无色底
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(icon, size: 18, color: Colors.white60),
-                const SizedBox(width: 8),
+                if (icon != null) ...[
+                  Icon(icon, size: 18, color: Colors.white60),
+                  const SizedBox(width: 8),
+                ],
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white60,
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontWeight: FontWeight.w600, // Apple style secondary bold
+                    letterSpacing: 0.5,
                   ),
                 ),
               ],
@@ -247,23 +327,35 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: multiline ? 14 : 16,
-                      color: Colors.white,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(
+                          alpha: 0.05), // Input field like flat area
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: multiline ? 15 : 17,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
                 if (onCopy != null)
                   IconButton(
-                    icon: const Icon(Icons.copy, size: 20),
+                    icon: Icon(Icons.copy,
+                        size: 20, color: Colors.white.withValues(alpha: 0.5)),
                     onPressed: onCopy,
                     tooltip: l10n.copy,
                   ),
                 if (onLaunch != null)
                   IconButton(
-                    icon: const Icon(Icons.open_in_new, size: 20),
+                    icon: Icon(Icons.open_in_new,
+                        size: 20, color: Colors.white.withValues(alpha: 0.5)),
                     onPressed: onLaunch,
                     tooltip: l10n.open,
                   ),
@@ -278,24 +370,24 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
   Widget _buildPasswordCard(String password, AppLocalizations l10n) {
     return Card(
       elevation: 0,
-      color: const Color(0xFF16213E),
+      color: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.lock_outline, size: 18, color: Colors.white60),
-                const SizedBox(width: 8),
                 Text(
-                  l10n.passwordLabel,
-                  style: const TextStyle(
+                  'PASSWORD', // 纯大写隔离
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white60,
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
                   ),
                 ),
                 const Spacer(),
@@ -308,8 +400,13 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
                   icon: Icon(
                     _showPassword ? Icons.visibility_off : Icons.visibility,
                     size: 16,
+                    color: Colors.white.withValues(alpha: 0.6),
                   ),
-                  label: Text(_showPassword ? l10n.hide : l10n.show),
+                  label: Text(
+                    _showPassword ? l10n.hide : l10n.show,
+                    style:
+                        TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                  ),
                 ),
               ],
             ),
@@ -319,27 +416,29 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                        horizontal: 16, vertical: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F3460),
-                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       _showPassword
                           ? password
                           : '•' * (password.length > 20 ? 20 : password.length),
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: _showPassword ? 17 : 24, // 掩码状态大一点
                         fontFamily: 'monospace',
-                        letterSpacing: 1,
+                        color: Colors.white,
+                        letterSpacing: _showPassword ? 1 : 4,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.copy, size: 20),
+                  icon: Icon(Icons.copy,
+                      size: 20, color: Colors.white.withValues(alpha: 0.5)),
                   onPressed: () =>
                       _copyToClipboard(password, l10n.passwordLabel),
                   tooltip: l10n.copyPassword,
@@ -354,20 +453,21 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
 
   Widget _buildMetadataSection(AppLocalizations l10n) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8), // 对齐上方内容
       decoration: BoxDecoration(
-        color: const Color(0xFF16213E),
+        color: Colors.transparent, // 抛弃背景色
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.metadata,
-            style: const TextStyle(
-              fontSize: 14,
+            l10n.metadata.toUpperCase(), // 大写作为分类符
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.5),
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              letterSpacing: 0.5,
             ),
           ),
           const SizedBox(height: 12),
@@ -399,17 +499,18 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.white60,
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.white.withValues(alpha: 0.4),
           ),
         ),
         const Spacer(),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.white,
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.white.withValues(alpha: 0.7),
+            fontFamily: 'monospace',
           ),
         ),
       ],

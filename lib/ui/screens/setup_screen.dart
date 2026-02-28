@@ -146,61 +146,57 @@ class _SetupScreenState extends State<SetupScreen> {
   }
 
   Widget _buildWelcomePage(AppLocalizations l10n) {
-    return Padding(
+    return ListView(
       padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Icon(
-            Icons.shield_outlined,
-            size: 80,
-            color: Color(0xFF6C63FF),
+      children: [
+        const Icon(
+          Icons.shield_outlined,
+          size: 80,
+          color: Color(0xFF6C63FF),
+        ),
+        const SizedBox(height: 32),
+        Text(
+          l10n.welcomeToZTD,
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-          const SizedBox(height: 32),
-          Text(
-            l10n.welcomeToZTD,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-            textAlign: TextAlign.center,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          l10n.appTitle,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.white70,
           ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.appTitle,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.white70,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 48),
-          _buildFeatureItem(
-            Icons.lock_outline,
-            l10n.e2eEncryption,
-            l10n.e2eEncryptionDesc,
-          ),
-          const SizedBox(height: 16),
-          _buildFeatureItem(
-            Icons.cloud_sync_outlined,
-            l10n.distributedSync,
-            l10n.distributedSyncDesc,
-          ),
-          const SizedBox(height: 16),
-          _buildFeatureItem(
-            Icons.offline_bolt_outlined,
-            l10n.offlineFirst,
-            l10n.offlineFirstDesc,
-          ),
-          const Spacer(),
-          ElevatedButton(
-            onPressed: _nextPage,
-            child: Text(l10n.getStarted),
-          ),
-        ],
-      ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 48),
+        _buildFeatureItem(
+          Icons.lock_outline,
+          l10n.e2eEncryption,
+          l10n.e2eEncryptionDesc,
+        ),
+        const SizedBox(height: 16),
+        _buildFeatureItem(
+          Icons.cloud_sync_outlined,
+          l10n.distributedSync,
+          l10n.distributedSyncDesc,
+        ),
+        const SizedBox(height: 16),
+        _buildFeatureItem(
+          Icons.offline_bolt_outlined,
+          l10n.offlineFirst,
+          l10n.offlineFirstDesc,
+        ),
+        const SizedBox(height: 32),
+        ElevatedButton(
+          onPressed: _nextPage,
+          child: Text(l10n.getStarted),
+        ),
+      ],
     );
   }
 
@@ -243,85 +239,82 @@ class _SetupScreenState extends State<SetupScreen> {
   }
 
   Widget _buildPasswordPage(AppLocalizations l10n) {
-    return Padding(
+    return ListView(
       padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 32),
-          Text(
-            l10n.createMasterPassword,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+      children: [
+        const SizedBox(height: 32),
+        Text(
+          l10n.createMasterPassword,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l10n.masterPasswordDesc,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Colors.white60,
+          ),
+        ),
+        const SizedBox(height: 32),
+        TextField(
+          controller: _passwordController,
+          obscureText: true,
+          onChanged: _calculatePasswordStrength,
+          decoration: InputDecoration(
+            labelText: l10n.masterPassword,
+            prefixIcon: const Icon(Icons.lock_outline),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Password strength indicator
+        Row(
+          children: [
+            Expanded(
+              child: LinearProgressIndicator(
+                value: _passwordStrength,
+                backgroundColor: Colors.white10,
+                valueColor: AlwaysStoppedAnimation<Color>(_getStrengthColor()),
+                minHeight: 6,
+                borderRadius: BorderRadius.circular(3),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.masterPasswordDesc,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.white60,
+            const SizedBox(width: 12),
+            Text(
+              _getStrengthText(l10n),
+              style: TextStyle(
+                color: _getStrengthColor(),
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          const SizedBox(height: 32),
-          TextField(
-            controller: _passwordController,
-            obscureText: true,
-            onChanged: _calculatePasswordStrength,
-            decoration: InputDecoration(
-              labelText: l10n.masterPassword,
-              prefixIcon: const Icon(Icons.lock_outline),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _buildPasswordRequirements(l10n),
+        const SizedBox(height: 32),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _previousPage,
+                child: Text(l10n.back),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          // Password strength indicator
-          Row(
-            children: [
-              Expanded(
-                child: LinearProgressIndicator(
-                  value: _passwordStrength,
-                  backgroundColor: Colors.white10,
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(_getStrengthColor()),
-                  minHeight: 6,
-                  borderRadius: BorderRadius.circular(3),
-                ),
+            const SizedBox(width: 16),
+            Expanded(
+              flex: 2,
+              child: ElevatedButton(
+                onPressed: _passwordStrength >= 0.4 ? _nextPage : null,
+                child: Text(l10n.continueText),
               ),
-              const SizedBox(width: 12),
-              Text(
-                _getStrengthText(l10n),
-                style: TextStyle(
-                  color: _getStrengthColor(),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          _buildPasswordRequirements(l10n),
-          const Spacer(),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _previousPage,
-                  child: Text(l10n.back),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: _passwordStrength >= 0.4 ? _nextPage : null,
-                  child: Text(l10n.continueText),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+        SizedBox(height: MediaQuery.of(context).viewInsets.bottom > 0 ? 32 : 0),
+      ],
     );
   }
 
@@ -379,90 +372,88 @@ class _SetupScreenState extends State<SetupScreen> {
   }
 
   Widget _buildConfirmPage(AppLocalizations l10n, bool isLoading) {
-    return Padding(
+    return ListView(
       padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 32),
-          Text(
-            l10n.confirmPassword,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+      children: [
+        const SizedBox(height: 32),
+        Text(
+          l10n.confirmPassword,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.enterPasswordAgain,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.white60,
-            ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l10n.enterPasswordAgain,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Colors.white60,
           ),
-          const SizedBox(height: 32),
-          TextField(
-            controller: _confirmController,
-            obscureText: true,
-            decoration: InputDecoration(
-              labelText: l10n.confirmPassword,
-              prefixIcon: const Icon(Icons.lock_outline),
-            ),
+        ),
+        const SizedBox(height: 32),
+        TextField(
+          controller: _confirmController,
+          obscureText: true,
+          decoration: InputDecoration(
+            labelText: l10n.confirmPassword,
+            prefixIcon: const Icon(Icons.lock_outline),
           ),
-          if (_errorMessage.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _errorMessage,
-                      style: const TextStyle(color: Colors.red),
-                    ),
+        ),
+        if (_errorMessage.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.red.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _errorMessage,
+                    style: const TextStyle(color: Colors.red),
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+        ],
+        const SizedBox(height: 32),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _previousPage,
+                child: Text(l10n.back),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              flex: 2,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : () => _completeSetup(l10n),
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Text(l10n.createVault),
               ),
             ),
           ],
-          const Spacer(),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _previousPage,
-                  child: Text(l10n.back),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: isLoading ? null : () => _completeSetup(l10n),
-                  child: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : Text(l10n.createVault),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+        SizedBox(height: MediaQuery.of(context).viewInsets.bottom > 0 ? 32 : 0),
+      ],
     );
   }
 }
