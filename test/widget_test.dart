@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ztd_password_manager/main.dart';
+import 'package:ztd_password_manager/ui/screens/splash_screen.dart';
 
 void main() {
   testWidgets('App starts and shows splash screen',
@@ -16,10 +17,11 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const ZTDPasswordManagerApp());
 
-    // Verify that splash screen text is present
+    // Verify that splash screen is rendered
     expect(find.text('ZTD Password'), findsOneWidget);
     expect(find.text('Manager'), findsOneWidget);
-    expect(find.text('Zero-Trust Distributed Security'), findsOneWidget);
+    // Tagline is now localized via l10n.offlineFirstDesc, check SplashScreen type instead
+    expect(find.byType(SplashScreen), findsOneWidget);
 
     // Verify loading indicator exists
     expect(find.byType(CircularProgressIndicator), findsOneWidget);

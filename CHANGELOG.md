@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.9] - 2026-02-28
+
+### 🔧 修复 (Fixes)
+- **单元测试修复**：更新 `widget_test.dart` 以适配本地化后的 Splash Screen。
+  - 将硬编码的 tagline 文本断言替换为对 `SplashScreen` 组件类型的校验，解决 CI 环境因 Locale 差异导致的测试失败。
+
 ## [0.2.8] - 2026-02-26
 
 ### 🔧 修复 (Fixes)
