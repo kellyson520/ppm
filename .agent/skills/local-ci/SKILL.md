@@ -15,13 +15,15 @@ version: 2.0
 # ✅ Standards & Rules
 
 ## 1. Flutter Local CI 流程 (Standard)
-1.  **代码风格格式化**: `dart format .`
-2.  **静态分析**: `flutter analyze` (禁止任何 error/warning/info，根据项目配置决定阈值)。
-3.  **生成代码校验**: 
+1.  **修复建议**: `dart fix --apply` (优先自动修复 lint 问题)。
+2.  **代码风格格式化**: `dart format .`
+3.  **多语言同步**: 若修改了 `.arb` 文件，运行 `flutter gen-l10n`。
+4.  **静态分析**: `flutter analyze` (禁止任何 error，warning 需评估)。
+5.  **生成代码校验**: 
     - 若修改了模型或 BLoC：`dart run build_runner build --delete-conflicting-outputs`。
-4.  **单元测试 (Test)**: 
+6.  **单元测试 (Test)**: 
     - 针对性测试: `flutter test test/path/to/test.dart`。
-    - 全量测试: `flutter test` (仅在必要时执行，建议聚焦修改模块)。
+    - 全量测试: `flutter test` (建议聚焦修改模块)。
 
 ## 2. 原生层检查 (Native Layer)
 - 若修改了 `android/` 目录: `./gradlew lintDebug`。

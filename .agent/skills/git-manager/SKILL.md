@@ -18,6 +18,7 @@ version: 2.0
 - **Minor** (0.2.x → 0.3.0): 新功能模块（如新增 Authenticator、QR Scanner）。
 - **Major** (0.x → 1.0.0): 架构大改或首次正式发布。
 - **必须**: 每次推送必须同步更新 `pubspec.yaml` 中的 `version` 和 `CHANGELOG.md`。
+- **注意**: 若修改了 `.arb` 语言文件，必须在提交前执行 `flutter gen-l10n` 确保生成的代码是最新的。
 
 ## 2. 提交规范
 - **格式**: `<type>(<scope>): <subject>`
@@ -42,25 +43,17 @@ version: 2.0
 - **变更日志**: `CHANGELOG.md`（项目根目录）
 - **CI**: `.github/workflows/ci.yml`
 
+## D. Windows/PowerShell 适配 ⚠️
+- **禁止使用 `&&`**: PowerShell 不识别 `&&` 作为语句分隔符。
+- **方案**: 使用分号 `;` 分隔命令，或者分步执行。
+  - 错误: `git tag v1.0 && git push`
+  - 正确: `git tag v1.0; git push` 或分成两行执行。
+
 # 🚀 Workflow
-
-## A. 开发周期
-1. 编辑代码。
-2. **必须** 运行 `flutter analyze` + `flutter test` (或调用 `local-ci`)。
-3. `git add .` → `git commit -m "type(scope): subject"`
-4. `git push`
-
-## B. 发版 (Release)
-1. 更新 `pubspec.yaml` 中的 `version`。
-2. 更新 `CHANGELOG.md`。
-3. `git add .` → `git commit -m "chore(release): bump version to x.y.z"`
-4. `git tag -a vx.y.z -m "vx.y.z 发版说明"`
-5. `git push origin vx.y.z` → `git push`
-
-## C. 回滚
-- **Soft**: `git reset --soft HEAD~1` (撤回提交但保留改动)
-- **Hard**: `git reset --hard HEAD~1` (销毁改动)
-- **Safe**: `git revert HEAD` (生成新提交回滚)
+1. **Prepare**: 确认 `pubspec.yaml` 版本号及 `CHANGELOG.md` 已更新。
+2. **Lint**: 调用 `local-ci` 执行 `dart fix --apply` 和 `flutter analyze`。
+3. **Commit**: 进行规范化提交。
+4. **Tag & Push**: (Windows 环境) 先 `git tag`，再 `git push`，最后 `git push --tags`。
 
 # 💡 Examples
 **User:** "发一个 patch 版本。"
