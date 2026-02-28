@@ -158,7 +158,7 @@ class VaultService {
         iv: base64Encode(encryptedPayload.iv),
         authTag: base64Encode(encryptedPayload.authTag),
       ),
-      deviceId: _deviceId ?? 'unknown-device',
+      deviceId: _deviceId!,
     );
 
     // 将完整三段（ciphertext + iv + authTag）序列化存入 card.encryptedPayload
@@ -223,7 +223,7 @@ class VaultService {
         iv: base64Encode(encryptedPayload.iv),
         authTag: base64Encode(encryptedPayload.authTag),
       ),
-      deviceId: _deviceId ?? 'unknown-device',
+      deviceId: _deviceId!,
       prevEventHash: existingCard.currentEventId,
     );
 
@@ -265,7 +265,7 @@ class VaultService {
         iv: '',
         authTag: '',
       ),
-      deviceId: _deviceId ?? 'unknown-device',
+      deviceId: _deviceId!,
       prevEventHash: card.currentEventId,
     );
 

@@ -6,6 +6,7 @@ import '../../services/vault_service.dart';
 import '../../core/models/auth_card.dart';
 import '../../core/crypto/totp_generator.dart';
 import 'auth_detail_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Authenticator 页面 - 三重鼎立之验证器
 ///
@@ -144,6 +145,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
 
   /// 复制验证码到剪贴板
   void _copyCode(String code) {
+    final l10n = AppLocalizations.of(context)!;
     Clipboard.setData(ClipboardData(text: code));
     HapticFeedback.lightImpact();
 
@@ -153,7 +155,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
           children: [
             const Icon(Icons.check_circle, color: Colors.white, size: 20),
             const SizedBox(width: 8),
-            Text('验证码 $code 已复制'),
+            Text('${l10n.codeCopied}: $code'),
           ],
         ),
         backgroundColor: const Color(0xFF00BFA6),
@@ -195,6 +197,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         // 搜索框
@@ -204,7 +207,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
             controller: _searchController,
             onChanged: _search,
             decoration: InputDecoration(
-              hintText: '搜索验证器...',
+              hintText: l10n.searchAuthenticator,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
@@ -226,13 +229,13 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
               _buildStatChip(
                 Icons.verified_user,
                 '${_cards.length}',
-                '验证器',
+                l10n.authenticator,
               ),
               const SizedBox(width: 8),
               _buildStatChip(
                 Icons.security,
                 'AES-GCM',
-                '加密',
+                l10n.encryption,
               ),
             ],
           ),
@@ -243,7 +246,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _filteredCards.isEmpty
-                  ? _buildEmptyState()
+                  ? _buildEmptyState(l10n)
                   : RefreshIndicator(
                       onRefresh: () async => _loadData(),
                       child: ListView.builder(
@@ -252,7 +255,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                         itemBuilder: (context, index) {
                           final card = _filteredCards[index];
                           final entry = _decryptedEntries[card.cardId];
-                          return _buildAuthCardItem(card, entry);
+                          return _buildAuthCardItem(card, entry, l10n);
                         },
                       ),
                     ),
@@ -261,7 +264,8 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
     );
   }
 
-  Widget _buildAuthCardItem(AuthCard card, _DecryptedEntry? entry) {
+  Widget _buildAuthCardItem(
+      AuthCard card, _DecryptedEntry? entry, AppLocalizations l10n) {
     final isExpanded = entry != null;
 
     return AnimatedContainer(
@@ -327,7 +331,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                                 ? entry.payload.issuer.isNotEmpty
                                     ? entry.payload.issuer
                                     : entry.payload.account
-                                : '●● 点击解密 ●●',
+                                : l10n.clickToDecrypt,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -348,7 +352,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                             ),
                           if (!isExpanded)
                             Text(
-                              'ID: ${card.cardId.substring(0, 12)}...',
+                              'ID: ${card.cardId.substring(0, card.cardId.length > 12 ? 12 : card.cardId.length)}...',
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Colors.white.withValues(alpha: 0.3),
@@ -472,7 +476,8 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                       TextButton.icon(
                         onPressed: () => _navigateToAuthDetail(card),
                         icon: const Icon(Icons.info_outline, size: 16),
-                        label: const Text('详情', style: TextStyle(fontSize: 12)),
+                        label: Text(l10n.details,
+                            style: const TextStyle(fontSize: 12)),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.white60,
                         ),
@@ -528,7 +533,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -540,7 +545,9 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            _searchController.text.isEmpty ? '暂无验证器' : '未找到匹配项',
+            _searchController.text.isEmpty
+                ? l10n.noAuthenticators
+                : l10n.noMatches,
             style: TextStyle(
               fontSize: 18,
               color: Colors.white.withValues(alpha: 0.6),
@@ -549,7 +556,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
           const SizedBox(height: 8),
           if (_searchController.text.isEmpty)
             Text(
-              '点击右下角 + 按钮添加第一个验证器',
+              l10n.clickToAddAuth,
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.white.withValues(alpha: 0.4),

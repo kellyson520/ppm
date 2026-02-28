@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'l10n/app_localizations.dart';
+import 'package:ztd_password_manager/l10n/app_localizations.dart';
 
 import 'core/diagnostics/crash_report_service.dart';
 import 'ui/screens/splash_screen.dart';
@@ -16,8 +16,6 @@ import 'services/auth_service.dart';
 import 'blocs/vault/vault_bloc.dart';
 import 'blocs/password/password_bloc.dart';
 import 'blocs/auth/auth_bloc.dart';
-import 'blocs/sync/sync_bloc.dart';
-import 'services/sync_service.dart';
 
 /// 全局 Navigator Key，供 CrashReportService 在 Widget 树外进行界面跳转
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -100,21 +98,18 @@ class ZTDPasswordManagerApp extends StatefulWidget {
 class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
   late final VaultService _vaultService;
   late final AuthService _authService;
-  late final SyncService _syncService;
 
   @override
   void initState() {
     super.initState();
     _vaultService = VaultService();
     _authService = AuthService();
-    _syncService = SyncService();
   }
 
   @override
   void dispose() {
     _vaultService.dispose();
     _authService.dispose();
-    _syncService.dispose();
     super.dispose();
   }
 
@@ -124,7 +119,6 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
       providers: [
         RepositoryProvider.value(value: _vaultService),
         RepositoryProvider.value(value: _authService),
-        RepositoryProvider.value(value: _syncService),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -137,10 +131,6 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
           ),
           BlocProvider(
             create: (context) => AuthBloc(authService: _authService),
-          ),
-          BlocProvider(
-            create: (context) =>
-                SyncBloc(syncService: _syncService)..add(SyncNodesRequested()),
           ),
         ],
         child: MaterialApp(

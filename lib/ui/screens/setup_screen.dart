@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/vault/vault_bloc.dart';
+import '../../l10n/app_localizations.dart';
 
 class SetupScreen extends StatefulWidget {
   const SetupScreen({super.key});
@@ -47,10 +48,10 @@ class _SetupScreenState extends State<SetupScreen> {
     return Colors.green;
   }
 
-  String _getStrengthText() {
-    if (_passwordStrength < 0.4) return 'Weak';
-    if (_passwordStrength < 0.7) return 'Medium';
-    return 'Strong';
+  String _getStrengthText(AppLocalizations l10n) {
+    if (_passwordStrength < 0.4) return l10n.weak;
+    if (_passwordStrength < 0.7) return l10n.medium;
+    return l10n.strong;
   }
 
   void _nextPage() {
@@ -77,17 +78,17 @@ class _SetupScreenState extends State<SetupScreen> {
     }
   }
 
-  Future<void> _completeSetup() async {
+  Future<void> _completeSetup(AppLocalizations l10n) async {
     if (_passwordController.text != _confirmController.text) {
       setState(() {
-        _errorMessage = 'Passwords do not match';
+        _errorMessage = l10n.passwordsDoNotMatch;
       });
       return;
     }
 
     if (_passwordController.text.length < 8) {
       setState(() {
-        _errorMessage = 'Password must be at least 8 characters';
+        _errorMessage = l10n.passwordTooShort;
       });
       return;
     }
@@ -101,14 +102,16 @@ class _SetupScreenState extends State<SetupScreen> {
   Widget build(BuildContext context) {
     return BlocListener<VaultBloc, VaultState>(
       listener: (context, state) {
+        final l10n = AppLocalizations.of(context)!;
         if (state.status == VaultStatus.error) {
           setState(() {
-            _errorMessage = state.errorMessage ?? 'Unknown error';
+            _errorMessage = state.errorMessage ?? l10n.unknownError;
           });
         }
       },
       child: BlocBuilder<VaultBloc, VaultState>(
         builder: (context, state) {
+          final l10n = AppLocalizations.of(context)!;
           final isLoading = state.status == VaultStatus.loading;
 
           return Scaffold(
@@ -127,9 +130,9 @@ class _SetupScreenState extends State<SetupScreen> {
                       controller: _pageController,
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
-                        _buildWelcomePage(),
-                        _buildPasswordPage(),
-                        _buildConfirmPage(isLoading),
+                        _buildWelcomePage(l10n),
+                        _buildPasswordPage(l10n),
+                        _buildConfirmPage(l10n, isLoading),
                       ],
                     ),
                   ),
@@ -142,7 +145,7 @@ class _SetupScreenState extends State<SetupScreen> {
     );
   }
 
-  Widget _buildWelcomePage() {
+  Widget _buildWelcomePage(AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
@@ -155,9 +158,9 @@ class _SetupScreenState extends State<SetupScreen> {
             color: Color(0xFF6C63FF),
           ),
           const SizedBox(height: 32),
-          const Text(
-            'Welcome to ZTD',
-            style: TextStyle(
+          Text(
+            l10n.welcomeToZTD,
+            style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -165,9 +168,9 @@ class _SetupScreenState extends State<SetupScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Zero-Trust Distributed Password Manager',
-            style: TextStyle(
+          Text(
+            l10n.appTitle,
+            style: const TextStyle(
               fontSize: 16,
               color: Colors.white70,
             ),
@@ -176,25 +179,25 @@ class _SetupScreenState extends State<SetupScreen> {
           const SizedBox(height: 48),
           _buildFeatureItem(
             Icons.lock_outline,
-            'End-to-End Encryption',
-            'Your data is encrypted with AES-256-GCM',
+            l10n.e2eEncryption,
+            l10n.e2eEncryptionDesc,
           ),
           const SizedBox(height: 16),
           _buildFeatureItem(
             Icons.cloud_sync_outlined,
-            'Distributed Sync',
-            'Sync across devices via WebDAV',
+            l10n.distributedSync,
+            l10n.distributedSyncDesc,
           ),
           const SizedBox(height: 16),
           _buildFeatureItem(
             Icons.offline_bolt_outlined,
-            'Offline First',
-            'Access your passwords anytime, anywhere',
+            l10n.offlineFirst,
+            l10n.offlineFirstDesc,
           ),
           const Spacer(),
           ElevatedButton(
             onPressed: _nextPage,
-            child: const Text('Get Started'),
+            child: Text(l10n.getStarted),
           ),
         ],
       ),
@@ -239,25 +242,25 @@ class _SetupScreenState extends State<SetupScreen> {
     );
   }
 
-  Widget _buildPasswordPage() {
+  Widget _buildPasswordPage(AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 32),
-          const Text(
-            'Create Master Password',
-            style: TextStyle(
+          Text(
+            l10n.createMasterPassword,
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'This password will encrypt all your data. Make it strong and memorable.',
-            style: TextStyle(
+          Text(
+            l10n.masterPasswordDesc,
+            style: const TextStyle(
               fontSize: 14,
               color: Colors.white60,
             ),
@@ -267,9 +270,9 @@ class _SetupScreenState extends State<SetupScreen> {
             controller: _passwordController,
             obscureText: true,
             onChanged: _calculatePasswordStrength,
-            decoration: const InputDecoration(
-              labelText: 'Master Password',
-              prefixIcon: Icon(Icons.lock_outline),
+            decoration: InputDecoration(
+              labelText: l10n.masterPassword,
+              prefixIcon: const Icon(Icons.lock_outline),
             ),
           ),
           const SizedBox(height: 16),
@@ -288,7 +291,7 @@ class _SetupScreenState extends State<SetupScreen> {
               ),
               const SizedBox(width: 12),
               Text(
-                _getStrengthText(),
+                _getStrengthText(l10n),
                 style: TextStyle(
                   color: _getStrengthColor(),
                   fontWeight: FontWeight.w600,
@@ -297,14 +300,14 @@ class _SetupScreenState extends State<SetupScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          _buildPasswordRequirements(),
+          _buildPasswordRequirements(l10n),
           const Spacer(),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: _previousPage,
-                  child: const Text('Back'),
+                  child: Text(l10n.back),
                 ),
               ),
               const SizedBox(width: 16),
@@ -312,7 +315,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 flex: 2,
                 child: ElevatedButton(
                   onPressed: _passwordStrength >= 0.4 ? _nextPage : null,
-                  child: const Text('Continue'),
+                  child: Text(l10n.continueText),
                 ),
               ),
             ],
@@ -322,30 +325,30 @@ class _SetupScreenState extends State<SetupScreen> {
     );
   }
 
-  Widget _buildPasswordRequirements() {
+  Widget _buildPasswordRequirements(AppLocalizations l10n) {
     final password = _passwordController.text;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildRequirement(
-          'At least 8 characters',
+          l10n.atLeast8Chars,
           password.length >= 8,
         ),
         _buildRequirement(
-          'Contains uppercase letter',
+          l10n.containsUpper,
           password.contains(RegExp(r'[A-Z]')),
         ),
         _buildRequirement(
-          'Contains lowercase letter',
+          l10n.containsLower,
           password.contains(RegExp(r'[a-z]')),
         ),
         _buildRequirement(
-          'Contains number',
+          l10n.containsNumber,
           password.contains(RegExp(r'[0-9]')),
         ),
         _buildRequirement(
-          'Contains special character',
+          l10n.containsSpecial,
           password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]')),
         ),
       ],
@@ -375,25 +378,25 @@ class _SetupScreenState extends State<SetupScreen> {
     );
   }
 
-  Widget _buildConfirmPage(bool isLoading) {
+  Widget _buildConfirmPage(AppLocalizations l10n, bool isLoading) {
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 32),
-          const Text(
-            'Confirm Password',
-            style: TextStyle(
+          Text(
+            l10n.confirmPassword,
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Enter your password again to confirm.',
-            style: TextStyle(
+          Text(
+            l10n.enterPasswordAgain,
+            style: const TextStyle(
               fontSize: 14,
               color: Colors.white60,
             ),
@@ -402,9 +405,9 @@ class _SetupScreenState extends State<SetupScreen> {
           TextField(
             controller: _confirmController,
             obscureText: true,
-            decoration: const InputDecoration(
-              labelText: 'Confirm Password',
-              prefixIcon: Icon(Icons.lock_outline),
+            decoration: InputDecoration(
+              labelText: l10n.confirmPassword,
+              prefixIcon: const Icon(Icons.lock_outline),
             ),
           ),
           if (_errorMessage.isNotEmpty) ...[
@@ -435,14 +438,14 @@ class _SetupScreenState extends State<SetupScreen> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: _previousPage,
-                  child: const Text('Back'),
+                  child: Text(l10n.back),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
-                  onPressed: isLoading ? null : _completeSetup,
+                  onPressed: isLoading ? null : () => _completeSetup(l10n),
                   child: isLoading
                       ? const SizedBox(
                           width: 20,
@@ -453,7 +456,7 @@ class _SetupScreenState extends State<SetupScreen> {
                                 AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text('Create Vault'),
+                      : Text(l10n.createVault),
                 ),
               ),
             ],

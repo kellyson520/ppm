@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A2E),
       body: Center(
@@ -56,9 +58,9 @@ class SplashScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             // Tagline
-            const Text(
-              'Zero-Trust Distributed Security',
-              style: TextStyle(
+            Text(
+              l10n.offlineFirstDesc,
+              style: const TextStyle(
                 fontSize: 14,
                 color: Colors.white60,
                 letterSpacing: 1.2,

@@ -17,3 +17,5 @@
 | 20260226_FixLintingIssues | 修复 Flutter 严格代码规范 (Linting) | 2026-02-26 | 2026-02-26 | 100% | [📂 Check](./Workstream_Core/20260226_FixLintingIssues/) |
 | 20260226_FixEntropyTestFailure | 修复加密熵值校验测试失败 | 2026-02-26 | 2026-02-26 | 100% | [📂 Check](./Workstream_Crypto/20260226_FixEntropyTestFailure/) |
 | 20260226_UpgradeAndroidSDK36 | 升级 Android SDK 至 36 (兼容 sqlcipher) | 2026-02-26 | 2026-02-26 | 100% | [📂 Check](./Workstream_Core/20260226_UpgradeAndroidSDK36/) |
+| 20260228_AppLocalization | 全面汉化应用 | 2026-02-28 | | Active | [📂 Check](./Workstream_UI/20260228_AppLocalization/) |
+| 20260228_FixAddAuthScreenL10n | 修复 AddAuthScreen 本地化缺失 | 2026-02-28 | 2026-02-28 | 100% | [📂 Check](./Workstream_Authenticator/FixAddAuthScreenError/) |

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/vault/vault_bloc.dart';
+import '../../l10n/app_localizations.dart';
 
 class LockScreen extends StatefulWidget {
   const LockScreen({super.key});
@@ -47,17 +48,17 @@ class _LockScreenState extends State<LockScreen>
         );
   }
 
-  void _handleFailedAttempt() {
+  void _handleFailedAttempt(AppLocalizations l10n) {
     _failedAttempts++;
     _shakeController.forward().then((_) => _shakeController.reset());
     HapticFeedback.heavyImpact();
 
     setState(() {
       if (_failedAttempts >= 5) {
-        _errorMessage = 'Too many failed attempts. Please wait.';
+        _errorMessage = l10n.tooManyAttempts;
       } else {
         _errorMessage =
-            'Incorrect password. ${_failedAttempts > 1 ? '($_failedAttempts attempts)' : ''}';
+            '${l10n.incorrectPassword} ${_failedAttempts > 1 ? '($_failedAttempts ${l10n.attempts})' : ''}';
       }
     });
   }
@@ -66,18 +67,20 @@ class _LockScreenState extends State<LockScreen>
   Widget build(BuildContext context) {
     return BlocListener<VaultBloc, VaultState>(
       listener: (context, state) {
+        final l10n = AppLocalizations.of(context)!;
         if (state.status == VaultStatus.locked &&
             state.errorMessage != null &&
             state.errorMessage == 'Invalid master password') {
-          _handleFailedAttempt();
+          _handleFailedAttempt(l10n);
         } else if (state.status == VaultStatus.error) {
           setState(() {
-            _errorMessage = state.errorMessage ?? 'An error occurred';
+            _errorMessage = state.errorMessage ?? l10n.anErrorOccurred;
           });
         }
       },
       child: BlocBuilder<VaultBloc, VaultState>(
         builder: (context, state) {
+          final l10n = AppLocalizations.of(context)!;
           final isLoading = state.status == VaultStatus.loading;
 
           return Scaffold(
@@ -124,18 +127,18 @@ class _LockScreenState extends State<LockScreen>
                         ),
                         const SizedBox(height: 40),
                         // Title
-                        const Text(
-                          'Vault Locked',
-                          style: TextStyle(
+                        Text(
+                          l10n.vaultLocked,
+                          style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Enter your master password to unlock',
-                          style: TextStyle(
+                        Text(
+                          l10n.enterMasterPassword,
+                          style: const TextStyle(
                             fontSize: 14,
                             color: Colors.white60,
                           ),
@@ -149,7 +152,7 @@ class _LockScreenState extends State<LockScreen>
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => _unlock(),
                           decoration: InputDecoration(
-                            labelText: 'Master Password',
+                            labelText: l10n.masterPassword,
                             prefixIcon: const Icon(Icons.lock_outline),
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -210,7 +213,7 @@ class _LockScreenState extends State<LockScreen>
                                           Colors.white),
                                     ),
                                   )
-                                : const Text('Unlock'),
+                                : Text(l10n.unlock),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -219,13 +222,13 @@ class _LockScreenState extends State<LockScreen>
                           onPressed: () {
                             // TODO: Implement biometric authentication
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Biometric auth coming soon'),
+                              SnackBar(
+                                content: Text(l10n.biometricSoon),
                               ),
                             );
                           },
                           icon: const Icon(Icons.fingerprint),
-                          label: const Text('Use Biometric'),
+                          label: Text(l10n.useBiometric),
                         ),
                       ],
                     ),

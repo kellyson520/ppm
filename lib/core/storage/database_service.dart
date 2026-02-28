@@ -7,6 +7,7 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../models/models.dart';
 import '../crypto/crypto_service.dart';
 import '../events/event_store.dart';
+import '../sync/sync.dart';
 import '../diagnostics/crash_report_service.dart';
 
 /// Database Service for ZTD Password Manager
@@ -60,7 +61,7 @@ class DatabaseService {
     _db = await openDatabase(
       path,
       password: encryptionKey,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -111,13 +112,47 @@ class DatabaseService {
       CREATE INDEX idx_blind_index ON blind_index_entries(index_hash)
     ''');
 
+    // WebDAV nodes table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS webdav_nodes (
+        node_id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        url TEXT NOT NULL,
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,
+        priority TEXT NOT NULL,
+        sync_strategy TEXT NOT NULL,
+        supports_snapshots INTEGER DEFAULT 1,
+        is_active INTEGER DEFAULT 1,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+
     // Initialize event store tables
     await EventStore.initializeTables(db);
   }
 
   /// Database upgrade
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Handle future migrations
+    if (oldVersion < 2) {
+      // Version 2: Add webdav_nodes table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS webdav_nodes (
+          node_id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          url TEXT NOT NULL,
+          username TEXT NOT NULL,
+          password TEXT NOT NULL,
+          priority TEXT NOT NULL,
+          sync_strategy TEXT NOT NULL,
+          supports_snapshots INTEGER DEFAULT 1,
+          is_active INTEGER DEFAULT 1,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      ''');
+    }
   }
 
   /// Run operations in a transaction
@@ -342,6 +377,55 @@ class DatabaseService {
     );
 
     await saveCard(updatedCard);
+  }
+
+  // ==================== WebDAV Node Operations ====================
+
+  /// Save or update a WebDAV node
+  Future<void> saveWebDavNode(WebDavNode node) async {
+    await db.insert(
+      'webdav_nodes',
+      {
+        'node_id': node.name, // Use name as ID if no separate ID
+        'name': node.name,
+        'url': node.url,
+        'username': node.username,
+        'password': node.password,
+        'priority': node.priority.name,
+        'sync_strategy': node.syncStrategy.name,
+        'supports_snapshots': node.supportsSnapshots ? 1 : 0,
+        'is_active': 1,
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Get all WebDAV nodes
+  Future<List<WebDavNode>> getAllWebDavNodes() async {
+    final result = await db.query('webdav_nodes', where: 'is_active = 1');
+    return result.map((r) {
+      return WebDavNode(
+        name: r['name'] as String,
+        url: r['url'] as String,
+        username: r['username'] as String,
+        password: r['password'] as String,
+        priority: NodePriority.values.byName(r['priority'] as String),
+        syncStrategy: SyncStrategy.values.byName(r['sync_strategy'] as String),
+        supportsSnapshots: (r['supports_snapshots'] as int) == 1,
+      );
+    }).toList();
+  }
+
+  /// Delete a WebDAV node (soft delete)
+  Future<void> deleteWebDavNode(String name) async {
+    await db.update(
+      'webdav_nodes',
+      {'is_active': 0, 'updated_at': DateTime.now().toIso8601String()},
+      where: 'name = ?',
+      whereArgs: [name],
+    );
   }
 
   // ==================== Maintenance Operations ====================

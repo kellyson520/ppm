@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../services/vault_service.dart';
 import '../../core/models/models.dart';
 import 'add_password_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class PasswordDetailScreen extends StatefulWidget {
   final VaultService vaultService;
@@ -42,7 +43,8 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
     HapticFeedback.lightImpact();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$label copied to clipboard'),
+        content:
+            Text('$label ${AppLocalizations.of(context)!.copiedToClipboard}'),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
@@ -66,17 +68,16 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
   }
 
   Future<void> _deletePassword() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Password?'),
-        content: const Text(
-          'This will move the password to trash. You can restore it later.',
-        ),
+        title: Text(l10n.deletePasswordQuestion),
+        content: Text(l10n.deletePasswordDesc),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -84,7 +85,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -100,6 +101,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -108,9 +110,9 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
 
     if (_payload == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Error')),
-        body: const Center(
-          child: Text('Failed to decrypt password'),
+        appBar: AppBar(title: Text(l10n.error)),
+        body: Center(
+          child: Text(l10n.failedToDecryptPassword),
         ),
       );
     }
@@ -124,10 +126,12 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             onPressed: _editPassword,
+            tooltip: l10n.edit,
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: _deletePassword,
+            tooltip: l10n.delete,
           ),
         ],
       ),
@@ -136,60 +140,66 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
         children: [
           // Title card
           _buildInfoCard(
+            context: context,
             icon: Icons.label_outline,
-            label: 'Title',
+            label: l10n.title,
             value: payload.title,
-            onCopy: () => _copyToClipboard(payload.title, 'Title'),
+            onCopy: () => _copyToClipboard(payload.title, l10n.title),
           ),
           const SizedBox(height: 12),
-          
+
           // Username card
           _buildInfoCard(
+            context: context,
             icon: Icons.person_outline,
-            label: 'Username',
+            label: l10n.usernameLabel,
             value: payload.username,
-            onCopy: () => _copyToClipboard(payload.username, 'Username'),
+            onCopy: () =>
+                _copyToClipboard(payload.username, l10n.usernameLabel),
           ),
           const SizedBox(height: 12),
-          
+
           // Password card
-          _buildPasswordCard(payload.password),
+          _buildPasswordCard(payload.password, l10n),
           const SizedBox(height: 12),
-          
+
           // URL card (if present)
           if (payload.url != null && payload.url!.isNotEmpty) ...[
             _buildInfoCard(
+              context: context,
               icon: Icons.link,
-              label: 'Website',
+              label: l10n.website,
               value: payload.url!,
-              onCopy: () => _copyToClipboard(payload.url!, 'URL'),
+              onCopy: () => _copyToClipboard(payload.url!, l10n.website),
               onLaunch: () {
                 // TODO: Launch URL
               },
             ),
             const SizedBox(height: 12),
           ],
-          
+
           // Notes card (if present)
           if (payload.notes != null && payload.notes!.isNotEmpty) ...[
             _buildInfoCard(
+              context: context,
               icon: Icons.notes,
-              label: 'Notes',
+              label: l10n.notes,
               value: payload.notes!,
               multiline: true,
             ),
             const SizedBox(height: 12),
           ],
-          
+
           // Metadata
           const SizedBox(height: 24),
-          _buildMetadataSection(),
+          _buildMetadataSection(l10n),
         ],
       ),
     );
   }
 
   Widget _buildInfoCard({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -197,6 +207,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
     VoidCallback? onLaunch,
     bool multiline = false,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       elevation: 0,
       color: const Color(0xFF16213E),
@@ -237,13 +248,13 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
                   IconButton(
                     icon: const Icon(Icons.copy, size: 20),
                     onPressed: onCopy,
-                    tooltip: 'Copy',
+                    tooltip: l10n.copy,
                   ),
                 if (onLaunch != null)
                   IconButton(
                     icon: const Icon(Icons.open_in_new, size: 20),
                     onPressed: onLaunch,
-                    tooltip: 'Open',
+                    tooltip: l10n.open,
                   ),
               ],
             ),
@@ -253,7 +264,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
     );
   }
 
-  Widget _buildPasswordCard(String password) {
+  Widget _buildPasswordCard(String password, AppLocalizations l10n) {
     return Card(
       elevation: 0,
       color: const Color(0xFF16213E),
@@ -269,9 +280,9 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
               children: [
                 const Icon(Icons.lock_outline, size: 18, color: Colors.white60),
                 const SizedBox(width: 8),
-                const Text(
-                  'Password',
-                  style: TextStyle(
+                Text(
+                  l10n.passwordLabel,
+                  style: const TextStyle(
                     fontSize: 12,
                     color: Colors.white60,
                   ),
@@ -287,7 +298,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
                     _showPassword ? Icons.visibility_off : Icons.visibility,
                     size: 16,
                   ),
-                  label: Text(_showPassword ? 'Hide' : 'Show'),
+                  label: Text(_showPassword ? l10n.hide : l10n.show),
                 ),
               ],
             ),
@@ -305,7 +316,9 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      _showPassword ? password : '•' * password.length,
+                      _showPassword
+                          ? password
+                          : '•' * (password.length > 20 ? 20 : password.length),
                       style: const TextStyle(
                         fontSize: 16,
                         fontFamily: 'monospace',
@@ -316,8 +329,9 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.copy, size: 20),
-                  onPressed: () => _copyToClipboard(password, 'Password'),
-                  tooltip: 'Copy Password',
+                  onPressed: () =>
+                      _copyToClipboard(password, l10n.passwordLabel),
+                  tooltip: l10n.copyPassword,
                 ),
               ],
             ),
@@ -327,7 +341,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
     );
   }
 
-  Widget _buildMetadataSection() {
+  Widget _buildMetadataSection(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -337,9 +351,9 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Metadata',
-            style: TextStyle(
+          Text(
+            l10n.metadata,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -347,18 +361,22 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
           ),
           const SizedBox(height: 12),
           _buildMetadataRow(
-            'Created',
+            l10n.created,
             _formatDateTime(widget.card.createdAt.physicalTime),
           ),
           const SizedBox(height: 8),
           _buildMetadataRow(
-            'Last Updated',
+            l10n.lastUpdated,
             _formatDateTime(widget.card.updatedAt.physicalTime),
           ),
           const SizedBox(height: 8),
           _buildMetadataRow(
-            'Device ID',
-            widget.card.updatedAt.deviceId.substring(0, 8),
+            l10n.deviceID,
+            widget.card.updatedAt.deviceId.substring(
+                0,
+                widget.card.updatedAt.deviceId.length > 8
+                    ? 8
+                    : widget.card.updatedAt.deviceId.length),
           ),
         ],
       ),

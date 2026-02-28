@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/models/models.dart';
+import '../../l10n/app_localizations.dart';
 
 class PasswordCardItem extends StatelessWidget {
   final PasswordCard card;
@@ -54,7 +55,7 @@ class PasswordCardItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _getCardTitle(),
+                      _getCardTitle(context),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -86,9 +87,10 @@ class PasswordCardItem extends StatelessWidget {
     );
   }
 
-  String _getCardTitle() {
+  String _getCardTitle(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // In a real implementation, we would decrypt the title
-    // For now, return a placeholder
-    return 'Password Entry';
+    // For now, return a localized placeholder
+    return l10n.passwordEntry;
   }
 }

@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/diagnostics/crash_report_service.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 崩溃报告界面
 ///
 /// 当应用抛出未被捕获的异常时，由 [CrashReportService] 触发导航到此界面。
-/// 提供：
-/// - 错误摘要与调用堆栈展示
-/// - 「复制报告」按钮（写入系统剪贴板）
-/// - 「关闭应用」按钮（退出进程）
 class CrashReportScreen extends StatelessWidget {
   final CrashInfo crashInfo;
 
@@ -19,6 +16,7 @@ class CrashReportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D1A),
       body: SafeArea(
@@ -27,20 +25,13 @@ class CrashReportScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ─── 标题区 ───────────────────────────────────────────────
-              _buildHeader(),
+              _buildHeader(l10n),
               const SizedBox(height: 24),
-
-              // ─── 基本信息卡片 ─────────────────────────────────────────
-              _buildInfoCard(),
+              _buildInfoCard(l10n),
               const SizedBox(height: 16),
-
-              // ─── 堆栈可滚动区域 ───────────────────────────────────────
-              Expanded(child: _buildStackTrace()),
+              Expanded(child: _buildStackTrace(l10n)),
               const SizedBox(height: 20),
-
-              // ─── 操作按钮区 ──────────────────────────────────────────
-              _buildActions(context),
+              _buildActions(context, l10n),
             ],
           ),
         ),
@@ -48,11 +39,7 @@ class CrashReportScreen extends StatelessWidget {
     );
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // 子组件构建方法
-  // ──────────────────────────────────────────────────────────────────────────
-
-  Widget _buildHeader() {
+  Widget _buildHeader(AppLocalizations l10n) {
     return Row(
       children: [
         Container(
@@ -69,22 +56,22 @@ class CrashReportScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 14),
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '应用崩溃',
-              style: TextStyle(
+              l10n.appCrashed,
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
                 letterSpacing: 0.5,
               ),
             ),
-            SizedBox(height: 2),
+            const SizedBox(height: 2),
             Text(
-              'Crash Report',
-              style: TextStyle(
+              l10n.crashReport,
+              style: const TextStyle(
                 fontSize: 13,
                 color: Color(0xFFFF4C5B),
                 fontWeight: FontWeight.w500,
@@ -96,7 +83,7 @@ class CrashReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard() {
+  Widget _buildInfoCard(AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -110,7 +97,6 @@ class CrashReportScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 时间 + 来源
           Row(
             children: [
               _infoChip(
@@ -127,10 +113,9 @@ class CrashReportScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          // 错误标签
-          const Text(
-            '错误信息',
-            style: TextStyle(
+          Text(
+            l10n.errorInfo,
+            style: const TextStyle(
               fontSize: 11,
               color: Color(0xFF8888AA),
               fontWeight: FontWeight.w600,
@@ -138,7 +123,6 @@ class CrashReportScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          // 错误内容（最多显示前 3 行）
           Text(
             _truncate(crashInfo.errorMessage, 200),
             style: const TextStyle(
@@ -153,7 +137,7 @@ class CrashReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStackTrace() {
+  Widget _buildStackTrace(AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -164,21 +148,20 @@ class CrashReportScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 堆栈标题栏
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: const BoxDecoration(
               color: Color(0xFF1A1A2E),
               borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.list_alt_outlined,
+                const Icon(Icons.list_alt_outlined,
                     size: 15, color: Color(0xFF8888AA)),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 Text(
-                  'Stack Trace',
-                  style: TextStyle(
+                  l10n.stackTrace,
+                  style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF8888AA),
                     fontWeight: FontWeight.w600,
@@ -188,14 +171,13 @@ class CrashReportScreen extends StatelessWidget {
               ],
             ),
           ),
-          // 可滚动堆栈区
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(14),
               child: SelectableText(
                 crashInfo.stackTrace.isNotEmpty
                     ? crashInfo.stackTrace
-                    : '（无堆栈信息）',
+                    : l10n.noStackTrace,
                 style: const TextStyle(
                   fontSize: 11,
                   color: Color(0xFF9999BB),
@@ -210,26 +192,24 @@ class CrashReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActions(BuildContext context) {
+  Widget _buildActions(BuildContext context, AppLocalizations l10n) {
     return Row(
       children: [
-        // 「复制报告」
         Expanded(
           child: _ActionButton(
             id: 'crash_copy_button',
             icon: Icons.copy_outlined,
-            label: '复制报告',
+            label: l10n.copyReport,
             color: const Color(0xFF6C63FF),
-            onPressed: () => _copyReport(context),
+            onPressed: () => _copyReport(context, l10n),
           ),
         ),
         const SizedBox(width: 12),
-        // 「关闭应用」
         Expanded(
           child: _ActionButton(
             id: 'crash_close_button',
             icon: Icons.close_rounded,
-            label: '关闭应用',
+            label: l10n.closeApp,
             color: const Color(0xFFFF4C5B),
             onPressed: _closeApp,
           ),
@@ -237,10 +217,6 @@ class CrashReportScreen extends StatelessWidget {
       ],
     );
   }
-
-  // ──────────────────────────────────────────────────────────────────────────
-  // 辅助方法
-  // ──────────────────────────────────────────────────────────────────────────
 
   Widget _infoChip({
     required IconData icon,
@@ -276,17 +252,17 @@ class CrashReportScreen extends StatelessWidget {
     return '${text.substring(0, maxLength)}…';
   }
 
-  /// 将完整报告写入剪贴板并显示提示
-  Future<void> _copyReport(BuildContext context) async {
+  Future<void> _copyReport(BuildContext context, AppLocalizations l10n) async {
     await Clipboard.setData(ClipboardData(text: crashInfo.toPlainText()));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.check_circle_outline, color: Colors.white, size: 18),
-              SizedBox(width: 8),
-              Text('崩溃报告已复制到剪贴板'),
+              const Icon(Icons.check_circle_outline,
+                  color: Colors.white, size: 18),
+              const SizedBox(width: 8),
+              Text(l10n.reportCopied),
             ],
           ),
           backgroundColor: const Color(0xFF6C63FF),
@@ -299,15 +275,10 @@ class CrashReportScreen extends StatelessWidget {
     }
   }
 
-  /// 退出应用
   void _closeApp() {
     SystemNavigator.pop();
   }
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// 操作按钮组件
-// ────────────────────────────────────────────────────────────────────────────
 
 class _ActionButton extends StatelessWidget {
   final String id;

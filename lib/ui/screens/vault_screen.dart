@@ -8,6 +8,7 @@ import 'password_detail_screen.dart';
 import 'authenticator_screen.dart';
 import 'add_auth_screen.dart';
 import 'settings_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Vault 主页 - 三重鼎立架构
 ///
@@ -74,7 +75,10 @@ class _VaultScreenState extends State<VaultScreen> {
       setState(() {
         _isLoading = false;
       });
-      _showError('Failed to load vault data');
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        _showError(l10n.anErrorOccurred);
+      }
     }
   }
 
@@ -122,7 +126,10 @@ class _VaultScreenState extends State<VaultScreen> {
 
     if (result == true) {
       _loadData();
-      _showSuccess('Password saved successfully');
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        _showSuccess(l10n.passwordSaved);
+      }
     }
   }
 
@@ -144,13 +151,14 @@ class _VaultScreenState extends State<VaultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_getTitle()),
+        title: Text(_getTitle(l10n)),
         leading: IconButton(
           icon: const Icon(Icons.lock_outline),
           onPressed: widget.onLockRequested,
-          tooltip: '锁定保险箱',
+          tooltip: l10n.lockVault,
         ),
         actions: [
           if (_currentIndex == 0 &&
@@ -161,7 +169,7 @@ class _VaultScreenState extends State<VaultScreen> {
               child: IconButton(
                 icon: const Icon(Icons.sync),
                 onPressed: () {
-                  _showSuccess('Sync started');
+                  _showSuccess(l10n.syncStarted);
                 },
               ),
             )
@@ -169,13 +177,13 @@ class _VaultScreenState extends State<VaultScreen> {
             IconButton(
               icon: const Icon(Icons.sync),
               onPressed: () {
-                _showSuccess('Already up to date');
+                _showSuccess(l10n.alreadyUpToDate);
               },
             ),
         ],
       ),
-      body: _buildBody(),
-      bottomNavigationBar: _buildBottomNavBar(),
+      body: _buildBody(l10n),
+      bottomNavigationBar: _buildBottomNavBar(l10n),
       floatingActionButton: _currentIndex == 2
           ? null // 设置页面不需要FAB
           : FloatingActionButton.extended(
@@ -183,7 +191,7 @@ class _VaultScreenState extends State<VaultScreen> {
                   ? _navigateToAddPassword
                   : _navigateToAddAuth,
               icon: const Icon(Icons.add),
-              label: Text(_currentIndex == 0 ? '添加密码' : '添加验证'),
+              label: Text(_currentIndex == 0 ? l10n.addPassword : l10n.addAuth),
               backgroundColor: _currentIndex == 0
                   ? const Color(0xFF6C63FF)
                   : const Color(0xFF00BFA6),
@@ -191,23 +199,23 @@ class _VaultScreenState extends State<VaultScreen> {
     );
   }
 
-  String _getTitle() {
+  String _getTitle(AppLocalizations l10n) {
     switch (_currentIndex) {
       case 0:
-        return '密码保险箱';
+        return l10n.passwordVault;
       case 1:
-        return '身份验证';
+        return l10n.authenticator;
       case 2:
-        return '设置';
+        return l10n.settings;
       default:
-        return 'ZTD Vault';
+        return l10n.appTitle;
     }
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(AppLocalizations l10n) {
     switch (_currentIndex) {
       case 0:
-        return _buildPasswordTab();
+        return _buildPasswordTab(l10n);
       case 1:
         return AuthenticatorScreen(
           vaultService: widget.vaultService,
@@ -225,7 +233,7 @@ class _VaultScreenState extends State<VaultScreen> {
     }
   }
 
-  Widget _buildPasswordTab() {
+  Widget _buildPasswordTab(AppLocalizations l10n) {
     return Column(
       children: [
         // 搜索框
@@ -235,7 +243,7 @@ class _VaultScreenState extends State<VaultScreen> {
             controller: _searchController,
             onChanged: _search,
             decoration: InputDecoration(
-              hintText: '搜索密码...',
+              hintText: l10n.searchPassword,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
@@ -258,13 +266,13 @@ class _VaultScreenState extends State<VaultScreen> {
                 _buildStatChip(
                   Icons.password,
                   '${_stats!.cardCount}',
-                  '密码',
+                  l10n.passwords,
                 ),
                 const SizedBox(width: 8),
                 _buildStatChip(
                   Icons.history,
                   '${_stats!.eventCount}',
-                  '事件',
+                  l10n.events,
                 ),
               ],
             ),
@@ -275,7 +283,7 @@ class _VaultScreenState extends State<VaultScreen> {
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _filteredCards.isEmpty
-                  ? _buildEmptyState()
+                  ? _buildEmptyState(l10n)
                   : RefreshIndicator(
                       onRefresh: _loadData,
                       child: ListView.builder(
@@ -320,7 +328,7 @@ class _VaultScreenState extends State<VaultScreen> {
   }
 
   /// 底部导航栏 - 三重鼎立
-  Widget _buildBottomNavBar() {
+  Widget _buildBottomNavBar(AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF16213E),
@@ -342,21 +350,21 @@ class _VaultScreenState extends State<VaultScreen> {
                 index: 0,
                 icon: Icons.lock_outline,
                 activeIcon: Icons.lock,
-                label: '密码',
+                label: l10n.passwords,
                 color: const Color(0xFF6C63FF),
               ),
               _buildNavItem(
                 index: 1,
                 icon: Icons.verified_user_outlined,
                 activeIcon: Icons.verified_user,
-                label: '验证器',
+                label: l10n.authenticator,
                 color: const Color(0xFF00BFA6),
               ),
               _buildNavItem(
                 index: 2,
                 icon: Icons.settings_outlined,
                 activeIcon: Icons.settings,
-                label: '设置',
+                label: l10n.settings,
                 color: const Color(0xFFFF6B6B),
               ),
             ],
@@ -449,7 +457,7 @@ class _VaultScreenState extends State<VaultScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -461,7 +469,7 @@ class _VaultScreenState extends State<VaultScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            _searchController.text.isEmpty ? '暂无密码' : '未找到匹配项',
+            _searchController.text.isEmpty ? l10n.noPasswords : l10n.noMatches,
             style: TextStyle(
               fontSize: 18,
               color: Colors.white.withValues(alpha: 0.6),
@@ -470,7 +478,7 @@ class _VaultScreenState extends State<VaultScreen> {
           const SizedBox(height: 8),
           if (_searchController.text.isEmpty)
             Text(
-              '点击右下角 + 按钮添加第一个密码',
+              l10n.clickToAdd,
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.white.withValues(alpha: 0.4),

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../services/vault_service.dart';
+import '../../l10n/app_localizations.dart';
+import '../../blocs/sync/sync_bloc.dart';
+import 'webdav_settings_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsScreen extends StatefulWidget {
   final VaultService vaultService;
@@ -37,35 +41,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final oldPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
     final confirmController = TextEditingController();
+    final l10n = AppLocalizations.of(context)!;
 
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change Master Password'),
+        title: Text(l10n.changeMasterPassword),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: oldPasswordController,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Current Password',
+              decoration: InputDecoration(
+                labelText: l10n.currentPassword,
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: newPasswordController,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'New Password',
+              decoration: InputDecoration(
+                labelText: l10n.newPassword,
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: confirmController,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Confirm New Password',
+              decoration: InputDecoration(
+                labelText: l10n.confirmNewPassword,
               ),
             ),
           ],
@@ -73,11 +78,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Change'),
+            child: Text(l10n.change),
           ),
         ],
       ),
@@ -85,7 +90,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (result == true) {
       if (newPasswordController.text != confirmController.text) {
-        _showError('New passwords do not match');
+        _showError(l10n.passwordsDoNotMatch);
         return;
       }
 
@@ -95,34 +100,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
 
       if (success) {
-        _showSuccess('Password changed successfully');
+        _showSuccess(l10n.passwordChanged);
       } else {
-        _showError('Failed to change password');
+        _showError(l10n.failedToChangePassword);
       }
     }
   }
 
   Future<void> _exportEmergencyKit() async {
     final passwordController = TextEditingController();
+    final l10n = AppLocalizations.of(context)!;
 
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Export Emergency Kit'),
+        title: Text(l10n.exportEmergencyKit),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'This will export your encryption keys for emergency recovery. '
-              'Store this securely!',
-              style: TextStyle(fontSize: 14),
+            Text(
+              l10n.exportEmergencyKitDesc,
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: passwordController,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Master Password',
+              decoration: InputDecoration(
+                labelText: l10n.masterPassword,
               ),
             ),
           ],
@@ -130,11 +135,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Export'),
+            child: Text(l10n.export),
           ),
         ],
       ),
@@ -146,31 +151,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
 
       if (kit != null) {
-        // TODO: Save or share the emergency kit
-        _showSuccess('Emergency kit exported');
+        _showSuccess(l10n.emergencyKitExported);
       } else {
-        _showError('Failed to export emergency kit');
+        _showError(l10n.failedToExportEmergencyKit);
       }
     }
   }
 
   Future<void> _compactStorage() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Compact Storage?'),
-        content: const Text(
-          'This will compress your event history and create a snapshot. '
-          'This action cannot be undone.',
-        ),
+        title: Text(l10n.compactStorageQuestion),
+        content: Text(l10n.compactStorageDesc),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Compact'),
+            child: Text(l10n.compact),
           ),
         ],
       ),
@@ -180,7 +182,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await widget.vaultService.createSnapshot();
       await _loadStats();
 
-      _showSuccess('Storage compacted successfully');
+      _showSuccess(l10n.storageCompacted);
     }
   }
 
@@ -204,11 +206,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  /// 功能未实现时的统一提示
   void _showComingSoon() {
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('此功能即将推出，敬请期待 🚀'),
+      SnackBar(
+        content: Text(l10n.comingSoon),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -216,30 +218,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final body = ListView(
       children: [
         // Vault Statistics
         if (_stats != null)
           _buildSection(
-            title: 'Vault Statistics',
+            title: l10n.vaultStatistics,
             children: [
               _buildStatTile(
-                'Passwords',
+                l10n.passwords,
                 '${_stats!.cardCount}',
                 Icons.password,
               ),
               _buildStatTile(
-                'Total Events',
+                l10n.totalEvents,
                 '${_stats!.eventCount}',
                 Icons.history,
               ),
               _buildStatTile(
-                'Pending Sync',
+                l10n.pendingSync,
                 '${_stats!.pendingSyncCount}',
                 Icons.sync,
               ),
               _buildStatTile(
-                'Snapshots',
+                l10n.snapshots,
                 '${_stats!.snapshotCount}',
                 Icons.backup,
               ),
@@ -248,28 +251,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         // Security
         _buildSection(
-          title: 'Security',
+          title: l10n.security,
           children: [
             ListTile(
               leading: const Icon(Icons.lock_outline),
-              title: const Text('Change Master Password'),
-              subtitle: const Text('Update your vault password'),
+              title: Text(l10n.changeMasterPassword),
+              subtitle: Text(l10n.updateVaultPassword),
               trailing: const Icon(Icons.chevron_right),
               onTap: _changePassword,
             ),
             ListTile(
               leading: const Icon(Icons.emergency_outlined),
-              title: const Text('Export Emergency Kit'),
-              subtitle: const Text('Backup your encryption keys'),
+              title: Text(l10n.exportEmergencyKit),
+              subtitle: Text(l10n.exportEmergencyKitDesc.split('.')[0]),
               trailing: const Icon(Icons.chevron_right),
               onTap: _exportEmergencyKit,
             ),
             ListTile(
               leading: const Icon(Icons.fingerprint),
-              title: const Text('Biometric Authentication'),
-              subtitle: const Text('Use Face ID / Touch ID'),
+              title: Text(l10n.biometricAuth),
+              subtitle: Text(l10n.useFaceTouchID),
               trailing: const Switch(
-                // 生物识别功能尚未实现，禁用 Switch 避免用户开启无效的开关
                 value: false,
                 onChanged: null,
               ),
@@ -280,47 +282,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         // Sync
         _buildSection(
-          title: 'Synchronization',
+          title: l10n.synchronization,
           children: [
             ListTile(
               leading: const Icon(Icons.cloud_sync_outlined),
-              title: const Text('WebDAV Nodes'),
-              subtitle: const Text('Configure sync destinations'),
+              title: Text(l10n.webdavNodes),
+              subtitle: Text(l10n.configureSyncDestinations),
               trailing: const Icon(Icons.chevron_right),
-              onTap: _showComingSoon,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const WebDavSettingsScreen()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.sync),
-              title: const Text('Manual Sync'),
-              subtitle: const Text('Sync now with all nodes'),
+              title: Text(l10n.manualSync),
+              subtitle: Text(l10n.syncNowWithNodes),
               trailing: const Icon(Icons.chevron_right),
-              onTap: _showComingSoon,
+              onTap: () {
+                context.read<SyncBloc>().add(SyncStarted());
+                _showSuccess(l10n.syncStarted);
+              },
             ),
           ],
         ),
 
         // Storage
         _buildSection(
-          title: 'Storage',
+          title: l10n.storage,
           children: [
             ListTile(
               leading: const Icon(Icons.compress),
-              title: const Text('Compact Storage'),
-              subtitle: const Text('Compress event history'),
+              title: Text(l10n.compactStorage),
+              subtitle: Text(l10n.compressEventHistory),
               trailing: const Icon(Icons.chevron_right),
               onTap: _compactStorage,
             ),
             ListTile(
               leading: const Icon(Icons.download_outlined),
-              title: const Text('Export Backup'),
-              subtitle: const Text('Create encrypted backup file'),
+              title: Text(l10n.exportBackup),
+              subtitle: Text(l10n.createEncryptedBackup),
               trailing: const Icon(Icons.chevron_right),
               onTap: _showComingSoon,
             ),
             ListTile(
               leading: const Icon(Icons.upload_outlined),
-              title: const Text('Import Backup'),
-              subtitle: const Text('Restore from backup file'),
+              title: Text(l10n.importBackup),
+              subtitle: Text(l10n.restoreFromBackup),
               trailing: const Icon(Icons.chevron_right),
               onTap: _showComingSoon,
             ),
@@ -329,22 +340,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         // About
         _buildSection(
-          title: 'About',
+          title: l10n.about,
           children: [
-            const ListTile(
-              leading: Icon(Icons.info_outline),
-              title: Text('Version'),
-              subtitle: Text('1.0.0'),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: Text(l10n.version),
+              subtitle: const Text('1.0.0'),
             ),
             ListTile(
               leading: const Icon(Icons.description_outlined),
-              title: const Text('Documentation'),
+              title: Text(l10n.documentation),
               trailing: const Icon(Icons.open_in_new, size: 18),
               onTap: _showComingSoon,
             ),
             ListTile(
               leading: const Icon(Icons.code),
-              title: const Text('Source Code'),
+              title: Text(l10n.sourceCode),
               trailing: const Icon(Icons.open_in_new, size: 18),
               onTap: _showComingSoon,
             ),
@@ -358,10 +369,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: ElevatedButton.icon(
             onPressed: () {
               widget.onLockRequested();
-              Navigator.pop(context);
+              if (!widget.isEmbedded) {
+                Navigator.pop(context);
+              }
             },
             icon: const Icon(Icons.lock),
-            label: const Text('Lock Vault'),
+            label: Text(l10n.lockVaultFull),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red.withValues(alpha: 0.8),
               foregroundColor: Colors.white,
@@ -379,7 +392,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settings),
       ),
       body: body,
     );

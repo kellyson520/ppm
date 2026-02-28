@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import '../../l10n/app_localizations.dart';
 
 /// QR 码扫描页面
 ///
@@ -78,6 +79,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -89,23 +91,23 @@ class _QrScannerScreenState extends State<QrScannerScreen>
           ),
 
           // 扫描框遮罩
-          _buildScanOverlay(),
+          _buildScanOverlay(l10n),
 
           // 顶部操作栏
-          _buildTopBar(),
+          _buildTopBar(l10n),
 
           // 底部控制栏
-          _buildBottomControls(),
+          _buildBottomControls(l10n),
 
           // 成功状态覆盖层
-          if (_hasScanned) _buildSuccessOverlay(),
+          if (_hasScanned) _buildSuccessOverlay(l10n),
         ],
       ),
     );
   }
 
   /// 构建扫描框遮罩
-  Widget _buildScanOverlay() {
+  Widget _buildScanOverlay(AppLocalizations l10n) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final scanAreaSize = constraints.maxWidth * 0.7;
@@ -167,10 +169,10 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               left: 0,
               right: 0,
               top: top + scanAreaSize + 24,
-              child: const Text(
-                '将 2FA 设置二维码放入框内',
+              child: Text(
+                l10n.placeQrInFrame,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
@@ -182,10 +184,10 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               left: 0,
               right: 0,
               top: top + scanAreaSize + 52,
-              child: const Text(
-                '自动识别 otpauth:// 二维码',
+              child: Text(
+                l10n.autoRecognizeQr,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white38,
                   fontSize: 12,
                 ),
@@ -214,7 +216,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
   }
 
   /// 顶部操作栏
-  Widget _buildTopBar() {
+  Widget _buildTopBar(AppLocalizations l10n) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -229,11 +231,11 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 shape: const CircleBorder(),
               ),
             ),
-            const Expanded(
+            Expanded(
               child: Text(
-                '扫描二维码',
+                l10n.scanQR,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -249,7 +251,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
   }
 
   /// 底部控制栏
-  Widget _buildBottomControls() {
+  Widget _buildBottomControls(AppLocalizations l10n) {
     return Positioned(
       left: 0,
       right: 0,
@@ -277,7 +279,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                   final torchOn = state.torchState == TorchState.on;
                   return _buildControlButton(
                     icon: torchOn ? Icons.flash_on : Icons.flash_off,
-                    label: torchOn ? '关闭照明' : '开启照明',
+                    label: torchOn ? l10n.turnOffFlash : l10n.turnOnFlash,
                     isActive: torchOn,
                     onTap: () => _cameraController.toggleTorch(),
                   );
@@ -286,7 +288,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               // 切换摄像头
               _buildControlButton(
                 icon: Icons.cameraswitch_outlined,
-                label: '切换摄像头',
+                label: l10n.switchCamera,
                 isActive: false,
                 onTap: () => _cameraController.switchCamera(),
               ),
@@ -342,7 +344,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
   }
 
   /// 扫描成功覆盖层
-  Widget _buildSuccessOverlay() {
+  Widget _buildSuccessOverlay(AppLocalizations l10n) {
     return Container(
       color: Colors.black54,
       child: Center(
@@ -363,9 +365,9 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              '扫描成功',
-              style: TextStyle(
+            Text(
+              l10n.scanSuccessful,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.w600,

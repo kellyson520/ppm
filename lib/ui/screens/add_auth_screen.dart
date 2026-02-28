@@ -4,6 +4,7 @@ import '../../core/diagnostics/crash_report_service.dart';
 import '../../services/auth_service.dart';
 import '../../core/models/auth_card.dart';
 import 'qr_scanner_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 添加验证器页面
 ///
@@ -88,9 +89,10 @@ class _AddAuthScreenState extends State<AddAuthScreen>
 
   /// 从 URI 解析并填充表单
   void _parseUri() {
+    final l10n = AppLocalizations.of(context)!;
     final uri = _uriController.text.trim();
     if (uri.isEmpty || !uri.startsWith('otpauth://')) {
-      _showError('请输入有效的 otpauth:// URI');
+      _showError(l10n.invalidURIMessage);
       return;
     }
 
@@ -107,11 +109,11 @@ class _AddAuthScreenState extends State<AddAuthScreen>
 
       // 切换到手动输入 tab 让用户确认
       _tabController.animateTo(0);
-      _showSuccess('URI 解析成功，请确认信息');
+      _showSuccess(l10n.uriParsedSuccessfully);
     } on Exception catch (e, stack) {
       CrashReportService.instance
           .reportError(e, stack, source: 'AddAuthScreen:parseUri');
-      _showError('URI 解析失败: $e');
+      _showError('${l10n.uriParseFailed}: $e');
     }
   }
 
@@ -128,6 +130,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
 
   /// 打开二维码扫描界面
   Future<void> _openQrScanner() async {
+    final l10n = AppLocalizations.of(context)!;
     final result = await Navigator.push<String>(
       context,
       MaterialPageRoute(
@@ -150,22 +153,23 @@ class _AddAuthScreenState extends State<AddAuthScreen>
 
         // 切换到手动输入 tab 让用户确认/编辑
         _tabController.animateTo(0);
-        _showSuccess('二维码解析成功，请确认信息');
+        _showSuccess(l10n.qrParsedSuccessfully);
       } on Exception catch (e, stack) {
         CrashReportService.instance
             .reportError(e, stack, source: 'AddAuthScreen:openQrScanner');
-        _showError('二维码解析失败: $e');
+        _showError('${l10n.qrParseFailed}: $e');
       }
     }
   }
 
   /// 保存
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     if (widget.dek == null ||
         widget.searchKey == null ||
         widget.deviceId == null) {
-      _showError('加密密钥未就绪');
+      _showError(l10n.encryptionKeysNotReady);
       return;
     }
 
@@ -217,21 +221,22 @@ class _AddAuthScreenState extends State<AddAuthScreen>
         _isLoading = false;
       });
       if (!mounted) return;
-      _showError('保存失败: $e');
+      _showError('${l10n.saveFailed}: $e');
     }
   }
 
   /// 批量导入
   Future<void> _batchImport() async {
+    final l10n = AppLocalizations.of(context)!;
     final text = _uriController.text.trim();
     if (text.isEmpty) {
-      _showError('请输入内容');
+      _showError(l10n.pleaseEnterContent);
       return;
     }
     if (widget.dek == null ||
         widget.searchKey == null ||
         widget.deviceId == null) {
-      _showError('加密密钥未就绪');
+      _showError(l10n.encryptionKeysNotReady);
       return;
     }
 
@@ -243,12 +248,13 @@ class _AddAuthScreenState extends State<AddAuthScreen>
     );
 
     if (imported.isNotEmpty) {
-      _showSuccess('成功导入 ${imported.length} 个验证器');
+      _showSuccess(
+          '${l10n.importedSuccessfullyPart1} ${imported.length} ${l10n.importedSuccessfullyPart2}');
       if (mounted) {
         Navigator.pop(context, true);
       }
     } else {
-      _showError('未找到有效的 otpauth:// URI');
+      _showError(l10n.noValidURIFound);
     }
   }
 
@@ -274,11 +280,12 @@ class _AddAuthScreenState extends State<AddAuthScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isEditing = widget.editCard != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? '编辑验证器' : '添加验证器'),
+        title: Text(isEditing ? l10n.editAuthenticator : l10n.addAuthenticator),
         actions: [
           if (_isLoading)
             const Center(
@@ -297,7 +304,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
           else
             TextButton(
               onPressed: _save,
-              child: const Text('保存'),
+              child: Text(l10n.save),
             ),
         ],
         bottom: isEditing
@@ -307,46 +314,50 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                 indicatorColor: const Color(0xFF6C63FF),
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.white60,
-                tabs: const [
-                  Tab(text: '手动输入', icon: Icon(Icons.edit, size: 18)),
-                  Tab(text: 'URI 导入', icon: Icon(Icons.link, size: 18)),
+                tabs: [
                   Tab(
-                      text: '扫码导入',
-                      icon: Icon(Icons.qr_code_scanner, size: 18)),
+                      text: l10n.manualInput,
+                      icon: const Icon(Icons.edit, size: 18)),
+                  Tab(
+                      text: l10n.uriImport,
+                      icon: const Icon(Icons.link, size: 18)),
+                  Tab(
+                      text: l10n.qrScanImport,
+                      icon: const Icon(Icons.qr_code_scanner, size: 18)),
                 ],
               ),
       ),
       body: Form(
         key: _formKey,
         child: isEditing
-            ? _buildManualInputForm()
+            ? _buildManualInputForm(l10n)
             : TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildManualInputForm(),
-                  _buildUriImportForm(),
-                  _buildQrScanTab(),
+                  _buildManualInputForm(l10n),
+                  _buildUriImportForm(l10n),
+                  _buildQrScanTab(l10n),
                 ],
               ),
       ),
     );
   }
 
-  Widget _buildManualInputForm() {
+  Widget _buildManualInputForm(AppLocalizations l10n) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         // 发行方
         TextFormField(
           controller: _issuerController,
-          decoration: const InputDecoration(
-            labelText: '发行方 *',
-            hintText: '例如: GitHub, Google, Binance',
-            prefixIcon: Icon(Icons.business),
+          decoration: InputDecoration(
+            labelText: l10n.issuerWithAsterisk,
+            hintText: l10n.issuerHint,
+            prefixIcon: const Icon(Icons.business),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return '请输入发行方名称';
+              return l10n.issuerRequired;
             }
             return null;
           },
@@ -357,14 +368,14 @@ class _AddAuthScreenState extends State<AddAuthScreen>
         // 账号
         TextFormField(
           controller: _accountController,
-          decoration: const InputDecoration(
-            labelText: '账号 *',
-            hintText: 'your@email.com',
-            prefixIcon: Icon(Icons.person_outline),
+          decoration: InputDecoration(
+            labelText: l10n.accountWithAsterisk,
+            hintText: l10n.usernameHint,
+            prefixIcon: const Icon(Icons.person_outline),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return '请输入账号';
+              return l10n.accountRequired;
             }
             return null;
           },
@@ -377,7 +388,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
           controller: _secretController,
           obscureText: !_showSecret,
           decoration: InputDecoration(
-            labelText: '密钥 (Secret) *',
+            labelText: l10n.secretWithAsterisk,
             hintText: 'JBSWY3DPEHPK3PXP',
             prefixIcon: const Icon(Icons.key),
             suffixIcon: IconButton(
@@ -393,13 +404,13 @@ class _AddAuthScreenState extends State<AddAuthScreen>
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return '请输入密钥';
+              return l10n.secretRequired;
             }
             // 基本的 Base32 验证
             final cleaned =
                 value.trim().toUpperCase().replaceAll(RegExp(r'\s'), '');
             if (!RegExp(r'^[A-Z2-7=]+$').hasMatch(cleaned)) {
-              return '密钥格式无效（仅支持 Base32 字符）';
+              return l10n.invalidSecretFormat;
             }
             return null;
           },
@@ -411,9 +422,9 @@ class _AddAuthScreenState extends State<AddAuthScreen>
         Theme(
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
-            title: const Text(
-              '高级选项',
-              style: TextStyle(
+            title: Text(
+              l10n.advancedOptions,
+              style: const TextStyle(
                 fontSize: 14,
                 color: Colors.white70,
               ),
@@ -426,9 +437,9 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
-                    const Expanded(
-                      child:
-                          Text('哈希算法', style: TextStyle(color: Colors.white70)),
+                    Expanded(
+                      child: Text(l10n.hashAlgorithm,
+                          style: const TextStyle(color: Colors.white70)),
                     ),
                     SegmentedButton<String>(
                       segments: const [
@@ -458,14 +469,16 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
-                    const Expanded(
-                      child: Text('验证码位数',
-                          style: TextStyle(color: Colors.white70)),
+                    Expanded(
+                      child: Text(l10n.verificationDigits,
+                          style: const TextStyle(color: Colors.white70)),
                     ),
                     SegmentedButton<int>(
-                      segments: const [
-                        ButtonSegment(value: 6, label: Text('6 位')),
-                        ButtonSegment(value: 8, label: Text('8 位')),
+                      segments: [
+                        ButtonSegment(
+                            value: 6, label: Text('6 ${l10n.digitSpan}')),
+                        ButtonSegment(
+                            value: 8, label: Text('8 ${l10n.digitSpan}')),
                       ],
                       selected: {_digits},
                       onSelectionChanged: (selected) {
@@ -486,9 +499,9 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
-                    const Expanded(
-                      child:
-                          Text('刷新周期', style: TextStyle(color: Colors.white70)),
+                    Expanded(
+                      child: Text(l10n.refreshPeriod,
+                          style: const TextStyle(color: Colors.white70)),
                     ),
                     SegmentedButton<int>(
                       segments: const [
@@ -517,10 +530,10 @@ class _AddAuthScreenState extends State<AddAuthScreen>
         // 备注
         TextFormField(
           controller: _notesController,
-          decoration: const InputDecoration(
-            labelText: '备注',
-            hintText: '额外信息...',
-            prefixIcon: Icon(Icons.notes),
+          decoration: InputDecoration(
+            labelText: l10n.notes,
+            hintText: l10n.notesHint,
+            prefixIcon: const Icon(Icons.notes),
             alignLabelWithHint: true,
           ),
           maxLines: 2,
@@ -530,7 +543,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
     );
   }
 
-  Widget _buildUriImportForm() {
+  Widget _buildUriImportForm(AppLocalizations l10n) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -540,30 +553,29 @@ class _AddAuthScreenState extends State<AddAuthScreen>
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Padding(
-            padding: EdgeInsets.all(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(Icons.info_outline,
+                    const Icon(Icons.info_outline,
                         color: Color(0xFF6C63FF), size: 20),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
-                      '导入方式',
-                      style: TextStyle(
+                      l10n.importMethod,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
-                  '粘贴 otpauth:// URI 或多个 URI（每行一个）来批量导入。\n'
-                  '格式: otpauth://totp/Label?secret=XXX&issuer=YYY',
-                  style: TextStyle(fontSize: 13, color: Colors.white60),
+                  l10n.uriImportDesc,
+                  style: const TextStyle(fontSize: 13, color: Colors.white60),
                 ),
               ],
             ),
@@ -581,7 +593,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
             suffixIcon: IconButton(
               icon: const Icon(Icons.paste),
               onPressed: _pasteFromClipboard,
-              tooltip: '从剪贴板粘贴',
+              tooltip: l10n.pasteFromClipboard,
             ),
             alignLabelWithHint: true,
           ),
@@ -597,7 +609,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               child: OutlinedButton.icon(
                 onPressed: _parseUri,
                 icon: const Icon(Icons.article_outlined, size: 18),
-                label: const Text('解析并编辑'),
+                label: Text(l10n.parseAndEdit),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF6C63FF),
                   side: const BorderSide(color: Color(0xFF6C63FF)),
@@ -610,7 +622,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               child: ElevatedButton.icon(
                 onPressed: _batchImport,
                 icon: const Icon(Icons.download, size: 18),
-                label: const Text('快速导入'),
+                label: Text(l10n.quickImport),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF00BFA6),
                   foregroundColor: Colors.white,
@@ -625,7 +637,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
   }
 
   /// 二维码扫描 Tab 页面
-  Widget _buildQrScanTab() {
+  Widget _buildQrScanTab(AppLocalizations l10n) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -659,9 +671,9 @@ class _AddAuthScreenState extends State<AddAuthScreen>
             ),
             const SizedBox(height: 32),
 
-            const Text(
-              '扫描 2FA 设置二维码',
-              style: TextStyle(
+            Text(
+              l10n.scanQRToSet,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
@@ -669,7 +681,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
             ),
             const SizedBox(height: 12),
             Text(
-              '使用相机扫描应用程序提供的\n二维码即可快速添加验证器',
+              l10n.scanQRDesc,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -685,9 +697,9 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               child: ElevatedButton.icon(
                 onPressed: _openQrScanner,
                 icon: const Icon(Icons.camera_alt, size: 22),
-                label: const Text(
-                  '开始扫描',
-                  style: TextStyle(
+                label: Text(
+                  l10n.startScanning,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -712,21 +724,21 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                 color: const Color(0xFF0F3460).withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Column(
+              child: Column(
                 children: [
                   _SupportItem(
                     icon: Icons.check_circle_outline,
-                    text: '支持 Google Authenticator 格式',
+                    text: l10n.supportGoogleAuth,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   _SupportItem(
                     icon: Icons.check_circle_outline,
-                    text: '支持 TOTP / HOTP 协议',
+                    text: l10n.supportTotpHotp,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   _SupportItem(
                     icon: Icons.check_circle_outline,
-                    text: '自动识别 otpauth:// URI',
+                    text: l10n.autoRecognizeURI,
                   ),
                 ],
               ),

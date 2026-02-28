@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../core/diagnostics/crash_report_service.dart';
 import '../../services/vault_service.dart';
 import '../../core/models/models.dart';
+import '../../l10n/app_localizations.dart';
 
 class AddPasswordScreen extends StatefulWidget {
   final VaultService vaultService;
@@ -83,11 +84,10 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
   }
 
   void _generatePassword() {
-    const chars =
-        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$%^&*';
-    final random = DateTime.now().millisecondsSinceEpoch;
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    final randomValue = DateTime.now().millisecondsSinceEpoch;
     final password = List.generate(16, (index) {
-      return chars[(random + index * 17) % chars.length];
+      return chars[(randomValue + index * 17) % chars.length];
     }).join();
 
     setState(() {
@@ -99,6 +99,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
   }
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -136,7 +137,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to save: $e'),
+          content: Text('${l10n.unknownError}: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -145,11 +146,12 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isEditing = widget.editCard != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Password' : 'Add Password'),
+        title: Text(isEditing ? l10n.editPassword : l10n.addPassword),
         actions: [
           if (_isLoading)
             const Center(
@@ -168,7 +170,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
           else
             TextButton(
               onPressed: _save,
-              child: const Text('Save'),
+              child: Text(l10n.save),
             ),
         ],
       ),
@@ -180,14 +182,14 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
             // Title
             TextFormField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title *',
-                hintText: 'e.g., Google, Netflix, Bank',
-                prefixIcon: Icon(Icons.label_outline),
+              decoration: InputDecoration(
+                labelText: l10n.titleWithAsterisk,
+                hintText: l10n.titleHint,
+                prefixIcon: const Icon(Icons.label_outline),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Title is required';
+                  return l10n.titleRequired;
                 }
                 return null;
               },
@@ -198,14 +200,14 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
             // Username
             TextFormField(
               controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Username / Email *',
-                hintText: 'your@email.com',
-                prefixIcon: Icon(Icons.person_outline),
+              decoration: InputDecoration(
+                labelText: l10n.usernameWithAsterisk,
+                hintText: l10n.usernameHint,
+                prefixIcon: const Icon(Icons.person_outline),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Username is required';
+                  return l10n.usernameRequired;
                 }
                 return null;
               },
@@ -219,7 +221,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
               obscureText: _obscurePassword,
               onChanged: _calculatePasswordStrength,
               decoration: InputDecoration(
-                labelText: 'Password *',
+                labelText: l10n.passwordWithAsterisk,
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -239,17 +241,17 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
                     IconButton(
                       icon: const Icon(Icons.refresh),
                       onPressed: _generatePassword,
-                      tooltip: 'Generate Password',
+                      tooltip: l10n.generatePassword,
                     ),
                   ],
                 ),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Password is required';
+                  return l10n.passwordRequired;
                 }
                 if (value.length < 6) {
-                  return 'Password must be at least 6 characters';
+                  return l10n.passwordTooShortShort;
                 }
                 return null;
               },
@@ -273,10 +275,10 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
                 const SizedBox(width: 12),
                 Text(
                   _passwordStrength < 0.4
-                      ? 'Weak'
+                      ? l10n.weak
                       : _passwordStrength < 0.7
-                          ? 'Medium'
-                          : 'Strong',
+                          ? l10n.medium
+                          : l10n.strong,
                   style: TextStyle(
                     fontSize: 12,
                     color: _getStrengthColor(),
@@ -289,10 +291,10 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
             // URL
             TextFormField(
               controller: _urlController,
-              decoration: const InputDecoration(
-                labelText: 'Website URL',
+              decoration: InputDecoration(
+                labelText: l10n.websiteURL,
                 hintText: 'https://example.com',
-                prefixIcon: Icon(Icons.link),
+                prefixIcon: const Icon(Icons.link),
               ),
               keyboardType: TextInputType.url,
               textInputAction: TextInputAction.next,
@@ -302,10 +304,10 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
             // Notes
             TextFormField(
               controller: _notesController,
-              decoration: const InputDecoration(
-                labelText: 'Notes',
-                hintText: 'Additional information...',
-                prefixIcon: Icon(Icons.notes),
+              decoration: InputDecoration(
+                labelText: l10n.notes,
+                hintText: l10n.notesHint,
+                prefixIcon: const Icon(Icons.notes),
                 alignLabelWithHint: true,
               ),
               maxLines: 3,

@@ -5,6 +5,7 @@ import '../../services/auth_service.dart';
 import '../../core/models/auth_card.dart';
 import '../../core/crypto/totp_generator.dart';
 import 'add_auth_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 验证器详情页
 ///
@@ -74,11 +75,12 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
   }
 
   void _copyToClipboard(String text, String label) {
+    final l10n = AppLocalizations.of(context)!;
     Clipboard.setData(ClipboardData(text: text));
     HapticFeedback.lightImpact();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$label 已复制到剪贴板'),
+        content: Text('$label ${l10n.copiedToClipboard}'),
         backgroundColor: const Color(0xFF00BFA6),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
@@ -93,19 +95,20 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
 
   /// 导出为文件 (otpauth:// URI)
   void _exportAsText() {
+    final l10n = AppLocalizations.of(context)!;
     final uri = widget.payload.toOtpAuthUri();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('导出 URI'),
+        title: Text(l10n.exportURI),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '⚠️ 此 URI 包含密钥，请安全保管',
-              style: TextStyle(color: Colors.orange, fontSize: 13),
+            Text(
+              l10n.exportWarning,
+              style: const TextStyle(color: Colors.orange, fontSize: 13),
             ),
             const SizedBox(height: 12),
             Container(
@@ -128,7 +131,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton.icon(
             onPressed: () {
@@ -136,7 +139,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
               Navigator.pop(context);
             },
             icon: const Icon(Icons.copy, size: 16),
-            label: const Text('复制'),
+            label: Text(l10n.copy),
           ),
         ],
       ),
@@ -145,18 +148,19 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
 
   /// 导出为二维码
   void _exportAsQrCode() {
+    final l10n = AppLocalizations.of(context)!;
     final uri = widget.payload.toOtpAuthUri();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('二维码导出'),
+        title: Text(l10n.qrCodeExport),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              '⚠️ 此二维码包含密钥，请勿泄露！',
-              style: TextStyle(color: Colors.orange, fontSize: 13),
+            Text(
+              l10n.qrWarning,
+              style: const TextStyle(color: Colors.orange, fontSize: 13),
             ),
             const SizedBox(height: 16),
             // 简易二维码展示（使用文本图案模拟）
@@ -200,7 +204,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              '提示: 可使用其他验证器扫描此二维码导入',
+              l10n.qrScanTip,
               style: TextStyle(
                   fontSize: 12, color: Colors.white.withValues(alpha: 0.5)),
               textAlign: TextAlign.center,
@@ -210,7 +214,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton.icon(
             onPressed: () {
@@ -218,7 +222,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
               Navigator.pop(context);
             },
             icon: const Icon(Icons.copy, size: 16),
-            label: const Text('复制 URI'),
+            label: Text(l10n.copyURI),
           ),
         ],
       ),
@@ -248,25 +252,26 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
 
   /// 删除
   Future<void> _deleteEntry() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除验证器'),
+        title: Text(l10n.deleteAuthenticatorLabel),
         content: Text(
-          '确定要删除 "${widget.payload.issuer}" 的验证器吗？\n\n'
-          '⚠️ 删除后将无法恢复，请确保你已在对应网站禁用了二步验证或有其他备份',
+          '${l10n.deleteAuthenticatorConfirmPart1} "${widget.payload.issuer}" ${l10n.deleteAuthenticatorConfirmPart2}\n\n'
+          '⚠️ ${l10n.deleteAuthenticatorWarning}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red.withValues(alpha: 0.8),
             ),
-            child: const Text('删除'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -285,10 +290,12 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            widget.payload.issuer.isNotEmpty ? widget.payload.issuer : '验证器详情'),
+        title: Text(widget.payload.issuer.isNotEmpty
+            ? widget.payload.issuer
+            : l10n.authenticatorDetails),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -308,36 +315,38 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'edit',
                 child: ListTile(
-                  leading: Icon(Icons.edit, size: 20),
-                  title: Text('编辑'),
+                  leading: const Icon(Icons.edit, size: 20),
+                  title: Text(l10n.edit),
                   dense: true,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'export_text',
                 child: ListTile(
-                  leading: Icon(Icons.text_snippet, size: 20),
-                  title: Text('导出为文件'),
+                  leading: const Icon(Icons.text_snippet, size: 20),
+                  title: Text(l10n.exportAsFile),
                   dense: true,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'export_qr',
                 child: ListTile(
-                  leading: Icon(Icons.qr_code, size: 20),
-                  title: Text('导出为二维码'),
+                  leading: const Icon(Icons.qr_code, size: 20),
+                  title: Text(l10n.exportAsQrCode),
                   dense: true,
                 ),
               ),
               const PopupMenuDivider(),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'delete',
                 child: ListTile(
-                  leading: Icon(Icons.delete, color: Colors.red, size: 20),
-                  title: Text('删除', style: TextStyle(color: Colors.red)),
+                  leading:
+                      const Icon(Icons.delete, color: Colors.red, size: 20),
+                  title: Text(l10n.delete,
+                      style: const TextStyle(color: Colors.red)),
                   dense: true,
                 ),
               ),
@@ -398,7 +407,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                   const SizedBox(height: 20),
                   // 验证码
                   GestureDetector(
-                    onTap: () => _copyToClipboard(_currentCode, '验证码'),
+                    onTap: () => _copyToClipboard(_currentCode, l10n.code),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -471,7 +480,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '秒后刷新',
+                        l10n.refreshInSeconds,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.white.withValues(alpha: 0.5),
@@ -486,7 +495,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
           const SizedBox(height: 24),
 
           // ====== 详情信息 ======
-          _buildSectionTitle('详细信息'),
+          _buildSectionTitle(l10n.detailsLabel),
           Card(
             elevation: 0,
             color: const Color(0xFF16213E),
@@ -495,32 +504,36 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
             ),
             child: Column(
               children: [
-                _buildInfoTile('发行方', widget.payload.issuer, Icons.business),
                 _buildInfoTile(
-                    '账号', widget.payload.account, Icons.person_outline),
-                _buildInfoTile('算法', widget.payload.algorithm, Icons.settings),
-                _buildInfoTile('位数', '${widget.payload.digits} 位', Icons.pin),
+                    l10n.issuer, widget.payload.issuer, Icons.business),
                 _buildInfoTile(
-                  '刷新周期',
-                  '${widget.payload.period} 秒',
+                    l10n.account, widget.payload.account, Icons.person_outline),
+                _buildInfoTile(
+                    l10n.algorithm, widget.payload.algorithm, Icons.settings),
+                _buildInfoTile(l10n.digits,
+                    '${widget.payload.digits} ${l10n.digitSpan}', Icons.pin),
+                _buildInfoTile(
+                  l10n.refreshPeriod,
+                  '${widget.payload.period} ${l10n.secondSpan}',
                   Icons.timer,
                 ),
                 if (widget.payload.notes != null &&
                     widget.payload.notes!.isNotEmpty)
-                  _buildInfoTile('备注', widget.payload.notes!, Icons.notes),
+                  _buildInfoTile(
+                      l10n.notes, widget.payload.notes!, Icons.notes),
               ],
             ),
           ),
           const SizedBox(height: 24),
 
           // ====== 导出按钮 ======
-          _buildSectionTitle('导出'),
+          _buildSectionTitle(l10n.exportLabel),
           Row(
             children: [
               Expanded(
                 child: _buildActionButton(
                   icon: Icons.text_snippet_outlined,
-                  label: '导出文本',
+                  label: l10n.exportText,
                   color: const Color(0xFF6C63FF),
                   onPressed: _exportAsText,
                 ),
@@ -529,7 +542,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
               Expanded(
                 child: _buildActionButton(
                   icon: Icons.qr_code,
-                  label: '导出二维码',
+                  label: l10n.exportQrCodeButton,
                   color: const Color(0xFF00BFA6),
                   onPressed: _exportAsQrCode,
                 ),
@@ -539,10 +552,10 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
           const SizedBox(height: 24),
 
           // ====== 危险操作 ======
-          _buildSectionTitle('危险操作'),
+          _buildSectionTitle(l10n.dangerZone),
           _buildActionButton(
             icon: Icons.delete_forever,
-            label: '删除此验证器',
+            label: l10n.deleteThisAuthenticator,
             color: Colors.red.withValues(alpha: 0.8),
             onPressed: _deleteEntry,
           ),

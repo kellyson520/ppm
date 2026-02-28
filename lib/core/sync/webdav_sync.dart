@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 import '../diagnostics/crash_report_service.dart';
+import '../crypto/key_manager.dart';
 import '../models/models.dart';
 import '../events/event_store.dart';
 import '../crdt/crdt_merger.dart';
@@ -23,6 +24,7 @@ import '../crdt/crdt_merger.dart';
 class WebDavSyncManager {
   final List<WebDavNode> _nodes;
   final EventStore _eventStore;
+  final KeyManager _keyManager;
 
   // Sync state
   bool _isSyncing = false;
@@ -31,9 +33,11 @@ class WebDavSyncManager {
   WebDavSyncManager({
     required List<WebDavNode> nodes,
     required EventStore eventStore,
+    required KeyManager keyManager,
     CrdtMerger? crdtMerger,
   })  : _nodes = nodes,
-        _eventStore = eventStore;
+        _eventStore = eventStore,
+        _keyManager = keyManager;
 
   /// Sync progress stream
   Stream<SyncProgress> get syncProgress => _syncController.stream;
@@ -136,15 +140,19 @@ class WebDavSyncManager {
       final remoteManifest = await _getRemoteManifest(client);
 
       // Get local state
-      final _ = await _eventStore.getLatestHlc();
+      final latestLocalHlc = await _eventStore.getLatestHlc();
       final unsyncedEvents = await _eventStore.getUnsyncedEvents();
 
-      // Download remote events
+      // Download remote events only if remote has newer data
       final eventsToDownload = <PasswordEvent>[];
       if (remoteManifest != null) {
-        eventsToDownload.addAll(
-          await _downloadEvents(client, remoteManifest),
-        );
+        // Compare manifests
+        if (latestLocalHlc == null ||
+            remoteManifest.lastModified.compareTo(latestLocalHlc) > 0) {
+          eventsToDownload.addAll(
+            await _downloadEvents(client, remoteManifest),
+          );
+        }
       }
 
       // Merge events
@@ -360,10 +368,10 @@ class WebDavSyncManager {
     }
   }
 
-  /// Get device ID
+  /// Get device ID from KeyManager
   Future<String> _getDeviceId() async {
-    // This should be retrieved from KeyManager
-    return 'unknown-device';
+    final deviceId = await _keyManager.getDeviceId();
+    return deviceId ?? 'unknown-device';
   }
 
   /// Dispose
