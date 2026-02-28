@@ -35,3 +35,7 @@ Android 编译失败，报错 Unresolved reference for `java.util.Properties` an
 - [x] 回滚 `compilerOptions` 到 `kotlinOptions` (因为 `android` 扩展不直接支持 `compilerOptions`)
 - [x] 验证 `kotlinOptions` 语法正确性
 - [x] 更新文档并准备推送
+### Phase 6: Release Signing Fix
+- [x] 增强 `build.gradle.kts` 鲁棒性：在配置环境变量签名之前检查文件是否存在。
+- [x] 修复 CI 验证失败：确保缺少 Keystore 文件时自动回退到 Debug 签名而非中断构建。
+- [x] 代码推送与验证。

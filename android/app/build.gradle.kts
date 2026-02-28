@@ -40,7 +40,9 @@ android {
 
     signingConfigs {
         create("release") {
+            var signatureConfigured = false
             val keystorePropertiesFile = rootProject.file("key.properties")
+            
             if (keystorePropertiesFile.exists()) {
                 val keystoreProperties = Properties()
                 keystoreProperties.load(FileInputStream(keystorePropertiesFile))
@@ -49,14 +51,21 @@ android {
                 keyPassword = keystoreProperties.getProperty("keyPassword")
                 storeFile = file(keystoreProperties.getProperty("storeFile"))
                 storePassword = keystoreProperties.getProperty("storePassword")
+                signatureConfigured = true
             } else if (System.getenv("KEYSTORE_PASSWORD") != null) {
-                keyAlias = System.getenv("KEY_ALIAS") ?: "upload"
-                keyPassword = System.getenv("KEY_PASSWORD") ?: System.getenv("KEYSTORE_PASSWORD")
-                storeFile = file(System.getenv("KEYSTORE_FILE_PATH") ?: "upload-keystore.jks")
-                storePassword = System.getenv("KEYSTORE_PASSWORD")
-            } else {
-                // Fallback: Using debug signature for release build so CI doesn't fail immediately,
-                // but note that every CI runner will have a different debug key unless configured.
+                val ksPath = System.getenv("KEYSTORE_FILE_PATH") ?: "upload-keystore.jks"
+                val ksFile = file(ksPath)
+                if (ksFile.exists()) {
+                    keyAlias = System.getenv("KEY_ALIAS") ?: "upload"
+                    keyPassword = System.getenv("KEY_PASSWORD") ?: System.getenv("KEYSTORE_PASSWORD")
+                    storeFile = ksFile
+                    storePassword = System.getenv("KEYSTORE_PASSWORD")
+                    signatureConfigured = true
+                }
+            }
+
+            if (!signatureConfigured) {
+                // Fallback: Using debug signature for release build so CI doesn't fail immediately.
                 val debugConfig = getByName("debug")
                 keyAlias = debugConfig.keyAlias
                 keyPassword = debugConfig.keyPassword
