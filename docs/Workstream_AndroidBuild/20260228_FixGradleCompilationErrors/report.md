@@ -1,24 +1,20 @@
-# Task Report: Fix Android Gradle Compilation & Signing Errors (v3)
+# Task Report: Fix Android Gradle Compilation & Signing Errors (v4)
 
 ## Summary
-在解决了 DSL 编译错误后，CI 构建在 `validateSigningRelease` 阶段由于找不到指定的 Keystore 文件而失败。这是因为 CI 环境配置了签名密码环境变量，触发了 `build.gradle.kts` 中的签名加载逻辑，但实际的 `.jks` 文件并未就绪。
-
-本次修复增强了签名配置的鲁棒性，确保在文件缺失时能平滑回退，不中断构建流水线。
+在之前的修复中，我们通过增加文件存在性检查确保了构建的鲁棒性。为了进一步自动化发布流程，我现已启用了 CI 脚本中的 Keystore 自动解码功能。
 
 ## Changes
-1. **增强签名校验逻辑**:
-   - 重构了 `android/app/build.gradle.kts` 中的 `signingConfigs` 块。
-   - 新增了文件存在性检查：仅当 `key.properties` 存在，或者环境变量指定的 Keystore 文件实际存在于磁盘时，才应用正式签名配置。
-   - 实现自动回退：若上述条件均不满足，系统将自动回退到 `debug` 签名配置，确保 CI 能够完成 APK 生成。
+1. **启用 CI 解码步骤**:
+   - 在 `.github/workflows/ci.yml` 中取消了 `Decode Keystore` 步骤的注释。
+   - 当 GitHub Secrets 中配置了 `UPLOAD_KEYSTORE_BASE64` 时，系统将自动还原 `.jks` 文件并应用正式签名。
 
-2. **保留之前的 DSL 修复**:
-   - 继续使用 `kotlinOptions` 适配 AGP。
-   - 保留 `java.util.Properties` 等必要导入。
+2. **鲁棒性保留**:
+   - 如果 Secrets 未配置或为空，由于 `build.gradle.kts` 中的防护代码，构建仍然会回退到 `debug` 模式，不会报错。
 
 ## Verification Results
-- **本地验证**: 语法检查通过。
-- **CI 预期**: 即使未在 GitHub Secrets 中配置 `UPLOAD_KEYSTORE_BASE64`（或未启用解码步骤），`flutter build apk --release` 也能通过使用 debug 签名成功完成。
+- **CI 下一步**: 只要用户在 GitHub 后台添加了正确的 Secret，即可输出正式签名的 APK。
 
-## Impact
-- 解决了 CI 流程中 `app:validateSigningRelease` 任务失败导致的构建中断。
-- 允许用户在正式签名准备好之前，依然能通过 CI 获取预览版 APK。
+## Instructions to User
+1. 在本地运行以下命令生成 Base64：
+   `[Convert]::ToBase64String([IO.File]::ReadAllBytes("e:\FQ\ppm\upload-keystore.jks")) | clip`
+2. 在 GitHub 仓库 Settings -> Secrets -> Actions 添加名为 `UPLOAD_KEYSTORE_BASE64` 的 Secret，粘贴剪贴板内容。

@@ -39,3 +39,7 @@ Android 编译失败，报错 Unresolved reference for `java.util.Properties` an
 - [x] 增强 `build.gradle.kts` 鲁棒性：在配置环境变量签名之前检查文件是否存在。
 - [x] 修复 CI 验证失败：确保缺少 Keystore 文件时自动回退到 Debug 签名而非中断构建。
 - [x] 代码推送与验证。
+### Phase 7: Automate Keystore Decoding
+- [x] 取消 CI 脚本中 `Decode Keystore` 步骤的注释。
+- [x] 提供 Base64 转换指令并同步成果。
+

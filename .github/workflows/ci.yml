@@ -55,8 +55,8 @@ jobs:
         # The upload-keystore.jks needs to be decoded if you upload it as a base64 secret.
         # Uncomment the next step in your project and add the 'UPLOAD_KEYSTORE_BASE64' secret
         # to properly sign the release APKs in CI.
-      #- name: Decode Keystore
-      #  run: echo "${{ secrets.UPLOAD_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+      - name: Decode Keystore
+        run: echo "${{ secrets.UPLOAD_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
 
       - name: Build Android AppBundle
         run: flutter build appbundle --release
