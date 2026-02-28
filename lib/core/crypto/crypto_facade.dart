@@ -9,10 +9,10 @@ import 'crypto_policy.dart';
 import 'providers/hkdf_provider.dart';
 
 /// 密码学门面（Facade）
-/// 
+///
 /// 供业务层（Vault/Sync/Event）调用的稳定 API。
 /// 业务代码**只依赖此类**，不直接依赖具体算法实现。
-/// 
+///
 /// 功能：
 /// - 对称加密/解密（通过 CiphertextEnvelope 自描述格式）
 /// - 密钥派生（KDF）
@@ -83,12 +83,13 @@ class CryptoFacade {
       throw StateError('KDF "${suite.kdfId}" 未注册');
     }
 
-    final effectiveParams = params ?? KdfParams(
-      kdfId: suite.kdfId,
-      memoryKB: 65536,
-      iterations: 3,
-      parallelism: 4,
-    );
+    final effectiveParams = params ??
+        KdfParams(
+          kdfId: suite.kdfId,
+          memoryKB: 65536,
+          iterations: 3,
+          parallelism: 4,
+        );
 
     return kdf.deriveKey(
       password: password,
@@ -104,7 +105,7 @@ class CryptoFacade {
   Uint8List generateDEK() => generateRandomBytes(32);
 
   /// 加密数据（返回 CiphertextEnvelope）
-  /// 
+  ///
   /// 使用默认套件加密。返回的 Envelope 包含算法元数据，
   /// 使密文自描述、可向后兼容。
   CiphertextEnvelope encrypt(
@@ -146,7 +147,7 @@ class CryptoFacade {
   }
 
   /// 解密数据（从 CiphertextEnvelope）
-  /// 
+  ///
   /// 自动根据 Envelope 中的 suiteId/aeadId 选择算法。
   /// 防降级：校验套件是否在允许列表中。
   Uint8List decrypt(CiphertextEnvelope envelope, Uint8List key) {
@@ -176,7 +177,9 @@ class CryptoFacade {
   }
 
   /// 加密字符串（便捷方法）
-  CiphertextEnvelope encryptString(String plaintext, Uint8List key, {
+  CiphertextEnvelope encryptString(
+    String plaintext,
+    Uint8List key, {
     Map<String, String>? aadMeta,
   }) {
     return encrypt(
@@ -295,7 +298,8 @@ class CryptoFacade {
   }) {
     final tokens = _tokenize(plaintext.toLowerCase(), minTokenLength);
     return tokens.map((token) {
-      final hmacResult = hmacSha256(searchKey, Uint8List.fromList(utf8.encode(token)));
+      final hmacResult =
+          hmacSha256(searchKey, Uint8List.fromList(utf8.encode(token)));
       return base64Encode(hmacResult);
     }).toList();
   }
@@ -310,8 +314,8 @@ class CryptoFacade {
         if (word.length > minLength) {
           for (int i = 0; i <= word.length - minLength; i++) {
             for (int len = minLength;
-                 len <= min(word.length - i, minLength + 3);
-                 len++) {
+                len <= min(word.length - i, minLength + 3);
+                len++) {
               tokens.add(word.substring(i, i + len));
             }
           }

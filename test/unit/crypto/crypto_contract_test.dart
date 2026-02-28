@@ -4,6 +4,7 @@
 /// 通用性：即使底层从 AES-GCM 换成 XChaCha20-Poly1305，
 ///         只要满足相同的加解密契约，这些测试不需任何修改。
 library;
+
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';

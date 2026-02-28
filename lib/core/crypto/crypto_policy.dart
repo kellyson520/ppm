@@ -2,7 +2,7 @@ import 'crypto_core.dart';
 import 'crypto_registry.dart';
 
 /// 密码学策略引擎
-/// 
+///
 /// 职责：
 /// 1. 选择默认加密套件
 /// 2. 校验解密时的套件可用性（防降级攻击）
@@ -67,11 +67,11 @@ class CryptoPolicyEngine {
   // ==================== 解密校验 ====================
 
   /// 校验套件是否允许解密
-  /// 
+  ///
   /// 防降级攻击：
   /// 1. 套件必须在 AllowedSuites 集合中
   /// 2. 套件安全等级不低于最低可接受等级
-  /// 
+  ///
   /// 返回 null 表示通过，否则返回拒绝原因
   String? validateForDecryption(String suiteId) {
     // 检查是否在允许列表
@@ -110,10 +110,10 @@ class CryptoPolicyEngine {
 
   /// 获取策略摘要（用于调试/审计）
   Map<String, dynamic> get policySummary => {
-    'defaultSuiteId': _defaultSuiteId,
-    'minSecurityLevel': _minSecurityLevel,
-    'allowedSuiteCount': _registry.allowedSuiteIds.length,
-    'registeredAeadCount': _registry.aeadProviderIds.length,
-    'registeredKdfCount': _registry.kdfProviderIds.length,
-  };
+        'defaultSuiteId': _defaultSuiteId,
+        'minSecurityLevel': _minSecurityLevel,
+        'allowedSuiteCount': _registry.allowedSuiteIds.length,
+        'registeredAeadCount': _registry.aeadProviderIds.length,
+        'registeredKdfCount': _registry.kdfProviderIds.length,
+      };
 }

@@ -6,6 +6,7 @@ import '../../core/models/auth_card.dart';
 import '../../core/crypto/totp_generator.dart';
 import 'add_auth_screen.dart';
 import '../../l10n/app_localizations.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 /// 验证器详情页
 ///
@@ -163,43 +164,17 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
               style: const TextStyle(color: Colors.orange, fontSize: 13),
             ),
             const SizedBox(height: 16),
-            // 简易二维码展示（使用文本图案模拟）
-            // 实际生产中应使用 qr_flutter 套件
             Container(
-              width: 200,
-              height: 200,
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.qr_code_2,
-                        size: 100, color: Colors.black87),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        widget.payload.issuer,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    const Text(
-                      '需集成 qr_flutter',
-                      style: TextStyle(fontSize: 9, color: Colors.black38),
-                    ),
-                  ],
-                ),
+              child: QrImageView(
+                data: uri,
+                version: QrVersions.auto,
+                size: 200.0,
+                backgroundColor: Colors.white,
               ),
             ),
             const SizedBox(height: 12),

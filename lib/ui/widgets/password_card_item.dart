@@ -4,11 +4,13 @@ import '../../l10n/app_localizations.dart';
 
 class PasswordCardItem extends StatelessWidget {
   final PasswordCard card;
+  final PasswordPayload? payload;
   final VoidCallback onTap;
 
   const PasswordCardItem({
     super.key,
     required this.card,
+    this.payload,
     required this.onTap,
   });
 
@@ -66,7 +68,8 @@ class PasswordCardItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'ID: ${card.cardId.substring(0, 8)}...',
+                      payload?.username ??
+                          'ID: ${card.cardId.substring(0, 8)}...',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.white.withValues(alpha: 0.5),
@@ -88,9 +91,10 @@ class PasswordCardItem extends StatelessWidget {
   }
 
   String _getCardTitle(BuildContext context) {
+    if (payload != null && payload!.title.isNotEmpty) {
+      return payload!.title;
+    }
     final l10n = AppLocalizations.of(context)!;
-    // In a real implementation, we would decrypt the title
-    // For now, return a localized placeholder
     return l10n.passwordEntry;
   }
 }

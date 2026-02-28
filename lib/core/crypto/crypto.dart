@@ -1,5 +1,5 @@
 /// 密码学模块 - 统一导出
-/// 
+///
 /// 架构层次：
 /// 1. crypto_core.dart    - 接口与数据格式（Kdf, AeadCipher, CiphertextEnvelope...）
 /// 2. providers/           - 算法实现（AES-GCM, PBKDF2, HKDF...）

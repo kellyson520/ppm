@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 /// 密码学模块核心接口与数据格式
-/// 
+///
 /// 业务层只依赖此文件中的接口，不依赖具体算法实现。
 /// 通过依赖注入 / 注册表加载具体 Provider。
 
@@ -40,11 +40,11 @@ class KdfParams {
   });
 
   Map<String, dynamic> toJson() => {
-    'kdfId': kdfId,
-    'memoryKB': memoryKB,
-    'iterations': iterations,
-    'parallelism': parallelism,
-  };
+        'kdfId': kdfId,
+        'memoryKB': memoryKB,
+        'iterations': iterations,
+        'parallelism': parallelism,
+      };
 
   factory KdfParams.fromJson(Map<String, dynamic> json) {
     return KdfParams(
@@ -126,7 +126,7 @@ abstract interface class Rng {
 // ==================== 密文封装格式 ====================
 
 /// 统一密文封装格式（Ciphertext Envelope）
-/// 
+///
 /// 所有加密产物使用此自描述格式，包含：
 /// - schemaVersion: 封装格式版本
 /// - suiteId: 算法套件 ID
@@ -177,16 +177,16 @@ class CiphertextEnvelope {
   });
 
   Map<String, dynamic> toJson() => {
-    'schemaVersion': schemaVersion,
-    'suiteId': suiteId,
-    'aeadId': aeadId,
-    if (kdfParams != null) 'kdfParams': kdfParams!.toJson(),
-    if (keyInfo != null) 'keyInfo': keyInfo!.toJson(),
-    'nonce': _bytesToBase64(nonce),
-    'ciphertext': _bytesToBase64(ciphertext),
-    'authTag': _bytesToBase64(authTag),
-    if (aadMeta != null) 'aadMeta': aadMeta,
-  };
+        'schemaVersion': schemaVersion,
+        'suiteId': suiteId,
+        'aeadId': aeadId,
+        if (kdfParams != null) 'kdfParams': kdfParams!.toJson(),
+        if (keyInfo != null) 'keyInfo': keyInfo!.toJson(),
+        'nonce': _bytesToBase64(nonce),
+        'ciphertext': _bytesToBase64(ciphertext),
+        'authTag': _bytesToBase64(authTag),
+        if (aadMeta != null) 'aadMeta': aadMeta,
+      };
 
   factory CiphertextEnvelope.fromJson(Map<String, dynamic> json) {
     return CiphertextEnvelope(
@@ -229,9 +229,9 @@ class KeyVersionInfo {
   });
 
   Map<String, dynamic> toJson() => {
-    'dekVersion': dekVersion,
-    if (kekBinding != null) 'kekBinding': kekBinding,
-  };
+        'dekVersion': dekVersion,
+        if (kekBinding != null) 'kekBinding': kekBinding,
+      };
 
   factory KeyVersionInfo.fromJson(Map<String, dynamic> json) {
     return KeyVersionInfo(
@@ -244,7 +244,7 @@ class KeyVersionInfo {
 // ==================== 算法套件 ====================
 
 /// 算法套件定义
-/// 
+///
 /// 将 AEAD + KDF + (可选的 KeyWrap + Signer) 组合为一个套件
 class CryptoSuite {
   /// 套件 ID，例如 "ZTDPM_SUITE_2026_01"
@@ -279,14 +279,14 @@ class CryptoSuite {
   });
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'displayName': displayName,
-    'aeadId': aeadId,
-    'kdfId': kdfId,
-    if (keyWrapId != null) 'keyWrapId': keyWrapId,
-    if (signerId != null) 'signerId': signerId,
-    'securityLevel': securityLevel,
-  };
+        'id': id,
+        'displayName': displayName,
+        'aeadId': aeadId,
+        'kdfId': kdfId,
+        if (keyWrapId != null) 'keyWrapId': keyWrapId,
+        if (signerId != null) 'signerId': signerId,
+        'securityLevel': securityLevel,
+      };
 
   factory CryptoSuite.fromJson(Map<String, dynamic> json) {
     return CryptoSuite(

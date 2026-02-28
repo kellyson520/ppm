@@ -3,7 +3,7 @@ import 'providers/aes_gcm_provider.dart';
 import 'providers/pbkdf2_provider.dart';
 
 /// 密码学 Provider 注册表
-/// 
+///
 /// 管理多个算法 Provider 的注册与查找。
 /// 支持算法热插拔：新增算法只需注册新 Provider，无需改动业务代码。
 class CryptoRegistry {

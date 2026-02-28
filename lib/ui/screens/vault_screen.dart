@@ -40,6 +40,7 @@ class _VaultScreenState extends State<VaultScreen> {
   final _searchController = TextEditingController();
   List<PasswordCard> _cards = [];
   List<PasswordCard> _filteredCards = [];
+  Map<String, PasswordPayload> _payloads = {};
   bool _isLoading = true;
   VaultStats? _stats;
 
@@ -65,9 +66,18 @@ class _VaultScreenState extends State<VaultScreen> {
       final cards = await widget.vaultService.getAllCards();
       final stats = await widget.vaultService.getStats();
 
+      final Map<String, PasswordPayload> payloads = {};
+      for (final card in cards) {
+        final payload = await widget.vaultService.decryptCard(card);
+        if (payload != null) {
+          payloads[card.cardId] = payload;
+        }
+      }
+
       setState(() {
         _cards = cards;
         _filteredCards = cards;
+        _payloads = payloads;
         _stats = stats;
         _isLoading = false;
       });
@@ -291,8 +301,10 @@ class _VaultScreenState extends State<VaultScreen> {
                         itemCount: _filteredCards.length,
                         itemBuilder: (context, index) {
                           final card = _filteredCards[index];
+                          final payload = _payloads[card.cardId];
                           return PasswordCardItem(
                             card: card,
+                            payload: payload,
                             onTap: () => _navigateToPasswordDetail(card),
                           );
                         },

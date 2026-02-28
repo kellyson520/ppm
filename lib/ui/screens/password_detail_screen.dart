@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/vault_service.dart';
 import '../../core/models/models.dart';
 import 'add_password_screen.dart';
@@ -171,8 +172,18 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
               label: l10n.website,
               value: payload.url!,
               onCopy: () => _copyToClipboard(payload.url!, l10n.website),
-              onLaunch: () {
-                // TODO: Launch URL
+              onLaunch: () async {
+                final uri = Uri.tryParse(payload.url!);
+                if (uri != null) {
+                  try {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } on Exception catch (e) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${l10n.error}: $e')),
+                    );
+                  }
+                }
               },
             ),
             const SizedBox(height: 12),

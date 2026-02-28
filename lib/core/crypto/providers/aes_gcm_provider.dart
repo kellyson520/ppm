@@ -3,7 +3,7 @@ import 'package:pointycastle/export.dart';
 import '../crypto_core.dart';
 
 /// AES-256-GCM AEAD 算法实现
-/// 
+///
 /// 特性：
 /// - 256-bit 密钥
 /// - 96-bit (12字节) nonce

@@ -3,13 +3,13 @@ import 'dart:typed_data';
 import 'package:synchronized/synchronized.dart';
 
 /// Secure Buffer for sensitive data
-/// 
+///
 /// Features:
 /// - Automatic memory wiping after TTL
 /// - Read/Write locking for thread safety
 /// - DoD 5220.22-M compliant data destruction
 /// - Access resets TTL timer
-/// 
+///
 /// Usage:
 /// ```dart
 /// final buffer = SecureBuffer(ttl: Duration(seconds: 30));
@@ -48,10 +48,10 @@ class SecureBuffer {
   Future<Uint8List?> access() async {
     return await _lock.synchronized(() {
       if (_sensitiveData == null) return null;
-      
+
       _resetTimer();
       _lastAccess = DateTime.now();
-      
+
       // Return a copy to prevent external modification
       return Uint8List.fromList(_sensitiveData!);
     });
@@ -95,7 +95,7 @@ class SecureBuffer {
       _sensitiveData!.fillRange(0, _sensitiveData!.length, 0xFF);
       // Pass 3: Write 0x00
       _sensitiveData!.fillRange(0, _sensitiveData!.length, 0x00);
-      
+
       _sensitiveData = null;
     }
     _wipeTimer?.cancel();
@@ -116,7 +116,7 @@ class SecureBuffer {
 }
 
 /// Password Input Buffer - Specialized for password entry
-/// 
+///
 /// Automatically masks input and provides secure handling
 class PasswordInputBuffer {
   final List<int> _chars = [];
@@ -185,7 +185,7 @@ class PasswordInputBuffer {
 }
 
 /// Secure String - Immutable secure string container
-/// 
+///
 /// Automatically wipes after TTL or when disposed
 class SecureString {
   final SecureBuffer _buffer;
@@ -228,7 +228,7 @@ class SecureString {
 }
 
 /// Memory pressure handler
-/// 
+///
 /// Wipes all secure buffers when memory pressure is detected
 class MemoryPressureHandler {
   static final List<SecureBuffer> _buffers = [];

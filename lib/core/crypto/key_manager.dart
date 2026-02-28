@@ -21,6 +21,7 @@ class KeyManager {
   static const String _argonParamsKeyName = 'ztd_argon_params';
   static const String _searchKeyName = 'ztd_search_key';
   static const String _deviceIdKeyName = 'ztd_device_id';
+  static const String _bioPwdKeyName = 'ztd_bio_pwd';
 
   final FlutterSecureStorage _secureStorage;
   final CryptoService _cryptoService;
@@ -333,6 +334,7 @@ class KeyManager {
     await _secureStorage.delete(key: _argonParamsKeyName);
     await _secureStorage.delete(key: _searchKeyName);
     await _secureStorage.delete(key: _deviceIdKeyName);
+    await _secureStorage.delete(key: _bioPwdKeyName);
   }
 
   /// Generate device ID
@@ -414,5 +416,17 @@ class KeyManager {
       );
       return false;
     }
+  }
+
+  Future<void> savePasswordForBiometric(String masterPassword) async {
+    await _secureStorage.write(key: _bioPwdKeyName, value: masterPassword);
+  }
+
+  Future<void> clearPasswordForBiometric() async {
+    await _secureStorage.delete(key: _bioPwdKeyName);
+  }
+
+  Future<String?> getStoredBiometricPassword() async {
+    return await _secureStorage.read(key: _bioPwdKeyName);
   }
 }

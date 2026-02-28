@@ -4,6 +4,7 @@ import '../../l10n/app_localizations.dart';
 import '../../blocs/sync/sync_bloc.dart';
 import 'webdav_settings_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:local_auth/local_auth.dart';
 
 class SettingsScreen extends StatefulWidget {
   final VaultService vaultService;
@@ -23,11 +24,21 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   VaultStats? _stats;
+  bool _isBiometricEnabled = false;
+  final _localAuth = LocalAuthentication();
 
   @override
   void initState() {
     super.initState();
     _loadStats();
+    _checkBiometrics();
+  }
+
+  Future<void> _checkBiometrics() async {
+    final enabled = await widget.vaultService.isBiometricEnabled();
+    setState(() {
+      _isBiometricEnabled = enabled;
+    });
   }
 
   Future<void> _loadStats() async {
@@ -104,6 +115,62 @@ class _SettingsScreenState extends State<SettingsScreen> {
       } else {
         _showError(l10n.failedToChangePassword);
       }
+    }
+  }
+
+  Future<void> _toggleBiometrics(bool enable) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (enable) {
+      final passwordController = TextEditingController();
+      final result = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.biometricAuth),
+          content: TextField(
+            controller: passwordController,
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: l10n.masterPassword,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, null),
+              child: Text(l10n.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, passwordController.text),
+              child: const Text('Enable'),
+            ),
+          ],
+        ),
+      );
+
+      if (result != null && result.isNotEmpty) {
+        bool authenticated = false;
+        try {
+          authenticated = await _localAuth.authenticate(
+            localizedReason: 'Enable biometric authentication',
+          );
+        } on Exception catch (e) {
+          _showError('Biometric error: $e');
+        }
+
+        if (authenticated) {
+          await widget.vaultService.enableBiometricMode(result);
+          setState(() {
+            _isBiometricEnabled = true;
+          });
+          _showSuccess('Biometrics enabled');
+        }
+      }
+    } else {
+      await widget.vaultService.disableBiometricMode();
+      setState(() {
+        _isBiometricEnabled = false;
+      });
+      _showSuccess('Biometrics disabled');
     }
   }
 
@@ -271,11 +338,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               leading: const Icon(Icons.fingerprint),
               title: Text(l10n.biometricAuth),
               subtitle: Text(l10n.useFaceTouchID),
-              trailing: const Switch(
-                value: false,
-                onChanged: null,
+              trailing: Switch(
+                value: _isBiometricEnabled,
+                onChanged: _toggleBiometrics,
               ),
-              onTap: _showComingSoon,
+              onTap: () => _toggleBiometrics(!_isBiometricEnabled),
             ),
           ],
         ),

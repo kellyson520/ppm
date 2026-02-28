@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../services/vault_service.dart';
+import 'package:local_auth/local_auth.dart';
 import '../../blocs/vault/vault_bloc.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -18,6 +20,9 @@ class _LockScreenState extends State<LockScreen>
   String _errorMessage = '';
   int _failedAttempts = 0;
 
+  bool _isBiometricEnabled = false;
+  final _localAuth = LocalAuthentication();
+
   late AnimationController _shakeController;
   late Animation<double> _shakeAnimation;
 
@@ -32,6 +37,48 @@ class _LockScreenState extends State<LockScreen>
       begin: 0,
       end: 10,
     ).chain(CurveTween(curve: Curves.elasticIn)).animate(_shakeController);
+
+    Future.microtask(_checkBiometrics);
+  }
+
+  Future<void> _checkBiometrics() async {
+    final service = context.read<VaultService>();
+    final enabled = await service.isBiometricEnabled();
+    if (mounted) {
+      setState(() {
+        _isBiometricEnabled = enabled;
+      });
+    }
+  }
+
+  Future<void> _unlockWithBiometric() async {
+    final l10n = AppLocalizations.of(context)!;
+    bool authenticated = false;
+    try {
+      authenticated = await _localAuth.authenticate(
+        localizedReason: l10n.biometricAuth,
+      );
+    } on Exception catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = '${l10n.error}: $e';
+        });
+      }
+    }
+
+    if (authenticated && mounted) {
+      final service = context.read<VaultService>();
+      final pwd = await service.getStoredBiometricPassword();
+      if (!mounted) return;
+      if (pwd != null) {
+        context.read<VaultBloc>().add(VaultUnlockRequested(pwd));
+      } else {
+        setState(() {
+          _errorMessage =
+              'Biometric token expired. Please enter password and re-enable in Settings.';
+        });
+      }
+    }
   }
 
   @override
@@ -217,19 +264,13 @@ class _LockScreenState extends State<LockScreen>
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // Biometric option (placeholder)
-                        TextButton.icon(
-                          onPressed: () {
-                            // TODO: Implement biometric authentication
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.biometricSoon),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.fingerprint),
-                          label: Text(l10n.useBiometric),
-                        ),
+                        // Biometric option
+                        if (_isBiometricEnabled)
+                          TextButton.icon(
+                            onPressed: _unlockWithBiometric,
+                            icon: const Icon(Icons.fingerprint),
+                            label: Text(l10n.useBiometric),
+                          ),
                       ],
                     ),
                   ),

@@ -4,15 +4,15 @@ import 'crypto_core.dart';
 import 'crypto_facade.dart';
 
 /// Cryptographic Service for ZTD Password Manager (向后兼容层)
-/// 
+///
 /// **已重构**：此类现在是 [CryptoFacade] 的薄包装层。
 /// 所有加密算法通过可插拔的 Provider 注册表加载，
 /// 不再硬编码具体算法实现。
-/// 
+///
 /// 新代码应直接使用 [CryptoFacade]。
-/// 此类保留是为了已有业务代码（KeyManager, EventStore, 
+/// 此类保留是为了已有业务代码（KeyManager, EventStore,
 /// DatabaseService, VaultService）的平滑过渡。
-/// 
+///
 /// 架构层次：
 /// - CryptoService (此类, 兼容层)
 ///   -> CryptoFacade (门面层)
@@ -206,10 +206,10 @@ class Argon2Parameters {
   });
 
   Map<String, dynamic> toJson() => {
-    'memoryKB': memoryKB,
-    'iterations': iterations,
-    'parallelism': parallelism,
-  };
+        'memoryKB': memoryKB,
+        'iterations': iterations,
+        'parallelism': parallelism,
+      };
 
   factory Argon2Parameters.fromJson(Map<String, dynamic> json) {
     return Argon2Parameters(
@@ -221,15 +221,15 @@ class Argon2Parameters {
 
   /// 转换为新的 KdfParams 格式
   KdfParams toKdfParams() => KdfParams(
-    kdfId: 'pbkdf2-hmac-sha256',
-    memoryKB: memoryKB,
-    iterations: iterations,
-    parallelism: parallelism,
-  );
+        kdfId: 'pbkdf2-hmac-sha256',
+        memoryKB: memoryKB,
+        iterations: iterations,
+        parallelism: parallelism,
+      );
 }
 
 /// 加密数据容器（兼容旧代码）
-/// 
+///
 /// 新代码应使用 [CiphertextEnvelope] 替代（包含算法元数据）。
 class EncryptedData {
   final Uint8List ciphertext;
@@ -244,10 +244,10 @@ class EncryptedData {
 
   /// 从旧格式 JSON 反序列化
   Map<String, String> toJson() => {
-    'ciphertext': base64Encode(ciphertext),
-    'iv': base64Encode(iv),
-    'authTag': base64Encode(authTag),
-  };
+        'ciphertext': base64Encode(ciphertext),
+        'iv': base64Encode(iv),
+        'authTag': base64Encode(authTag),
+      };
 
   factory EncryptedData.fromJson(Map<String, dynamic> json) {
     return EncryptedData(

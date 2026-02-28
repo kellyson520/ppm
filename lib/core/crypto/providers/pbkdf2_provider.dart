@@ -4,10 +4,10 @@ import 'package:pointycastle/export.dart';
 import '../crypto_core.dart';
 
 /// PBKDF2-HMAC-SHA256 KDF 实现
-/// 
+///
 /// 作为 Argon2id 的降级替代（Argon2id 需要原生 FFI 支持）。
 /// 生产环境建议：当平台支持 Argon2id 时，应使用 Argon2idProvider 替换。
-/// 
+///
 /// 安全参数基准：
 /// - iterations: 3000 (PBKDF2 等效参数)
 /// - salt: 32 bytes

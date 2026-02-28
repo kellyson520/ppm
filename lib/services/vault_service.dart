@@ -479,6 +479,25 @@ class VaultService {
     );
   }
 
+  // ==================== Biometric Operations ====================
+
+  Future<bool> isBiometricEnabled() async {
+    final pwd = await _keyManager.getStoredBiometricPassword();
+    return pwd != null;
+  }
+
+  Future<void> enableBiometricMode(String masterPassword) async {
+    await _keyManager.savePasswordForBiometric(masterPassword);
+  }
+
+  Future<void> disableBiometricMode() async {
+    await _keyManager.clearPasswordForBiometric();
+  }
+
+  Future<String?> getStoredBiometricPassword() async {
+    return await _keyManager.getStoredBiometricPassword();
+  }
+
   // ==================== Private Methods ====================
 
   void _ensureUnlocked() {

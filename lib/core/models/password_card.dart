@@ -5,13 +5,13 @@ import 'hlc.dart';
 /// Password Card Entity
 /// Represents an encrypted password entry in the vault
 class PasswordCard extends Equatable {
-  final String cardId;           // UUID v4
+  final String cardId; // UUID v4
   final String encryptedPayload; // AES-GCM encrypted JSON
   final List<String> blindIndexes; // HMAC-SHA256 indexes for search
   final HLC createdAt;
   final HLC updatedAt;
-  final String currentEventId;   // Points to latest event
-  final bool isDeleted;          // Tombstone marker
+  final String currentEventId; // Points to latest event
+  final bool isDeleted; // Tombstone marker
 
   const PasswordCard({
     required this.cardId,
@@ -68,18 +68,18 @@ class PasswordCard extends Equatable {
 
   /// Convert to database row
   Map<String, dynamic> toMap() => {
-    'card_id': cardId,
-    'encrypted_payload': encryptedPayload,
-    'blind_indexes': blindIndexes.join(','),
-    'created_at_physical': createdAt.physicalTime,
-    'created_at_logical': createdAt.logicalCounter,
-    'created_at_device': createdAt.deviceId,
-    'updated_at_physical': updatedAt.physicalTime,
-    'updated_at_logical': updatedAt.logicalCounter,
-    'updated_at_device': updatedAt.deviceId,
-    'current_event_id': currentEventId,
-    'is_deleted': isDeleted ? 1 : 0,
-  };
+        'card_id': cardId,
+        'encrypted_payload': encryptedPayload,
+        'blind_indexes': blindIndexes.join(','),
+        'created_at_physical': createdAt.physicalTime,
+        'created_at_logical': createdAt.logicalCounter,
+        'created_at_device': createdAt.deviceId,
+        'updated_at_physical': updatedAt.physicalTime,
+        'updated_at_logical': updatedAt.logicalCounter,
+        'updated_at_device': updatedAt.deviceId,
+        'current_event_id': currentEventId,
+        'is_deleted': isDeleted ? 1 : 0,
+      };
 
   /// Create a copy with updated values
   PasswordCard copyWith({
@@ -88,33 +88,34 @@ class PasswordCard extends Equatable {
     HLC? updatedAt,
     String? currentEventId,
     bool? isDeleted,
-  }) => PasswordCard(
-    cardId: cardId,
-    encryptedPayload: encryptedPayload ?? this.encryptedPayload,
-    blindIndexes: blindIndexes ?? this.blindIndexes,
-    createdAt: createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    currentEventId: currentEventId ?? this.currentEventId,
-    isDeleted: isDeleted ?? this.isDeleted,
-  );
+  }) =>
+      PasswordCard(
+        cardId: cardId,
+        encryptedPayload: encryptedPayload ?? this.encryptedPayload,
+        blindIndexes: blindIndexes ?? this.blindIndexes,
+        createdAt: createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        currentEventId: currentEventId ?? this.currentEventId,
+        isDeleted: isDeleted ?? this.isDeleted,
+      );
 
   /// Mark as deleted (tombstone)
   PasswordCard markDeleted(String deviceId, String eventId) => copyWith(
-    isDeleted: true,
-    updatedAt: HLC.now(deviceId),
-    currentEventId: eventId,
-  );
+        isDeleted: true,
+        updatedAt: HLC.now(deviceId),
+        currentEventId: eventId,
+      );
 
   @override
   List<Object?> get props => [
-    cardId, 
-    encryptedPayload, 
-    blindIndexes, 
-    createdAt, 
-    updatedAt, 
-    currentEventId, 
-    isDeleted
-  ];
+        cardId,
+        encryptedPayload,
+        blindIndexes,
+        createdAt,
+        updatedAt,
+        currentEventId,
+        isDeleted
+      ];
 }
 
 /// Decrypted password payload (in memory only, never stored)
@@ -145,21 +146,21 @@ class PasswordPayload extends Equatable {
       url: json['url'] as String?,
       notes: json['notes'] as String?,
       tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
-      expiresAt: json['expiresAt'] != null 
+      expiresAt: json['expiresAt'] != null
           ? DateTime.parse(json['expiresAt'] as String)
           : null,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'title': title,
-    'username': username,
-    'password': password,
-    if (url != null) 'url': url,
-    if (notes != null) 'notes': notes,
-    if (tags.isNotEmpty) 'tags': tags,
-    if (expiresAt != null) 'expiresAt': expiresAt!.toIso8601String(),
-  };
+        'title': title,
+        'username': username,
+        'password': password,
+        if (url != null) 'url': url,
+        if (notes != null) 'notes': notes,
+        if (tags.isNotEmpty) 'tags': tags,
+        if (expiresAt != null) 'expiresAt': expiresAt!.toIso8601String(),
+      };
 
   PasswordPayload copyWith({
     String? title,
@@ -169,16 +170,18 @@ class PasswordPayload extends Equatable {
     String? notes,
     List<String>? tags,
     DateTime? expiresAt,
-  }) => PasswordPayload(
-    title: title ?? this.title,
-    username: username ?? this.username,
-    password: password ?? this.password,
-    url: url ?? this.url,
-    notes: notes ?? this.notes,
-    tags: tags ?? this.tags,
-    expiresAt: expiresAt ?? this.expiresAt,
-  );
+  }) =>
+      PasswordPayload(
+        title: title ?? this.title,
+        username: username ?? this.username,
+        password: password ?? this.password,
+        url: url ?? this.url,
+        notes: notes ?? this.notes,
+        tags: tags ?? this.tags,
+        expiresAt: expiresAt ?? this.expiresAt,
+      );
 
   @override
-  List<Object?> get props => [title, username, password, url, notes, tags, expiresAt];
+  List<Object?> get props =>
+      [title, username, password, url, notes, tags, expiresAt];
 }

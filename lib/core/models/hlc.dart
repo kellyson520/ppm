@@ -4,15 +4,16 @@ import 'package:equatable/equatable.dart';
 
 /// Hybrid Logical Clock (HLC) implementation
 /// Based on the paper: "Logical Physical Clocks and Consistent Snapshots in Distributed Systems"
-/// 
+///
 /// HLC combines physical timestamps with logical counters to provide:
 /// - Causal ordering of events
 /// - Conflict resolution in distributed systems
 /// - Deterministic tie-breaking using device ID
 class HLC extends Equatable implements Comparable<HLC> {
-  final int physicalTime;  // Physical timestamp in milliseconds (NTP-synced)
+  final int physicalTime; // Physical timestamp in milliseconds (NTP-synced)
   final int logicalCounter; // Logical counter for concurrent events
-  final String deviceId;    // Device unique identifier (dictionary order tie-breaker)
+  final String
+      deviceId; // Device unique identifier (dictionary order tie-breaker)
 
   const HLC({
     required this.physicalTime,
@@ -40,10 +41,10 @@ class HLC extends Equatable implements Comparable<HLC> {
 
   /// Convert to JSON
   Map<String, dynamic> toJson() => {
-    'physicalTime': physicalTime,
-    'logicalCounter': logicalCounter,
-    'deviceId': deviceId,
-  };
+        'physicalTime': physicalTime,
+        'logicalCounter': logicalCounter,
+        'deviceId': deviceId,
+      };
 
   /// Compare two HLCs for partial ordering
   /// Returns: negative if this < other, positive if this > other, 0 if equal
@@ -62,20 +63,23 @@ class HLC extends Equatable implements Comparable<HLC> {
   bool happenedBefore(HLC other) => compareTo(other) < 0;
 
   /// Check if this HLC is concurrent with another
-  bool isConcurrent(HLC other) => 
-    physicalTime == other.physicalTime && 
-    logicalCounter == other.logicalCounter &&
-    deviceId != other.deviceId;
+  bool isConcurrent(HLC other) =>
+      physicalTime == other.physicalTime &&
+      logicalCounter == other.logicalCounter &&
+      deviceId != other.deviceId;
 
   /// Merge with remote HLC (HLC algorithm)
   HLC merge(HLC remote) {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final newPhysical = [physicalTime, remote.physicalTime, now].reduce((a, b) => a > b ? a : b);
-    
+    final newPhysical = [physicalTime, remote.physicalTime, now]
+        .reduce((a, b) => a > b ? a : b);
+
     int newLogical;
     if (newPhysical == physicalTime && newPhysical == remote.physicalTime) {
       // Both at same physical time, increment max logical counter
-      newLogical = logicalCounter > remote.logicalCounter ? logicalCounter : remote.logicalCounter;
+      newLogical = logicalCounter > remote.logicalCounter
+          ? logicalCounter
+          : remote.logicalCounter;
       newLogical++;
     } else if (newPhysical == physicalTime) {
       // Local event is latest, increment local counter
@@ -97,21 +101,22 @@ class HLC extends Equatable implements Comparable<HLC> {
 
   /// Increment logical counter for local events
   HLC increment() => HLC(
-    physicalTime: physicalTime,
-    logicalCounter: logicalCounter + 1,
-    deviceId: deviceId,
-  );
+        physicalTime: physicalTime,
+        logicalCounter: logicalCounter + 1,
+        deviceId: deviceId,
+      );
 
   /// Create a copy with updated values
   HLC copyWith({
     int? physicalTime,
     int? logicalCounter,
     String? deviceId,
-  }) => HLC(
-    physicalTime: physicalTime ?? this.physicalTime,
-    logicalCounter: logicalCounter ?? this.logicalCounter,
-    deviceId: deviceId ?? this.deviceId,
-  );
+  }) =>
+      HLC(
+        physicalTime: physicalTime ?? this.physicalTime,
+        logicalCounter: logicalCounter ?? this.logicalCounter,
+        deviceId: deviceId ?? this.deviceId,
+      );
 
   /// String representation for debugging
   @override
