@@ -3,7 +3,7 @@ description: Zero-Trust Distributed Password Manager - A secure, offline-first p
 
 publish_to: 'none'
 
-version: 0.2.12+12
+version: 0.2.13+13
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

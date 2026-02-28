@@ -23,3 +23,5 @@
 | 20260228_RefineUI_And_ImportExport | 完善导出导入与UI美化 | 2026-02-28 | 2026-02-28 | 100% | [📂 Check](./Workstream_UI/20260228_RefineUI_And_ImportExport/) |
 | 20260228_ResponsiveStrategy | 多尺寸与平板横屏响应式适配 | 2026-02-28 | | DONE | [📂 Check](./Workstream_UI/20260228_ResponsiveStrategy/) |
 | 20260228_FixAppUpgradeSignature | 修复 Android CI 自动发布覆盖安装提示签名不一致的问题 | 2026-02-28 | 2026-02-28 | 100% | [📂 Check](./Workstream_CI/20260228_FixAppUpgradeSignature/) |
+| 20260228_FixGradleCompilationErrors | 修复 Android Gradle 编译脚本 (KTS) 语法错误 | 2026-02-28 | 2026-02-28 | 100% | [📂 Check](./Workstream_AndroidBuild/20260228_FixGradleCompilationErrors/) |
+

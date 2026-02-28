@@ -172,7 +172,8 @@ class WebDavSettingsScreen extends StatelessWidget {
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
-                  if (nameController.text.isEmpty || urlController.text.isEmpty) {
+                  if (nameController.text.isEmpty ||
+                      urlController.text.isEmpty) {
                     return;
                   }
                   final node = WebDavNode(

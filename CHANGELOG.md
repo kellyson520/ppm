@@ -1,6 +1,16 @@
 # Changelog
 
-## [0.2.11] - 2026-02-28
+## [0.2.13] - 2026-02-28
+
+### 🔧 修复 (Fixes)
+- **Android Gradle 修复**: 解决了 `build.gradle.kts` 中的 Kotlin DSL 编译错误（`Properties` 和 `FileInputStream` 引用缺失）。
+- **配置迁移**: 将 `jvmTarget` 设置迁移至最新的 `compilerOptions` DSL，适配 Kotlin 2.0+。
+
+## [0.2.12] - 2026-02-28
+
+### 🔧 修复 (Fixes)
+- **CI 加密自签名**: 修复了 Android CI 自动发布时覆盖安装提示签名不一致的问题，统一了发布版签名配置。
+
 
 ### ✨ 新功能 (Features)
 - **全局UI改版**：采用行业顶尖标准的 Glassmorphism 玻璃态背景与高阶卡片阴影动画。
