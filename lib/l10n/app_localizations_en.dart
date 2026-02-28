@@ -388,6 +388,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get closeApp => 'Close App';
 
   @override
+  String get restartApp => 'Restart App';
+
+  @override
   String get reportCopied => 'Crash report copied to clipboard';
 
   @override
@@ -708,4 +711,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attempts => 'attempts';
+
+  @override
+  String get backupExported => 'Backup exported successfully';
+
+  @override
+  String get exportFailed => 'Failed to export backup';
+
+  @override
+  String backupImported(int count) {
+    return 'Imported $count items successfully';
+  }
+
+  @override
+  String get importFailed => 'Failed to import backup';
 }

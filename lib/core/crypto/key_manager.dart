@@ -153,11 +153,17 @@ class KeyManager {
     } on Exception catch (e, stack) {
       // 区分「密码错误」与「系统错误」：返回 false 代表密码不正确或存储损坏
       // 如果是确实的系统错误（如 TEE 异常）则上报
-      CrashReportService.instance.reportError(
-        e,
-        stack,
-        source: 'KeyManager.unlock',
-      );
+      final isWrongPassword =
+          e.runtimeType.toString() == 'InvalidCipherTextException' ||
+              e.toString().contains('InvalidCipherTextException');
+
+      if (!isWrongPassword) {
+        CrashReportService.instance.reportError(
+          e,
+          stack,
+          source: 'KeyManager.unlock',
+        );
+      }
       return false;
     }
   }

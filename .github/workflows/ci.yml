@@ -72,13 +72,17 @@ jobs:
           name: web-build
           path: build/web/
 
+      - name: Zip Web Build
+        run: cd build/web && zip -r ../../web-release.zip .
+
       - name: Create Release and Upload Assets
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: |
             build/app/outputs/flutter-apk/app-release.apk
-            build/web/**/*
+            build/app/outputs/bundle/release/app-release.aab
+            web-release.zip
           generate_release_notes: true
           draft: false
           prerelease: false

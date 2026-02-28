@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import '../../services/vault_service.dart';
 import '../../services/auth_service.dart';
@@ -341,45 +342,49 @@ class _VaultScreenState extends State<VaultScreen> {
 
   /// 底部导航栏 - 三重鼎立
   Widget _buildBottomNavBar(AppLocalizations l10n) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF16213E),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF16213E).withValues(alpha: 0.8),
+            border: Border(
+              top: BorderSide(
+                color: Colors.white.withValues(alpha: 0.05),
+                width: 1,
+              ),
+            ),
           ),
-        ],
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(
-                index: 0,
-                icon: Icons.lock_outline,
-                activeIcon: Icons.lock,
-                label: l10n.passwords,
-                color: const Color(0xFF6C63FF),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(
+                    index: 0,
+                    icon: Icons.lock_outline,
+                    activeIcon: Icons.lock,
+                    label: l10n.passwords,
+                    color: const Color(0xFF6C63FF),
+                  ),
+                  _buildNavItem(
+                    index: 1,
+                    icon: Icons.verified_user_outlined,
+                    activeIcon: Icons.verified_user,
+                    label: l10n.authenticator,
+                    color: const Color(0xFF00BFA6),
+                  ),
+                  _buildNavItem(
+                    index: 2,
+                    icon: Icons.settings_outlined,
+                    activeIcon: Icons.settings,
+                    label: l10n.settings,
+                    color: const Color(0xFFFF6B6B),
+                  ),
+                ],
               ),
-              _buildNavItem(
-                index: 1,
-                icon: Icons.verified_user_outlined,
-                activeIcon: Icons.verified_user,
-                label: l10n.authenticator,
-                color: const Color(0xFF00BFA6),
-              ),
-              _buildNavItem(
-                index: 2,
-                icon: Icons.settings_outlined,
-                activeIcon: Icons.settings,
-                label: l10n.settings,
-                color: const Color(0xFFFF6B6B),
-              ),
-            ],
+            ),
           ),
         ),
       ),

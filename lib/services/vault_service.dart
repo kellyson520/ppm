@@ -427,6 +427,55 @@ class VaultService {
     return await _database.eventStore.getAllSnapshots();
   }
 
+  // ==================== Export / Import Operations ====================
+
+  /// Export decrypted vault data as JSON
+  Future<String> exportVaultAsJson() async {
+    _ensureUnlocked();
+    final cards = await getAllCards();
+    final exports = <Map<String, dynamic>>[];
+
+    for (final card in cards) {
+      final payload = await decryptCard(card);
+      if (payload != null) {
+        exports.add(payload.toJson());
+      }
+    }
+
+    return jsonEncode(exports);
+  }
+
+  /// Import JSON data into vault
+  Future<int> importVaultFromJson(String jsonString) async {
+    _ensureUnlocked();
+
+    try {
+      final List<dynamic> items = jsonDecode(jsonString) as List<dynamic>;
+      int importedCount = 0;
+
+      for (final item in items) {
+        if (item is Map<String, dynamic>) {
+          try {
+            final payload = PasswordPayload.fromJson(item);
+            await createCard(payload);
+            importedCount++;
+          } catch (e) {
+            // Skip invalid items
+            continue;
+          }
+        }
+      }
+      return importedCount;
+    } on Exception catch (e, stack) {
+      CrashReportService.instance.reportError(
+        e,
+        stack,
+        source: 'VaultService.importVaultFromJson',
+      );
+      return 0;
+    }
+  }
+
   // ==================== Security Operations ====================
 
   /// Change master password

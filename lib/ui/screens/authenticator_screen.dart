@@ -271,20 +271,32 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        elevation: isExpanded ? 4 : 0,
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
         color: isExpanded ? const Color(0xFF1A2744) : const Color(0xFF16213E),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: isExpanded
-              ? const BorderSide(color: Color(0xFF6C63FF), width: 1)
-              : BorderSide.none,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isExpanded
+              ? const Color(0xFF6C63FF).withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.05),
+          width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: isExpanded
+                ? const Color(0xFF6C63FF).withValues(alpha: 0.15)
+                : Colors.black.withValues(alpha: 0.2),
+            blurRadius: isExpanded ? 20 : 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
         child: InkWell(
           onTap: () => _toggleCard(card),
           onLongPress: isExpanded ? () => _navigateToAuthDetail(card) : null,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(

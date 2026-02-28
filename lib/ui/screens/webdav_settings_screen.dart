@@ -78,7 +78,17 @@ class WebDavSettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.addWebDavNode),
+        backgroundColor: const Color(0xFF1A1A2E),
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Color(0xFF2D2D44), width: 1),
+        ),
+        title: Text(
+          l10n.addWebDavNode,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -86,39 +96,61 @@ class WebDavSettingsScreen extends StatelessWidget {
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(labelText: l10n.nodeName),
+                textInputAction: TextInputAction.next,
               ),
+              const SizedBox(height: 16),
               TextField(
                 controller: urlController,
                 decoration: InputDecoration(labelText: l10n.urlHint),
+                keyboardType: TextInputType.url,
+                textInputAction: TextInputAction.next,
               ),
+              const SizedBox(height: 16),
               TextField(
                 controller: userController,
                 decoration: InputDecoration(labelText: l10n.username),
+                textInputAction: TextInputAction.next,
               ),
+              const SizedBox(height: 16),
               TextField(
                 controller: passController,
                 obscureText: true,
                 decoration: InputDecoration(labelText: l10n.password),
+                textInputAction: TextInputAction.done,
               ),
             ],
           ),
         ),
+        actionsPadding:
+            const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: Colors.white70),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
+              if (nameController.text.isEmpty || urlController.text.isEmpty) {
+                return;
+              }
               final node = WebDavNode(
-                name: nameController.text,
-                url: urlController.text,
-                username: userController.text,
+                name: nameController.text.trim(),
+                url: urlController.text.trim(),
+                username: userController.text.trim(),
                 password: passController.text,
               );
               context.read<SyncBloc>().add(SyncNodeAdded(node));
               Navigator.pop(context);
             },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: Text(l10n.add),
           ),
         ],

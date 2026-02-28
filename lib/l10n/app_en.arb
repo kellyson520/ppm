@@ -135,6 +135,7 @@
   "noStackTrace": "(No stack trace info)",
   "copyReport": "Copy Report",
   "closeApp": "Close App",
+  "restartApp": "Restart App",
   "reportCopied": "Crash report copied to clipboard",
   "noWebDavNodes": "No WebDAV nodes configured",
   "addNode": "Add Node",
@@ -238,5 +239,17 @@
   "scanSuccessful": "Scan Successful",
   "passwordEntry": "Password Entry",
   "urlHint": "URL (e.g. https://cloud.com/dav/)",
-  "attempts": "attempts"
+  "attempts": "attempts",
+  "backupExported": "Backup exported successfully",
+  "exportFailed": "Failed to export backup",
+  "backupImported": "Imported {count} items successfully",
+  "@backupImported": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "importFailed": "Failed to import backup"
 }

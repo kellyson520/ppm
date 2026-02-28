@@ -384,6 +384,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get closeApp => '关闭应用';
 
   @override
+  String get restartApp => '重启应用';
+
+  @override
   String get reportCopied => '崩溃报告已复制到剪贴板';
 
   @override
@@ -696,4 +699,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get attempts => '次尝试';
+
+  @override
+  String get backupExported => '备份导出成功';
+
+  @override
+  String get exportFailed => '导出备份失败';
+
+  @override
+  String backupImported(int count) {
+    return '成功导入 $count 项数据';
+  }
+
+  @override
+  String get importFailed => '导入备份失败';
 }

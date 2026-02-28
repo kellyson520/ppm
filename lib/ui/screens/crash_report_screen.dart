@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/diagnostics/crash_report_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../main.dart';
 
 /// 崩溃报告界面
 ///
@@ -207,11 +208,11 @@ class CrashReportScreen extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _ActionButton(
-            id: 'crash_close_button',
-            icon: Icons.close_rounded,
-            label: l10n.closeApp,
+            id: 'crash_restart_button',
+            icon: Icons.refresh_rounded,
+            label: l10n.restartApp,
             color: const Color(0xFFFF4C5B),
-            onPressed: _closeApp,
+            onPressed: _restartApp,
           ),
         ),
       ],
@@ -275,8 +276,8 @@ class CrashReportScreen extends StatelessWidget {
     }
   }
 
-  void _closeApp() {
-    SystemNavigator.pop();
+  void _restartApp() {
+    runApp(const ZTDPasswordManagerApp());
   }
 }
 

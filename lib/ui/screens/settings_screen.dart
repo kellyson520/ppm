@@ -1,4 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../services/vault_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../blocs/sync/sync_bloc.dart';
@@ -283,6 +287,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _exportBackup() async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final jsonStr = await widget.vaultService.exportVaultAsJson();
+      final tempDir = await getTemporaryDirectory();
+      final file = File(
+          '${tempDir.path}/ztd_vault_export_${DateTime.now().millisecondsSinceEpoch}.json');
+      await file.writeAsString(jsonStr);
+
+      final result = await Share.shareXFiles(
+        [XFile(file.path)],
+        subject: l10n.exportBackup,
+      );
+
+      if (result.status == ShareResultStatus.success) {
+        _showSuccess(l10n.backupExported);
+      }
+    } on Exception catch (e) {
+      _showError('${l10n.exportFailed}: $e');
+    }
+  }
+
+  Future<void> _importBackup() async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        final jsonStr = await file.readAsString();
+
+        final count = await widget.vaultService.importVaultFromJson(jsonStr);
+        if (count > 0) {
+          _showSuccess(l10n.backupImported(count));
+          await _loadStats();
+        } else {
+          _showError(l10n.importFailed);
+        }
+      }
+    } on Exception catch (e) {
+      _showError('${l10n.importFailed}: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -393,14 +444,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: Text(l10n.exportBackup),
               subtitle: Text(l10n.createEncryptedBackup),
               trailing: const Icon(Icons.chevron_right),
-              onTap: _showComingSoon,
+              onTap: _exportBackup,
             ),
             ListTile(
               leading: const Icon(Icons.upload_outlined),
               title: Text(l10n.importBackup),
               subtitle: Text(l10n.restoreFromBackup),
               trailing: const Icon(Icons.chevron_right),
-              onTap: _showComingSoon,
+              onTap: _importBackup,
             ),
           ],
         ),

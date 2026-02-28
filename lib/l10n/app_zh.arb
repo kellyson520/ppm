@@ -135,6 +135,7 @@
   "noStackTrace": "（无堆栈信息）",
   "copyReport": "复制报告",
   "closeApp": "关闭应用",
+  "restartApp": "重启应用",
   "reportCopied": "崩溃报告已复制到剪贴板",
   "noWebDavNodes": "未配置 WebDAV 节点",
   "addNode": "添加节点",
@@ -237,5 +238,17 @@
   "scanSuccessful": "扫描成功",
   "passwordEntry": "密码条目",
   "urlHint": "URL (例如 https://cloud.com/dav/)",
-  "attempts": "次尝试"
+  "attempts": "次尝试",
+  "backupExported": "备份导出成功",
+  "exportFailed": "导出备份失败",
+  "backupImported": "成功导入 {count} 项数据",
+  "@backupImported": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "importFailed": "导入备份失败"
 }

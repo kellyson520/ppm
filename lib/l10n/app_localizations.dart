@@ -848,6 +848,12 @@ abstract class AppLocalizations {
   /// **'Close App'**
   String get closeApp;
 
+  /// No description provided for @restartApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart App'**
+  String get restartApp;
+
   /// No description provided for @reportCopied.
   ///
   /// In en, this message translates to:
@@ -1471,6 +1477,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'attempts'**
   String get attempts;
+
+  /// No description provided for @backupExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup exported successfully'**
+  String get backupExported;
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to export backup'**
+  String get exportFailed;
+
+  /// No description provided for @backupImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {count} items successfully'**
+  String backupImported(int count);
+
+  /// No description provided for @importFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to import backup'**
+  String get importFailed;
 }
 
 class _AppLocalizationsDelegate

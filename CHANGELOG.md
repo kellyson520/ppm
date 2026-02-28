@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.11] - 2026-02-28
+
+### ✨ 新功能 (Features)
+- **全局UI改版**：采用行业顶尖标准的 Glassmorphism 玻璃态背景与高阶卡片阴影动画。
+- **备份导入与导出**：完善 `VaultService` 的无格式 JSON 数据备份与恢复，接入 `SettingsScreen` 提供含异常捕获的安全分享机制 (`share_plus` 和 `file_picker`)。
+- **WebDAV 设置美化**：重构 WebDAV 节点创建弹窗，采用沉浸深色极夜蓝主题与宽扁距高可读性布局。
+
+### 🔧 修复 (Fixes)
+- **全面本地化支持**：在 `AddAuthScreen` 及其余缺失模块补全了国际化文案支持 (`app_en.arb` / `app_zh.arb`)。
+- **Dart 分析清理**：修复所有的遗留语法警告及异常捕获边界条件 (`on Exception catch`)，达成 100% `flutter analyze` 无警告。
+
 ## [0.2.10] - 2026-02-28
 
 ### ✨ 新功能 (Features)
