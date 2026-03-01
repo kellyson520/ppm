@@ -24,4 +24,4 @@
 | 20260228_ResponsiveStrategy | 多尺寸与平板横屏响应式适配 | 2026-02-28 | | DONE | [📂 Check](./Workstream_UI/20260228_ResponsiveStrategy/) |
 | 20260228_FixAppUpgradeSignature | 修复 Android CI 自动发布覆盖安装提示签名不一致的问题 | 2026-02-28 | 2026-02-28 | 100% | [📂 Check](./Workstream_CI/20260228_FixAppUpgradeSignature/) |
 | 20260228_FixGradleCompilationErrors | 修复 Android Gradle 编译脚本 (KTS) 语法错误 | 2026-02-28 | 2026-02-28 | 100% | [📂 Check](./Workstream_AndroidBuild/20260228_FixGradleCompilationErrors/) |
-
+| 20260301_Fix_Release_Keystore | Fix Android release build failing in CI (Keystore not found) | 2026-03-01 | 2026-03-01 | 100% | [📂 Check](./Workstream_CI/20260301_Fix_Release_Keystore/) |

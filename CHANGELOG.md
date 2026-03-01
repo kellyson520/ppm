@@ -1,6 +1,13 @@
 # Changelog
 
-## [0.2.13] - 2026-02-28
+## [0.2.16] - 2026-03-01
+
+### 🔧 修复 (Fixes)
+- **CI 工作流修复**: 修复了 Android Release 构建时因 Keystore 解码步骤滞后导致的“文件未找到”错误。
+- **构建脚本健壮性**: 增强了 `build.gradle.kts` 的签名逻辑，仅在密钥文件真实存在时应用签名配置，支持无密钥环境下（如本地开发）正常构建未签名 APK。
+- **本地化同步**: 重新生成了本地化代码 (`flutter gen-l10n`)，解决了生成的代码与 `arb` 文件不一致导致的静态分析错误。
+
+## [0.2.15] - 2026-02-28
 
 ### 🔧 修复 (Fixes)
 - **Android Gradle 修复**: 解决了 `build.gradle.kts` 中的 Kotlin DSL 编译错误（`Properties` 和 `FileInputStream` 引用缺失）。

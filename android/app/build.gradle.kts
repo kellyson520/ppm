@@ -65,19 +65,26 @@ android {
             }
 
             if (!signatureConfigured) {
-                // Fallback: Using debug signature for release build so CI doesn't fail immediately.
+                // Fallback: Using debug signature for release build ONLY if it exists.
                 val debugConfig = getByName("debug")
-                keyAlias = debugConfig.keyAlias
-                keyPassword = debugConfig.keyPassword
-                storeFile = debugConfig.storeFile
-                storePassword = debugConfig.storePassword
+                val debugStoreFile = debugConfig.storeFile
+                if (debugStoreFile != null && debugStoreFile.exists()) {
+                    keyAlias = debugConfig.keyAlias
+                    keyPassword = debugConfig.keyPassword
+                    storeFile = debugStoreFile
+                    storePassword = debugConfig.storePassword
+                }
             }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            val releaseConfig = signingConfigs.getByName("release")
+            // Only use signingConfig if storeFile exists to avoid build failure in CI without secrets
+            if (releaseConfig.storeFile?.exists() == true) {
+                signingConfig = releaseConfig
+            }
         }
     }
 }
