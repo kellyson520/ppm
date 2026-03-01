@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../services/vault_service.dart';
@@ -45,7 +46,8 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
   ) async {
     emit(state.copyWith(status: VaultStatus.loading));
     try {
-      await _vaultService.initialize(event.masterPassword);
+      await _vaultService.initialize(event.masterPassword,
+          entropy: event.entropy);
       emit(state.copyWith(status: VaultStatus.unlocked));
     } on Object catch (e) {
       emit(state.copyWith(

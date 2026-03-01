@@ -290,7 +290,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _exportBackup() async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      final jsonStr = await widget.vaultService.exportVaultAsJson();
+      // Use encrypted export by default
+      final jsonStr =
+          await widget.vaultService.exportVaultAsJson(encrypted: true);
 
       // Pass bytes so FilePicker handles writing on supported mobile platforms
       final bytes = utf8.encode(jsonStr);
@@ -303,12 +305,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
         bytes: Uint8List.fromList(bytes),
       );
 
-      // On Desktop, if it just returns path and didn't write bytes, write manually.
+      // On Android/iOS, if bytes are provided, file_picker handles the writing.
+      // On some platforms, outputFile might be a Content URI which File(path) cannot handle.
       if (outputFile != null) {
-        final file = File(outputFile);
-        if (!file.existsSync() || file.lengthSync() == 0) {
-          await file.writeAsBytes(bytes);
+        // Only attempt manual write on Desktop platforms if file wasn't written
+        if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+          final file = File(outputFile);
+          if (!file.existsSync() || file.lengthSync() == 0) {
+            await file.writeAsBytes(bytes);
+          }
         }
+
         _showSuccess(l10n.backupExported);
       }
     } on Exception catch (e) {

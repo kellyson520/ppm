@@ -11,10 +11,11 @@ class VaultCheckRequested extends VaultEvent {}
 
 class VaultInitializeRequested extends VaultEvent {
   final String masterPassword;
-  const VaultInitializeRequested(this.masterPassword);
+  final Uint8List? entropy;
+  const VaultInitializeRequested(this.masterPassword, {this.entropy});
 
   @override
-  List<Object?> get props => [masterPassword];
+  List<Object?> get props => [masterPassword, entropy];
 }
 
 class VaultUnlockRequested extends VaultEvent {

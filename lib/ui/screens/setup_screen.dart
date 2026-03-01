@@ -1,7 +1,9 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/vault/vault_bloc.dart';
 import '../../l10n/app_localizations.dart';
+import '../widgets/entropy_canvas_widget.dart';
 
 class SetupScreen extends StatefulWidget {
   const SetupScreen({super.key});
@@ -18,6 +20,7 @@ class _SetupScreenState extends State<SetupScreen> {
   int _currentPage = 0;
   String _errorMessage = '';
   double _passwordStrength = 0;
+  Uint8List? _collectedEntropy;
 
   @override
   void dispose() {
@@ -55,7 +58,7 @@ class _SetupScreenState extends State<SetupScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage < 2) {
+    if (_currentPage < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -78,7 +81,7 @@ class _SetupScreenState extends State<SetupScreen> {
     }
   }
 
-  Future<void> _completeSetup(AppLocalizations l10n) async {
+  void _completeSetup(AppLocalizations l10n) {
     if (_passwordController.text != _confirmController.text) {
       setState(() {
         _errorMessage = l10n.passwordsDoNotMatch;
@@ -93,8 +96,20 @@ class _SetupScreenState extends State<SetupScreen> {
       return;
     }
 
+    // Move to entropy collection page
+    _nextPage();
+  }
+
+  void _onEntropyCollected(Uint8List entropy) {
+    setState(() {
+      _collectedEntropy = entropy;
+    });
+
     context.read<VaultBloc>().add(
-          VaultInitializeRequested(_passwordController.text),
+          VaultInitializeRequested(
+            _passwordController.text,
+            entropy: _collectedEntropy,
+          ),
         );
   }
 
@@ -120,7 +135,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 children: [
                   // Progress indicator
                   LinearProgressIndicator(
-                    value: (_currentPage + 1) / 3,
+                    value: (_currentPage + 1) / 4,
                     backgroundColor: Colors.white10,
                     valueColor:
                         const AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
@@ -133,6 +148,7 @@ class _SetupScreenState extends State<SetupScreen> {
                         _buildWelcomePage(l10n),
                         _buildPasswordPage(l10n),
                         _buildConfirmPage(l10n, isLoading),
+                        _buildEntropyPage(l10n, isLoading),
                       ],
                     ),
                   ),
@@ -141,6 +157,45 @@ class _SetupScreenState extends State<SetupScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildEntropyPage(AppLocalizations l10n, bool isLoading) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        children: [
+          const SizedBox(height: 32),
+          const Text(
+            '注入混沌能量',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            '请闭上眼睛，在下方区域内随意涂鸦。我们将捕获您的指尖轨迹、按压力度及微秒单位的时间特征，为您锻造这个星球上独一无二的金库密钥。',
+            style: TextStyle(fontSize: 14, color: Colors.white60),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : EntropyCanvasWidget(
+                    onComplete: _onEntropyCollected,
+                  ),
+          ),
+          if (!isLoading)
+            TextButton(
+              onPressed: _previousPage,
+              child: Text(l10n.back),
+            ),
+          const SizedBox(height: 32),
+        ],
       ),
     );
   }

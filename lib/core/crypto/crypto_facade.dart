@@ -266,6 +266,11 @@ class CryptoFacade {
     return sha256.convert(utf8.encode(data)).toString();
   }
 
+  /// SHA512 哈希
+  Uint8List sha512Hash(Uint8List data) {
+    return Uint8List.fromList(sha512.convert(data).bytes);
+  }
+
   // ==================== 常量时间操作 ====================
 
   /// 常量时间比较（防止时序攻击）

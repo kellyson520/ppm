@@ -55,9 +55,9 @@ class VaultService {
   }
 
   /// Initialize new vault with master password
-  Future<void> initialize(String masterPassword) async {
+  Future<void> initialize(String masterPassword, {Uint8List? entropy}) async {
     // Initialize key manager
-    await _keyManager.initialize(masterPassword);
+    await _keyManager.initialize(masterPassword, userEntropy: entropy);
 
     // Get encryption key for database (derived from DEK)
     final dek = _keyManager.dek;
@@ -429,8 +429,12 @@ class VaultService {
 
   // ==================== Export / Import Operations ====================
 
-  /// Export decrypted vault data as JSON
-  Future<String> exportVaultAsJson() async {
+  /// Export vault data as JSON
+  ///
+  /// [encrypted] - Whether to encrypt the export using the session DEK.
+  /// If true, returns a base64 encoded string of [EncryptedData].
+  /// If false, returns a plain JSON array string.
+  Future<String> exportVaultAsJson({bool encrypted = true}) async {
     _ensureUnlocked();
     final cards = await getAllCards();
     final exports = <Map<String, dynamic>>[];
@@ -442,14 +446,42 @@ class VaultService {
       }
     }
 
-    return jsonEncode(exports);
+    final jsonStr = jsonEncode(exports);
+
+    if (encrypted) {
+      final encryptedData = await _encryptPayloadString(jsonStr);
+      return encryptedData.serialize();
+    }
+
+    return jsonStr;
   }
 
   /// Import JSON data into vault
-  Future<int> importVaultFromJson(String jsonString) async {
+  ///
+  /// Supports both plain JSON array and encrypted base64 string.
+  Future<int> importVaultFromJson(String inputString) async {
     _ensureUnlocked();
 
     try {
+      String jsonString = inputString;
+
+      // Check if it looks like an encrypted base64 string (EncryptedData)
+      // Base64 of JSON starting with {"ciphertext":...}
+      if (!inputString.trim().startsWith('[')) {
+        try {
+          final encryptedData = EncryptedData.deserialize(inputString);
+          jsonString = _cryptoService.decryptString(
+            encryptedData,
+            _sessionDek!,
+          );
+        } on Exception catch (_) {
+          // If decryption fails or it's not EncryptedData, search for plain JSON array
+          if (!inputString.trim().startsWith('[')) {
+            throw const FormatException('Invalid or unreadable backup format');
+          }
+        }
+      }
+
       final List<dynamic> items = jsonDecode(jsonString) as List<dynamic>;
       int importedCount = 0;
 
@@ -472,7 +504,7 @@ class VaultService {
         stack,
         source: 'VaultService.importVaultFromJson',
       );
-      return 0;
+      rethrow;
     }
   }
 
@@ -566,7 +598,11 @@ class VaultService {
 
   Future<EncryptedData> _encryptPayload(PasswordPayload payload) async {
     final jsonPayload = jsonEncode(payload.toJson());
-    return _cryptoService.encryptString(jsonPayload, _sessionDek!);
+    return _encryptPayloadString(jsonPayload);
+  }
+
+  Future<EncryptedData> _encryptPayloadString(String text) async {
+    return _cryptoService.encryptString(text, _sessionDek!);
   }
 
   /// Dispose

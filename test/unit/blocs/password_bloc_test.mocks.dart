@@ -4,9 +4,11 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i4;
+import 'dart:typed_data' as _i5;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:ztd_password_manager/core/events/event_store.dart' as _i5;
+import 'package:mockito/src/dummies.dart' as _i7;
+import 'package:ztd_password_manager/core/events/event_store.dart' as _i6;
 import 'package:ztd_password_manager/core/models/models.dart' as _i2;
 import 'package:ztd_password_manager/services/vault_service.dart' as _i3;
 
@@ -69,10 +71,15 @@ class MockVaultService extends _i1.Mock implements _i3.VaultService {
       ) as _i4.Future<bool>);
 
   @override
-  _i4.Future<void> initialize(String? masterPassword) => (super.noSuchMethod(
+  _i4.Future<void> initialize(
+    String? masterPassword, {
+    _i5.Uint8List? entropy,
+  }) =>
+      (super.noSuchMethod(
         Invocation.method(
           #initialize,
           [masterPassword],
+          {#entropy: entropy},
         ),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
@@ -239,13 +246,41 @@ class MockVaultService extends _i1.Mock implements _i3.VaultService {
       ) as _i4.Future<void>);
 
   @override
-  _i4.Future<List<_i5.Snapshot>> getSnapshots() => (super.noSuchMethod(
+  _i4.Future<List<_i6.Snapshot>> getSnapshots() => (super.noSuchMethod(
         Invocation.method(
           #getSnapshots,
           [],
         ),
-        returnValue: _i4.Future<List<_i5.Snapshot>>.value(<_i5.Snapshot>[]),
-      ) as _i4.Future<List<_i5.Snapshot>>);
+        returnValue: _i4.Future<List<_i6.Snapshot>>.value(<_i6.Snapshot>[]),
+      ) as _i4.Future<List<_i6.Snapshot>>);
+
+  @override
+  _i4.Future<String> exportVaultAsJson({bool? encrypted = true}) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #exportVaultAsJson,
+          [],
+          {#encrypted: encrypted},
+        ),
+        returnValue: _i4.Future<String>.value(_i7.dummyValue<String>(
+          this,
+          Invocation.method(
+            #exportVaultAsJson,
+            [],
+            {#encrypted: encrypted},
+          ),
+        )),
+      ) as _i4.Future<String>);
+
+  @override
+  _i4.Future<int> importVaultFromJson(String? inputString) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #importVaultFromJson,
+          [inputString],
+        ),
+        returnValue: _i4.Future<int>.value(0),
+      ) as _i4.Future<int>);
 
   @override
   _i4.Future<bool> changeMasterPassword(
@@ -305,6 +340,45 @@ class MockVaultService extends _i1.Mock implements _i3.VaultService {
           ),
         )),
       ) as _i4.Future<_i3.VaultStats>);
+
+  @override
+  _i4.Future<bool> isBiometricEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isBiometricEnabled,
+          [],
+        ),
+        returnValue: _i4.Future<bool>.value(false),
+      ) as _i4.Future<bool>);
+
+  @override
+  _i4.Future<void> enableBiometricMode(String? masterPassword) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #enableBiometricMode,
+          [masterPassword],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> disableBiometricMode() => (super.noSuchMethod(
+        Invocation.method(
+          #disableBiometricMode,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<String?> getStoredBiometricPassword() => (super.noSuchMethod(
+        Invocation.method(
+          #getStoredBiometricPassword,
+          [],
+        ),
+        returnValue: _i4.Future<String?>.value(),
+      ) as _i4.Future<String?>);
 
   @override
   _i4.Future<void> dispose() => (super.noSuchMethod(

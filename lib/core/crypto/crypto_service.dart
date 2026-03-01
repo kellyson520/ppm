@@ -160,6 +160,11 @@ class CryptoService {
     return _facade.sha256String(data);
   }
 
+  /// SHA512 哈希
+  Uint8List sha512Hash(Uint8List data) {
+    return _facade.sha512Hash(data);
+  }
+
   // ==================== 盲索引 ====================
 
   /// 生成搜索盲索引

@@ -11,10 +11,11 @@ import 'package:mockito/src/dummies.dart' as _i8;
 import 'package:sqflite_sqlcipher/sqflite.dart' as _i2;
 import 'package:ztd_password_manager/core/crypto/crypto_facade.dart' as _i5;
 import 'package:ztd_password_manager/core/crypto/crypto_service.dart' as _i6;
-import 'package:ztd_password_manager/core/crypto/key_manager.dart' as _i11;
+import 'package:ztd_password_manager/core/crypto/key_manager.dart' as _i12;
 import 'package:ztd_password_manager/core/events/event_store.dart' as _i3;
 import 'package:ztd_password_manager/core/models/models.dart' as _i9;
 import 'package:ztd_password_manager/core/storage/database_service.dart' as _i7;
+import 'package:ztd_password_manager/core/sync/sync.dart' as _i11;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -308,6 +309,36 @@ class MockDatabaseService extends _i1.Mock implements _i7.DatabaseService {
             plaintext,
             searchKey,
           ],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> saveWebDavNode(_i11.WebDavNode? node) => (super.noSuchMethod(
+        Invocation.method(
+          #saveWebDavNode,
+          [node],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<List<_i11.WebDavNode>> getAllWebDavNodes() => (super.noSuchMethod(
+        Invocation.method(
+          #getAllWebDavNodes,
+          [],
+        ),
+        returnValue:
+            _i4.Future<List<_i11.WebDavNode>>.value(<_i11.WebDavNode>[]),
+      ) as _i4.Future<List<_i11.WebDavNode>>);
+
+  @override
+  _i4.Future<void> deleteWebDavNode(String? name) => (super.noSuchMethod(
+        Invocation.method(
+          #deleteWebDavNode,
+          [name],
         ),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
@@ -662,6 +693,15 @@ class MockCryptoService extends _i1.Mock implements _i6.CryptoService {
       ) as String);
 
   @override
+  _i10.Uint8List sha512Hash(_i10.Uint8List? data) => (super.noSuchMethod(
+        Invocation.method(
+          #sha512Hash,
+          [data],
+        ),
+        returnValue: _i10.Uint8List(0),
+      ) as _i10.Uint8List);
+
+  @override
   List<String> generateBlindIndexes(
     String? plaintext,
     _i10.Uint8List? searchKey, {
@@ -716,7 +756,7 @@ class MockCryptoService extends _i1.Mock implements _i6.CryptoService {
 /// A class which mocks [KeyManager].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockKeyManager extends _i1.Mock implements _i11.KeyManager {
+class MockKeyManager extends _i1.Mock implements _i12.KeyManager {
   MockKeyManager() {
     _i1.throwOnMissingStub(this);
   }
@@ -728,10 +768,15 @@ class MockKeyManager extends _i1.Mock implements _i11.KeyManager {
       ) as bool);
 
   @override
-  _i4.Future<void> initialize(String? masterPassword) => (super.noSuchMethod(
+  _i4.Future<void> initialize(
+    String? masterPassword, {
+    _i10.Uint8List? userEntropy,
+  }) =>
+      (super.noSuchMethod(
         Invocation.method(
           #initialize,
           [masterPassword],
+          {#userEntropy: userEntropy},
         ),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
@@ -836,6 +881,36 @@ class MockKeyManager extends _i1.Mock implements _i11.KeyManager {
         ),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
+
+  @override
+  _i4.Future<void> savePasswordForBiometric(String? masterPassword) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #savePasswordForBiometric,
+          [masterPassword],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> clearPasswordForBiometric() => (super.noSuchMethod(
+        Invocation.method(
+          #clearPasswordForBiometric,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<String?> getStoredBiometricPassword() => (super.noSuchMethod(
+        Invocation.method(
+          #getStoredBiometricPassword,
+          [],
+        ),
+        returnValue: _i4.Future<String?>.value(),
+      ) as _i4.Future<String?>);
 }
 
 /// A class which mocks [EventStore].

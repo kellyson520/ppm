@@ -49,14 +49,24 @@ class KeyManager {
   /// Initialize with new master password (first setup)
   ///
   /// 1. Generate random salt
-  /// 2. Benchmark device for Argon2id parameters
-  /// 3. Derive KEK from master password
-  /// 4. Generate random DEK
-  /// 5. Encrypt DEK with KEK
-  /// 6. Store encrypted DEK and salt in secure storage
-  Future<void> initialize(String masterPassword) async {
-    // Generate random salt (32 bytes)
-    final salt = _cryptoService.generateRandomBytes(32);
+  /// 2. If [userEntropy] is provided, mix it with the system salt using SHA-512
+  /// 3. Benchmark device for Argon2id parameters
+  /// 4. Derive KEK from master password
+  /// 5. Generate random DEK
+  /// 6. Encrypt DEK with KEK
+  /// 7. Store encrypted DEK and salt in secure storage
+  Future<void> initialize(String masterPassword,
+      {Uint8List? userEntropy}) async {
+    // Generate random system salt (32 bytes)
+    var salt = _cryptoService.generateRandomBytes(32);
+
+    // If entropy is provided, mix it in to increase total entropy of the salt
+    if (userEntropy != null && userEntropy.isNotEmpty) {
+      final combined = BytesBuilder();
+      combined.add(salt);
+      combined.add(userEntropy);
+      salt = _cryptoService.sha512Hash(combined.toBytes());
+    }
 
     // Benchmark device for optimal Argon2id parameters
     final argonParams = _cryptoService.benchmarkDevice();
