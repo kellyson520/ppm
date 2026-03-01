@@ -110,6 +110,16 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
     setState(() {
       if (query.isEmpty) {
         _filteredCards = _cards;
+      } else if (widget.dek != null) {
+        final lowerQuery = query.toLowerCase();
+        _filteredCards = _cards.where((card) {
+          final payload = widget.authService.decryptCard(card, widget.dek!);
+          if (payload != null) {
+            return payload.issuer.toLowerCase().contains(lowerQuery) ||
+                payload.account.toLowerCase().contains(lowerQuery);
+          }
+          return false;
+        }).toList();
       } else if (widget.searchKey != null) {
         _filteredCards = widget.authService.search(query, widget.searchKey!);
       }
@@ -346,42 +356,20 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
               )
             : _filteredCards.isEmpty
                 ? SliverFillRemaining(child: _buildEmptyState(l10n))
-                : ResponsiveLayout.isMedium(context)
-                    ? SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 8),
-                        sliver: SliverGrid(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                            childAspectRatio: 2.5,
-                          ),
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final card = _filteredCards[index];
-                              final entry = _decryptedEntries[card.cardId];
-                              return _buildAuthCardItem(card, entry, l10n);
-                            },
-                            childCount: _filteredCards.length,
-                          ),
-                        ),
-                      )
-                    : SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 8),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final card = _filteredCards[index];
-                              final entry = _decryptedEntries[card.cardId];
-                              return _buildAuthCardItem(card, entry, l10n);
-                            },
-                            childCount: _filteredCards.length,
-                          ),
-                        ),
+                : SliverPadding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final card = _filteredCards[index];
+                          final entry = _decryptedEntries[card.cardId];
+                          return _buildAuthCardItem(card, entry, l10n);
+                        },
+                        childCount: _filteredCards.length,
                       ),
+                    ),
+                  ),
         const SliverPadding(padding: EdgeInsets.only(bottom: 120)), // 为悬浮栏留白
       ],
     );

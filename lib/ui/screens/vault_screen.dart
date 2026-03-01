@@ -102,8 +102,15 @@ class _VaultScreenState extends State<VaultScreen> {
       if (query.isEmpty) {
         _filteredCards = _cards;
       } else {
+        final lowerQuery = query.toLowerCase();
         _filteredCards = _cards.where((card) {
-          return card.cardId.toLowerCase().contains(query.toLowerCase());
+          final payload = _payloads[card.cardId];
+          if (payload != null) {
+            return payload.title.toLowerCase().contains(lowerQuery) ||
+                payload.username.toLowerCase().contains(lowerQuery) ||
+                (payload.url?.toLowerCase().contains(lowerQuery) ?? false);
+          }
+          return false;
         }).toList();
       }
     });
@@ -201,38 +208,6 @@ class _VaultScreenState extends State<VaultScreen> {
         }
       });
     }
-  }
-
-  AppBar _buildAppBar(AppLocalizations l10n) {
-    return AppBar(
-      title: Text(_getTitle(l10n)),
-      leading: IconButton(
-        icon: const Icon(Icons.lock_outline),
-        onPressed: widget.onLockRequested,
-        tooltip: l10n.lockVault,
-      ),
-      actions: [
-        if (_currentIndex == 0 &&
-            _stats != null &&
-            _stats!.pendingSyncCount > 0)
-          Badge(
-            label: Text('${_stats!.pendingSyncCount}'),
-            child: IconButton(
-              icon: const Icon(Icons.sync),
-              onPressed: () {
-                _showSuccess(l10n.syncStarted);
-              },
-            ),
-          )
-        else if (_currentIndex == 0)
-          IconButton(
-            icon: const Icon(Icons.sync),
-            onPressed: () {
-              _showSuccess(l10n.alreadyUpToDate);
-            },
-          ),
-      ],
-    );
   }
 
   @override
@@ -442,13 +417,58 @@ class _VaultScreenState extends State<VaultScreen> {
 
   Widget _buildTablet(AppLocalizations l10n) {
     return Scaffold(
-      appBar: _buildAppBar(l10n),
-      body: Row(
+      backgroundColor: Colors.transparent, // 透过 Scaffold 看到背景
+      body: Stack(
         children: [
-          _buildNavigationRail(l10n),
-          const VerticalDivider(thickness: 1, width: 1),
-          // 为了确保后续扩大布局或表单能够安全地不溢出
-          Expanded(child: SafeArea(child: ClipRect(child: _buildBody(l10n)))),
+          // 第一层：宇宙深渊背景光效
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(0, 1.2),
+                  radius: 1.5,
+                  colors: [
+                    Color(0xFF1E1C3A),
+                    Color(0xFF101018),
+                  ],
+                  stops: [0.0, 1.0],
+                ),
+              ),
+            ),
+          ),
+          // 第二层：主内容包裹层 (弹窗 3D 沉降)
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeOutCubic,
+            transform: _isModalOpen
+                ? (Matrix4.identity()
+                  ..setTranslationRaw(
+                      0.0, MediaQuery.of(context).size.height * 0.04, 0.0)
+                  // ignore: deprecated_member_use
+                  ..scale(0.92, 0.92, 1.0))
+                : Matrix4.identity(),
+            decoration: BoxDecoration(
+              borderRadius:
+                  _isModalOpen ? BorderRadius.circular(32) : BorderRadius.zero,
+            ),
+            clipBehavior: _isModalOpen ? Clip.hardEdge : Clip.none,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: _isModalOpen ? 0.6 : 1.0,
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    _buildNavigationRail(l10n),
+                    VerticalDivider(
+                        thickness: 1,
+                        width: 1,
+                        color: Colors.white.withValues(alpha: 0.1)),
+                    Expanded(child: ClipRect(child: _buildBody(l10n))),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -620,11 +640,11 @@ class _VaultScreenState extends State<VaultScreen> {
                             horizontal: 24, vertical: 8),
                         sliver: SliverGrid(
                           gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 450,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 8,
-                            childAspectRatio: 3.5,
+                            mainAxisExtent: 80,
                           ),
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
@@ -716,7 +736,7 @@ class _VaultScreenState extends State<VaultScreen> {
         });
       },
       labelType: NavigationRailLabelType.all,
-      backgroundColor: const Color(0xFF16213E),
+      backgroundColor: Colors.transparent, // 透射底层宇宙渐变
       indicatorColor: const Color(0xFF6C63FF).withValues(alpha: 0.2),
       leading: _currentIndex != 2
           ? Padding(

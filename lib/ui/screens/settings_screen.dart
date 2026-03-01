@@ -1,8 +1,8 @@
 import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import '../../services/vault_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../blocs/sync/sync_bloc.dart';
@@ -291,19 +291,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     try {
       final jsonStr = await widget.vaultService.exportVaultAsJson();
-      final tempDir = await getTemporaryDirectory();
-      final file = File(
-          '${tempDir.path}/ztd_vault_export_${DateTime.now().millisecondsSinceEpoch}.json');
-      await file.writeAsString(jsonStr);
 
-      final result = await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          subject: l10n.exportBackup,
-        ),
+      // Pass bytes so FilePicker handles writing on supported mobile platforms
+      final bytes = utf8.encode(jsonStr);
+      final String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: l10n.exportBackup,
+        fileName:
+            'ztd_vault_export_${DateTime.now().millisecondsSinceEpoch}.json',
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        bytes: Uint8List.fromList(bytes),
       );
 
-      if (result.status == ShareResultStatus.success) {
+      // On Desktop, if it just returns path and didn't write bytes, write manually.
+      if (outputFile != null) {
+        final file = File(outputFile);
+        if (!file.existsSync() || file.lengthSync() == 0) {
+          await file.writeAsBytes(bytes);
+        }
         _showSuccess(l10n.backupExported);
       }
     } on Exception catch (e) {
