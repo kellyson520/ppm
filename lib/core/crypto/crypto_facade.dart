@@ -223,6 +223,56 @@ class CryptoFacade {
     return aead.open(box: box, key: key);
   }
 
+  /// 使用指定 IV 加密（用于生物识别凭证加密）
+  String encryptAesGcmWithIv(Uint8List plaintext, Uint8List salt, Uint8List iv) {
+    final key = sha256Hash(salt);
+    final nonce = iv;
+    
+    final suite = _policy.defaultSuite;
+    final aead = _registry.getAead(suite.aeadId);
+    if (aead == null) {
+      throw StateError('AEAD "${suite.aeadId}" 未注册');
+    }
+
+    final box = aead.seal(
+      plaintext: plaintext,
+      key: key,
+      nonce: nonce,
+    );
+
+    final combined = Uint8List(16 + box.ciphertext.length + box.authTag.length);
+    combined.setRange(0, 16, iv);
+    combined.setRange(16, 16 + box.ciphertext.length, box.ciphertext);
+    combined.setRange(16 + box.ciphertext.length, combined.length, box.authTag);
+
+    return base64Encode(combined);
+  }
+
+  /// 使用指定 IV 解密（用于生物识别凭证解密）
+  Uint8List decryptAesGcmWithIv(String encryptedData, Uint8List salt, Uint8List iv) {
+    final decoded = base64Decode(encryptedData);
+    final cipherTextLength = decoded.length - 16 - 16;
+
+    final ciphertext = Uint8List.fromList(decoded.sublist(16, 16 + cipherTextLength));
+    final authTag = Uint8List.fromList(decoded.sublist(16 + cipherTextLength));
+
+    final key = sha256Hash(salt);
+    
+    final suite = _policy.defaultSuite;
+    final aead = _registry.getAead(suite.aeadId);
+    if (aead == null) {
+      throw StateError('AEAD "${suite.aeadId}" 未注册');
+    }
+
+    final box = EncryptedBox(
+      ciphertext: ciphertext,
+      nonce: iv,
+      authTag: authTag,
+    );
+
+    return aead.open(box: box, key: key);
+  }
+
   // ==================== HKDF ====================
 
   /// HKDF-SHA256 密钥拉伸

@@ -196,6 +196,16 @@ class CryptoService {
   void clearBuffer(Uint8List buffer) {
     _facade.clearBuffer(buffer);
   }
+
+  /// 使用指定 IV 加密（用于生物识别凭证加密）
+  String encryptAesGcmWithIv(Uint8List plaintext, Uint8List salt, Uint8List iv) {
+    return _facade.encryptAesGcmWithIv(plaintext, salt, iv);
+  }
+
+  /// 使用指定 IV 解密（用于生物识别凭证解密）
+  Uint8List decryptAesGcmWithIv(String encryptedData, Uint8List salt, Uint8List iv) {
+    return _facade.decryptAesGcmWithIv(encryptedData, salt, iv);
+  }
 }
 
 /// Argon2id 参数（兼容旧代码）
