@@ -131,6 +131,25 @@ lib/
 └── main.dart
 ```
 
+## Development Standards
+
+Before contributing, please read and follow our project standards:
+
+| Document | Description |
+|----------|-------------|
+| [STANDARDS.md](STANDARDS.md) | 编码规范、Dart/Flutter 规范、架构规范、安全规范 |
+| [GIT_WORKFLOW.md](GIT_WORKFLOW.md) | Git 分支策略、提交规范、PR 流程、版本发布 |
+| [CI_CD.md](CI_CD.md) | CI/CD 配置、质量门禁、构建产物、故障排查 |
+
+### Quick Check Before Commit
+
+- [ ] `flutter analyze` passes (no errors or warnings)
+- [ ] `flutter test` passes (all tests green)
+- [ ] Code follows naming conventions
+- [ ] No hardcoded secrets
+- [ ] Public APIs have documentation comments
+- [ ] Commit message follows the convention
+
 ### Running Tests
 
 ```bash
@@ -161,11 +180,14 @@ flutter test --coverage
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Read the [Development Standards](STANDARDS.md) documentation
+2. Fork the repository
+3. Create your feature branch (`git checkout -b feature/amazing-feature`)
+4. Follow [Git Workflow](GIT_WORKFLOW.md) for commit conventions
+5. Ensure `flutter analyze` and `flutter test` pass locally
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request following the [PR process](GIT_WORKFLOW.md#4-pull-request-流程)
+8. Wait for code review and address feedback
 
 ## License
 
