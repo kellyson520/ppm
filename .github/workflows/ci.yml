@@ -93,7 +93,6 @@ jobs:
           flutter-version: '3.41.2'
           channel: 'stable'
           cache: true
-          cache-dependency-path: pubspec.lock
 
       - name: Install dependencies
         run: flutter pub get
@@ -129,7 +128,6 @@ jobs:
           flutter-version: '3.41.2'
           channel: 'stable'
           cache: true
-          cache-dependency-path: pubspec.lock
 
       - name: Set up Android NDK
         uses: nttld/setup-ndk@v1
@@ -192,7 +190,6 @@ jobs:
           flutter-version: '3.41.2'
           channel: 'stable'
           cache: true
-          cache-dependency-path: pubspec.lock
 
       - name: Install dependencies
         run: flutter pub get
