@@ -37,10 +37,8 @@ class _VaultScreenState extends State<VaultScreen> {
   int _currentIndex = 0;
   bool _isModalOpen = false;
 
-  // Services
   final AuthService _authService = AuthService();
 
-  // Password tab state
   final _searchController = TextEditingController();
   List<PasswordCard> _cards = [];
   List<PasswordCard> _filteredCards = [];
@@ -137,7 +135,6 @@ class _VaultScreenState extends State<VaultScreen> {
   }
 
   void _navigateToAddPassword() {
-    // 触发底层主界面深沉缩放动画
     setState(() {
       _isModalOpen = true;
     });
@@ -145,9 +142,9 @@ class _VaultScreenState extends State<VaultScreen> {
     showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent, // 依赖内部内容的玻璃效果
+      backgroundColor: Colors.transparent,
       elevation: 0,
-      barrierColor: Colors.black.withValues(alpha: 0.4), // 环境变暗
+      barrierColor: Colors.black.withValues(alpha: 0.4),
       transitionAnimationController: AnimationController(
         vsync: Navigator.of(context),
         duration: const Duration(milliseconds: 400),
@@ -176,7 +173,6 @@ class _VaultScreenState extends State<VaultScreen> {
         _selectedPasswordCard = card;
       });
     } else {
-      // 触发底层主界面深沉缩放动画
       setState(() {
         _isModalOpen = true;
       });
@@ -184,9 +180,9 @@ class _VaultScreenState extends State<VaultScreen> {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        backgroundColor: Colors.transparent, // 依赖内部内容的玻璃效果
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        barrierColor: Colors.black.withValues(alpha: 0.4), // 环境变暗
+        barrierColor: Colors.black.withValues(alpha: 0.4),
         transitionAnimationController: AnimationController(
           vsync: Navigator.of(context),
           duration: const Duration(milliseconds: 400),
@@ -198,12 +194,10 @@ class _VaultScreenState extends State<VaultScreen> {
           isEmbedded: false,
         ),
       ).then((_) {
-        // 模态框关闭后，取消主界面的缩小状态
         if (mounted) {
           setState(() {
             _isModalOpen = false;
           });
-          // 重新加载可能的数据更新
           _loadData();
         }
       });
@@ -217,74 +211,59 @@ class _VaultScreenState extends State<VaultScreen> {
     return ResponsiveLayout(
       compact: _buildCompact(l10n),
       medium: _buildTablet(l10n),
-      expanded: _buildTablet(l10n), // Phase 3 将进一步实现 Expanded 的横屏 Master-Detail
+      expanded: _buildTablet(l10n),
     );
   }
 
   Widget _buildCompact(AppLocalizations l10n) {
-    // 强制去除 Scaffold 自带的 Background 以利用外层的深色宇宙径向渐变
     return Scaffold(
-      backgroundColor: Colors.transparent, // 透过 Scaffold 看到背景
-      // 废弃默认的 bottomNavigationBar, 改用 Stack 悬浮 Dock
-      // appBar: _buildAppBar(l10n), // 废弃传统顶栏，将在列表内变为 SliverAppBar
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // 第一层：宇宙深渊背景光效
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
-                // 以底部中心为圆心的一片巨大的幽暗紫色微光
                 gradient: RadialGradient(
                   center: Alignment(0, 1.2),
                   radius: 1.5,
                   colors: [
-                    Color(0xFF1E1C3A), // 幽暗的紫黑微光
-                    Color(0xFF101018), // 基础极深黑底
+                    Color(0xFF1E1C3A),
+                    Color(0xFF101018),
                   ],
                   stops: [0.0, 1.0],
                 ),
               ),
             ),
           ),
-
-          // 第二层：主内容包裹层 (弹窗 3D 沉降)
           AnimatedContainer(
             duration: const Duration(milliseconds: 400),
             curve: Curves.easeOutCubic,
-            // 假设打开弹窗时缩小，通过 Matrix 处理 Z 轴下沉
-            // ignore: deprecated_member_use
             transform: _isModalOpen
                 ? (Matrix4.identity()
                   ..setTranslationRaw(0.0,
-                      MediaQuery.of(context).size.height * 0.04, 0.0) // 往下坠一点
-                  // ignore: deprecated_member_use
-                  ..scale(0.92, 0.92, 1.0)) // 缩小比例
+                      MediaQuery.of(context).size.height * 0.04, 0.0)
+                  ..scale(0.92, 0.92, 1.0))
                 : Matrix4.identity(),
             decoration: BoxDecoration(
-              // 当缩小的时候给个圆角以符合 iOS 视差设计
               borderRadius:
                   _isModalOpen ? BorderRadius.circular(32) : BorderRadius.zero,
             ),
             clipBehavior: _isModalOpen ? Clip.hardEdge : Clip.none,
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 300),
-              opacity: _isModalOpen ? 0.6 : 1.0, // 背景变暗退到二线
+              opacity: _isModalOpen ? 0.6 : 1.0,
               child: SafeArea(
-                bottom: false, // 底部延伸下去，避免出现黑边
+                bottom: false,
                 child: _buildBody(l10n),
               ),
             ),
           ),
-
-          // 第三层：浮动玻璃岛 (Floating Glass Dock)
           Positioned(
-            bottom: 30, // 悬浮距离
-            left: MediaQuery.of(context).size.width * 0.1, // 两侧留空 10%
+            bottom: 30,
+            left: MediaQuery.of(context).size.width * 0.1,
             right: MediaQuery.of(context).size.width * 0.1,
             child: _buildFloatingDock(l10n),
           ),
-
-          // 悬浮创建按钮 (放在 Dock 外围右侧上方)
           if (_currentIndex != 2)
             Positioned(
               bottom: 110,
@@ -306,7 +285,6 @@ class _VaultScreenState extends State<VaultScreen> {
     );
   }
 
-  /// 替代传统的 SafeArea 底栏，使用 BackdropFilter 和圆角构建的极细玻璃浮岛
   Widget _buildFloatingDock(AppLocalizations l10n) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(34),
@@ -315,10 +293,10 @@ class _VaultScreenState extends State<VaultScreen> {
         child: Container(
           height: 68,
           decoration: BoxDecoration(
-            color: const Color(0x991C1C28), // 提供极低透明度的底板深色
+            color: const Color(0x991C1C28),
             borderRadius: BorderRadius.circular(34),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08), // Apple HIG 一根反光的细白边
+              color: Colors.white.withValues(alpha: 0.08),
               width: 0.5,
             ),
             boxShadow: [
@@ -369,7 +347,6 @@ class _VaultScreenState extends State<VaultScreen> {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        // 加入极轻的物理回馈
         HapticFeedback.lightImpact();
         setState(() {
           _currentIndex = index;
@@ -387,13 +364,11 @@ class _VaultScreenState extends State<VaultScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // 图标
             Icon(
               isActive ? activeIcon : icon,
               color: isActive ? color : Colors.white54,
               size: 26,
             ),
-            // 底板原点指示器 (Apple 喜欢在选中的项下面亮一个小点)
             Positioned(
               bottom: 6,
               child: AnimatedOpacity(
@@ -417,10 +392,9 @@ class _VaultScreenState extends State<VaultScreen> {
 
   Widget _buildTablet(AppLocalizations l10n) {
     return Scaffold(
-      backgroundColor: Colors.transparent, // 透过 Scaffold 看到背景
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // 第一层：宇宙深渊背景光效
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
@@ -436,7 +410,6 @@ class _VaultScreenState extends State<VaultScreen> {
               ),
             ),
           ),
-          // 第二层：主内容包裹层 (弹窗 3D 沉降)
           AnimatedContainer(
             duration: const Duration(milliseconds: 400),
             curve: Curves.easeOutCubic,
@@ -444,7 +417,6 @@ class _VaultScreenState extends State<VaultScreen> {
                 ? (Matrix4.identity()
                   ..setTranslationRaw(
                       0.0, MediaQuery.of(context).size.height * 0.04, 0.0)
-                  // ignore: deprecated_member_use
                   ..scale(0.92, 0.92, 1.0))
                 : Matrix4.identity(),
             decoration: BoxDecoration(
@@ -510,29 +482,25 @@ class _VaultScreenState extends State<VaultScreen> {
 
   Widget _buildPasswordTab(AppLocalizations l10n) {
     if (ResponsiveLayout.isExpanded(context)) {
-      // Expanded: Master-Detail
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Master: List
           Expanded(
             flex: 2,
             child: _buildPasswordListColumn(l10n),
           ),
           const VerticalDivider(width: 1, thickness: 1),
-          // Detail: Screen
           Expanded(
             flex: 3,
             child: _selectedPasswordCard == null
                 ? Center(
                     child: Text(
-                      l10n.noPasswords, // Alternatively a placeholder 'Select a password'
+                      l10n.noPasswords,
                       style:
                           TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                     ),
                   )
                 : PasswordDetailScreen(
-                    // Important: Use ValueKey to force recreation when selection changes
                     key: ValueKey(_selectedPasswordCard!.cardId),
                     vaultService: widget.vaultService,
                     card: _selectedPasswordCard!,
@@ -542,67 +510,78 @@ class _VaultScreenState extends State<VaultScreen> {
         ],
       );
     } else {
-      // Compact / Medium
       return _buildPasswordListColumn(l10n);
     }
   }
 
   Widget _buildPasswordListColumn(AppLocalizations l10n) {
+    final topPadding = MediaQuery.of(context).padding.top;
+
     return CustomScrollView(
       physics:
           const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       slivers: [
-        // 苹果风大标题与模糊搜索框
-        SliverAppBar.large(
+        SliverAppBar(
           backgroundColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent, // 避免 M3 默认颜色污染
-          expandedHeight: 180,
+          surfaceTintColor: Colors.transparent,
+          expandedHeight: 120,
+          floating: true,
+          pinned: true,
           flexibleSpace: FlexibleSpaceBar(
-            titlePadding: const EdgeInsets.only(left: 24, bottom: 16),
+            titlePadding: EdgeInsets.only(
+              left: 24,
+              bottom: 12 + topPadding * 0.3,
+            ),
             title: Text(
               _getTitle(l10n),
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    color: Colors.white,
-                    fontSize: 34,
-                  ),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            background: Padding(
-              padding: const EdgeInsets.only(top: 80, left: 24, right: 24),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: _search,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: l10n.searchPassword,
-                    hintStyle:
-                        TextStyle(color: Colors.white.withValues(alpha: 0.5)),
-                    filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.08), // 高通透输入框
-                    prefixIcon: Icon(Icons.search,
-                        color: Colors.white.withValues(alpha: 0.5)),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, color: Colors.white),
-                            onPressed: () {
-                              _searchController.clear();
-                              _search('');
-                            },
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(24, 16, 24, 8),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: _search,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: l10n.searchPassword,
+                  hintStyle:
+                      TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                  prefixIcon: Icon(Icons.search,
+                      color: Colors.white.withValues(alpha: 0.5)),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.white),
+                          onPressed: () {
+                            _searchController.clear();
+                            _search('');
+                          },
+                        )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
                   ),
                 ),
               ),
             ),
           ),
         ),
-
-        // 顶层控制状态（统计等，可选留存也可作为 SliverToBoxAdapter）
         if (_stats != null)
           SliverToBoxAdapter(
             child: Padding(
@@ -624,8 +603,6 @@ class _VaultScreenState extends State<VaultScreen> {
               ),
             ),
           ),
-
-        // 密码列表区
         _isLoading
             ? const SliverFillRemaining(
                 child: Center(child: CircularProgressIndicator()),
@@ -676,8 +653,6 @@ class _VaultScreenState extends State<VaultScreen> {
                           ),
                         ),
                       ),
-
-        // 垫底高度防止内容被 Dock 遮挡
         const SliverToBoxAdapter(
           child: SizedBox(height: 120),
         )
@@ -686,7 +661,6 @@ class _VaultScreenState extends State<VaultScreen> {
   }
 
   Widget _buildSettingsTab() {
-    // 直接嵌入设置页面内容（而非导航跳转）
     return SettingsScreen(
       vaultService: widget.vaultService,
       onLockRequested: widget.onLockRequested,
@@ -695,7 +669,6 @@ class _VaultScreenState extends State<VaultScreen> {
   }
 
   void _navigateToAddAuth() {
-    // 触发底层主界面深沉缩放动画
     setState(() {
       _isModalOpen = true;
     });
@@ -703,9 +676,9 @@ class _VaultScreenState extends State<VaultScreen> {
     showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent, // 依赖内部内容的玻璃效果
+      backgroundColor: Colors.transparent,
       elevation: 0,
-      barrierColor: Colors.black.withValues(alpha: 0.4), // 环境变暗
+      barrierColor: Colors.black.withValues(alpha: 0.4),
       transitionAnimationController: AnimationController(
         vsync: Navigator.of(context),
         duration: const Duration(milliseconds: 400),
@@ -722,7 +695,6 @@ class _VaultScreenState extends State<VaultScreen> {
         setState(() {
           _isModalOpen = false;
         });
-        // The AuthenticatorScreen inside _buildBody will handle its own refresh
       }
     });
   }
@@ -736,7 +708,7 @@ class _VaultScreenState extends State<VaultScreen> {
         });
       },
       labelType: NavigationRailLabelType.all,
-      backgroundColor: Colors.transparent, // 透射底层宇宙渐变
+      backgroundColor: Colors.transparent,
       indicatorColor: const Color(0xFF6C63FF).withValues(alpha: 0.2),
       leading: _currentIndex != 2
           ? Padding(
@@ -751,7 +723,7 @@ class _VaultScreenState extends State<VaultScreen> {
                 child: const Icon(Icons.add),
               ),
             )
-          : const SizedBox(height: 72), // Placeholder for FAB space
+          : const SizedBox(height: 72),
       destinations: [
         NavigationRailDestination(
           icon: const Icon(Icons.lock_outline),

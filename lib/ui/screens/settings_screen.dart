@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../services/vault_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../blocs/sync/sync_bloc.dart';
@@ -30,12 +31,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   VaultStats? _stats;
   bool _isBiometricEnabled = false;
   final _localAuth = LocalAuthentication();
+  PackageInfo? _packageInfo;
 
   @override
   void initState() {
     super.initState();
     _loadStats();
     _checkBiometrics();
+    _loadPackageInfo();
+  }
+
+  Future<void> _loadPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() {
+        _packageInfo = info;
+      });
+    }
   }
 
   Future<void> _checkBiometrics() async {
@@ -488,7 +500,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: _buildSection(
             title: l10n.about,
             children: [
-              _buildInfoTile(Icons.info_outline_rounded, l10n.version, '1.0.0'),
+              _buildInfoTile(Icons.info_outline_rounded, l10n.version, _packageInfo?.version ?? '...'),
               _buildDivider(),
               _buildListTile(
                 icon: Icons.description_outlined,

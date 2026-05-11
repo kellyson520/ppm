@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 /// 1. 采集手势物理特征（坐标、压力、时间戳）作为随机源。
 /// 2. 画笔痕迹随时间淡出，增强安全性并防止图案泄露。
 /// 3. 提供粒子火花动效，增强视觉回馈。
+/// 4. 基于速度预测实现流畅的跟手体验。
 class EntropyCanvasWidget extends StatefulWidget {
   /// 完成采集所需的目标采样点数
   final int targetPoints;
@@ -29,80 +30,14 @@ class _EntropyCanvasWidgetState extends State<EntropyCanvasWidget>
     with SingleTickerProviderStateMixin {
   final List<_EntropyPoint> _points = [];
   final List<_VisualPathPoint> _visualPoints = [];
-  late AnimationController _animationController;
 
   int _collectedCount = 0;
   bool _isFinished = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 16),
-    )..repeat();
-
-    _animationController.addListener(() {
-      _updateVisualPoints();
-    });
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _updateVisualPoints() {
-    if (_visualPoints.isEmpty) return;
-
-    setState(() {
-      _visualPoints.removeWhere((p) => p.isExpired);
-      for (var p in _visualPoints) {
-        p.age++;
-      }
-    });
-  }
-
-  void _handlePointerEvent(PointerEvent event) {
-    if (_isFinished) return;
-
-    // 采集底层数据（物理熵）
-    final point = _EntropyPoint(
-      x: event.position.dx,
-      y: event.position.dy,
-      pressure: event.pressure,
-      timestamp: DateTime.now().microsecondsSinceEpoch,
-    );
-    _points.add(point);
-    _collectedCount++;
-
-    // 添加视觉反馈点（火花粒子）
-    _visualPoints.add(_VisualPathPoint(event.position));
-
-    // 检查是否达到阈值
-    if (_collectedCount >= widget.targetPoints && !_isFinished) {
-      _finishCollection();
-    }
-  }
-
-  void _finishCollection() {
-    _isFinished = true;
-
-    // 生成哈希熵
-    final buffer = BytesBuilder();
-    for (var p in _points) {
-      // 将双精度转为字节流
-      final data =
-          Float64List.fromList([p.x, p.y, p.pressure, p.timestamp.toDouble()]);
-      buffer.add(data.buffer.asUint8List());
-    }
-
-    // 异步执行回调，确保 UI 刷新后再通知
-    Future.delayed(const Duration(milliseconds: 500), () {
-      widget.onComplete(buffer.toBytes());
-    });
-  }
+  Offset? _lastPosition;
+  DateTime? _lastTime;
+  final List<Offset> _velocityHistory = [];
+  static const int _velocityHistorySize = 5;
 
   @override
   Widget build(BuildContext context) {
@@ -116,16 +51,29 @@ class _EntropyCanvasWidgetState extends State<EntropyCanvasWidget>
           child: Listener(
             onPointerMove: _handlePointerEvent,
             onPointerDown: _handlePointerEvent,
-            child: CustomPaint(
-              painter: _EntropyPainter(
-                points: _visualPoints,
-                color: primaryColor,
+            onPointerUp: _handlePointerUp,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.02),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: primaryColor.withValues(alpha: 0.2),
+                  width: 1,
+                ),
               ),
-              size: Size.infinite,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: CustomPaint(
+                  painter: _EntropyPainter(
+                    points: _visualPoints,
+                    color: primaryColor,
+                  ),
+                  size: Size.infinite,
+                ),
+              ),
             ),
           ),
         ),
-        // 进度条
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
           child: Column(
@@ -141,7 +89,9 @@ class _EntropyCanvasWidgetState extends State<EntropyCanvasWidget>
               ),
               const SizedBox(height: 12),
               Text(
-                _isFinished ? '混沌能量已注满' : '指尖滑动，注入物理随机性能量',
+                _isFinished
+                    ? '混沌能量已注满'
+                    : '指尖滑动，注入物理随机性能量',
                 style: TextStyle(
                   color: primaryColor.withValues(alpha: 0.8),
                   fontSize: 14,
@@ -155,11 +105,83 @@ class _EntropyCanvasWidgetState extends State<EntropyCanvasWidget>
       ],
     );
   }
+
+  void _handlePointerEvent(PointerEvent event) {
+    if (_isFinished) return;
+
+    final now = DateTime.now();
+
+    if (_lastPosition != null && _lastTime != null) {
+      final dt = now.difference(_lastTime!).inMicroseconds;
+      if (dt > 0) {
+        final velocity = Offset(
+          (event.position.dx - _lastPosition!.dx) / dt * 1000000,
+          (event.position.dy - _lastPosition!.dy) / dt * 1000000,
+        );
+        _velocityHistory.add(velocity);
+        if (_velocityHistory.length > _velocityHistorySize) {
+          _velocityHistory.removeAt(0);
+        }
+      }
+    }
+
+    _lastPosition = event.position;
+    _lastTime = now;
+
+    final entropyPoint = _EntropyPoint(
+      x: event.position.dx,
+      y: event.position.dy,
+      pressure: event.pressure,
+      timestamp: now.microsecondsSinceEpoch,
+    );
+    _points.add(entropyPoint);
+    _collectedCount++;
+
+    final avgVelocity = _velocityHistory.isEmpty
+        ? Offset.zero
+        : _velocityHistory.reduce((a, b) => a + b) / _velocityHistory.length;
+
+    _visualPoints.add(_VisualPathPoint(
+      position: event.position,
+      velocity: avgVelocity,
+      pressure: event.pressure,
+    ));
+
+    if (_collectedCount >= widget.targetPoints && !_isFinished) {
+      _finishCollection();
+    }
+  }
+
+  void _handlePointerUp(PointerEvent event) {
+    _lastPosition = null;
+    _lastTime = null;
+    _velocityHistory.clear();
+  }
+
+  void _finishCollection() {
+    _isFinished = true;
+
+    final buffer = BytesBuilder();
+    for (var p in _points) {
+      final data = Float64List.fromList([
+        p.x,
+        p.y,
+        p.pressure,
+        p.timestamp.toDouble(),
+      ]);
+      buffer.add(data.buffer.asUint8List());
+    }
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      widget.onComplete(buffer.toBytes());
+    });
+  }
 }
 
 class _EntropyPoint {
   final double x, y, pressure;
   final int timestamp;
+
   _EntropyPoint({
     required this.x,
     required this.y,
@@ -170,13 +192,29 @@ class _EntropyPoint {
 
 class _VisualPathPoint {
   final Offset position;
+  final Offset velocity;
+  final double pressure;
   int age = 0;
-  static const int maxAge = 25; // 线条淡出速度
 
-  _VisualPathPoint(this.position);
+  _VisualPathPoint({
+    required this.position,
+    required this.velocity,
+    required this.pressure,
+  });
+
+  int get maxAge {
+    final speed = velocity.distance;
+    return (20 + speed * 0.5).toInt().clamp(15, 50);
+  }
+
+  double get opacity {
+    final t = age / maxAge;
+    return (1.0 - t * t).clamp(0.0, 1.0);
+  }
+
+  double get radius => (2.0 + pressure * 4).clamp(1.0, 6.0);
 
   bool get isExpired => age >= maxAge;
-  double get opacity => (1.0 - (age / maxAge)).clamp(0.0, 1.0);
 }
 
 class _EntropyPainter extends CustomPainter {
@@ -187,23 +225,42 @@ class _EntropyPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (points.isEmpty) return;
+
     final paint = Paint()
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 3.0;
+      ..style = PaintingStyle.fill;
 
     for (var i = 0; i < points.length; i++) {
       final p = points[i];
-      paint.color = color.withValues(alpha: p.opacity * 0.6);
+      if (p.isExpired) continue;
 
-      // 绘制火花点（带轻微模糊效果）
-      canvas.drawCircle(p.position, 2.0 * p.opacity, paint);
+      paint.color = color.withValues(alpha: p.opacity * 0.9);
+      canvas.drawCircle(p.position, p.radius * p.opacity, paint);
 
-      // 如果有多点，连接成虚幻的线条
+      if (p.velocity.distance > 100 && i > 0) {
+        final prev = points[i - 1];
+        final direction = (p.position - prev.position).direction;
+        final tailLength = (p.velocity.distance / 500).clamp(5.0, 30.0);
+        final tailEnd = p.position + Offset.fromDirection(direction, tailLength);
+
+        paint.style = PaintingStyle.stroke;
+        paint.strokeWidth = (1.0 + p.pressure * 2) * p.opacity;
+        paint.color = color.withValues(alpha: p.opacity * 0.4);
+        canvas.drawLine(p.position, tailEnd, paint);
+        paint.style = PaintingStyle.fill;
+      }
+
       if (i > 0) {
         final prev = points[i - 1];
-        if ((p.position - prev.position).distance < 50) {
-          paint.strokeWidth = 1.5 * p.opacity;
+        final distance = (p.position - prev.position).distance;
+
+        if (distance < 80) {
+          paint.style = PaintingStyle.stroke;
+          paint.strokeWidth = (1.0 + p.pressure * 2) * p.opacity.clamp(0.3, 1.0);
+          paint.color = color.withValues(alpha: p.opacity * 0.5);
           canvas.drawLine(prev.position, p.position, paint);
+          paint.style = PaintingStyle.fill;
         }
       }
     }
