@@ -30,6 +30,8 @@ analyzer:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "**/generated_plugin_registrant.dart"
+    - ".agent/**"
+    - "**/*.md"
   
   language:
     strict-casts: true
