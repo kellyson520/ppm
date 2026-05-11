@@ -12,29 +12,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
-env:
-  SKIP_PATTERNS: &skip_patterns
-    - '*.md'
-    - 'docs/**'
-    - '.agent/**'
-    - 'LICENSE'
-    - '.gitignore'
-    - '.vscode/**'
-    - '.idea/**'
-    - '*.lock'
-    - '!.lock' # except pubspec.lock
-
-  CODE_PATTERNS: &code_patterns
-    - 'lib/**'
-    - 'test/**'
-    - 'android/**'
-    - 'ios/**'
-    - 'web/**'
-    - 'pubspec.yaml'
-    - 'pubspec.lock'
-    - 'analysis_options.yaml'
-    - '.github/workflows/**'
-
 jobs:
   skip-check:
     name: Check if CI should run
@@ -57,9 +34,9 @@ jobs:
             exit 0
           fi
 
-          if [ "${{ startsWith(github.event.head_commit.message, 'docs:') }}" = "true" ] || \
-             [ "${{ startsWith(github.event.head_commit.message, 'chore:') }}" = "true" ] || \
-             [ "${{ startsWith(github.event.head_commit.message, 'ci:') }}" = "true" ]; then
+          if [[ "${{ github.event.head_commit.message }}" == docs:* ]] || \
+             [[ "${{ github.event.head_commit.message }}" == chore:* ]] || \
+             [[ "${{ github.event.head_commit.message }}" == ci:* ]]; then
             echo "should_run=false" >> $GITHUB_OUTPUT
             echo "changed_files=none" >> $GITHUB_OUTPUT
             exit 0
@@ -73,8 +50,7 @@ jobs:
 
           echo "Changed files: $CHANGED_FILES"
 
-          SKIP_DIRS="^\.agent\/|^docs\/|^\.github\/(?!workflows\/)|\.md$|^LICENSE$|^README|^LICENSE"
-
+          SKIP_DIRS="^\.agent\/|^docs\/|^\.github\/(?!workflows\/)|\.md$|^LICENSE$|^README"
           CODE_DIRS="^lib\/|^test\/|^android\/|^ios\/|^web\/|pubspec\.yaml|analysis_options\.yaml|\.github\/workflows\/"
 
           HAS_CODE=false
