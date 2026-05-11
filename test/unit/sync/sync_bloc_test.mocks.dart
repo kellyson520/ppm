@@ -2,6 +2,7 @@
 // Manual implementation instead of code generation
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:mockito/mockito.dart';
 import 'package:ztd_password_manager/services/sync_service.dart';
 import 'package:ztd_password_manager/core/sync/webdav_sync.dart';

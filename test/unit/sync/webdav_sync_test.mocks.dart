@@ -2,6 +2,7 @@
 // Manual implementation instead of code generation
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:mockito/mockito.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:ztd_password_manager/core/events/event_store.dart';
