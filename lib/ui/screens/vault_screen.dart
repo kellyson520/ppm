@@ -242,7 +242,7 @@ class _VaultScreenState extends State<VaultScreen> {
                 ? (Matrix4.identity()
                   ..setTranslationRaw(0.0,
                       MediaQuery.of(context).size.height * 0.04, 0.0)
-                  ..scale(0.92, 0.92, 1.0))
+                  ..scaleByDouble(0.92)))
                 : Matrix4.identity(),
             decoration: BoxDecoration(
               borderRadius:
@@ -417,7 +417,7 @@ class _VaultScreenState extends State<VaultScreen> {
                 ? (Matrix4.identity()
                   ..setTranslationRaw(
                       0.0, MediaQuery.of(context).size.height * 0.04, 0.0)
-                  ..scale(0.92, 0.92, 1.0))
+                  ..scaleByDouble(0.92))
                 : Matrix4.identity(),
             decoration: BoxDecoration(
               borderRadius:
@@ -534,7 +534,7 @@ class _VaultScreenState extends State<VaultScreen> {
             ),
             title: Text(
               _getTitle(l10n),
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -544,7 +544,7 @@ class _VaultScreenState extends State<VaultScreen> {
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(24, 16, 24, 8),
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.08),
