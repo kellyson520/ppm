@@ -242,7 +242,7 @@ class _VaultScreenState extends State<VaultScreen> {
                 ? (Matrix4.identity()
                   ..setTranslationRaw(0.0,
                       MediaQuery.of(context).size.height * 0.04, 0.0)
-                  ..scaleByDouble(0.92)))
+                  ..scaled(0.92, 0.92, 1.0))
                 : Matrix4.identity(),
             decoration: BoxDecoration(
               borderRadius:
@@ -417,7 +417,7 @@ class _VaultScreenState extends State<VaultScreen> {
                 ? (Matrix4.identity()
                   ..setTranslationRaw(
                       0.0, MediaQuery.of(context).size.height * 0.04, 0.0)
-                  ..scaleByDouble(0.92))
+                  ..scaled(0.92, 0.92, 1.0))
                 : Matrix4.identity(),
             decoration: BoxDecoration(
               borderRadius:
