@@ -22,6 +22,8 @@ class SecureBuffer {
   Timer? _wipeTimer;
   final _lock = Lock();
   final Duration _defaultTtl;
+  DateTime? _wipeStartAt;
+  Duration? _currentTtl;
   DateTime? _lastAccess;
 
   /// Create secure buffer with default TTL
@@ -81,6 +83,8 @@ class SecureBuffer {
 
   /// Schedule automatic wipe
   void _scheduleWipe(Duration ttl) {
+    _wipeStartAt = DateTime.now();
+    _currentTtl = ttl;
     _wipeTimer = Timer(ttl, () {
       _lock.synchronized(_wipe);
     });
@@ -100,6 +104,8 @@ class SecureBuffer {
     }
     _wipeTimer?.cancel();
     _wipeTimer = null;
+    _wipeStartAt = null;
+    _currentTtl = null;
   }
 
   /// Explicitly dispose and wipe
@@ -110,8 +116,11 @@ class SecureBuffer {
   /// Get remaining time before wipe
   Duration? get remainingTime {
     if (_wipeTimer == null) return null;
-    // Approximate remaining time
-    return _defaultTtl;
+    if (_wipeStartAt == null || _currentTtl == null) return null;
+    final elapsed = DateTime.now().difference(_wipeStartAt!);
+    final remaining = _currentTtl! - elapsed;
+    if (remaining.isNegative) return Duration.zero;
+    return remaining;
   }
 }
 

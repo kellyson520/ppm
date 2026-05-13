@@ -1,10 +1,16 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../services/vault_service.dart';
 import 'package:local_auth/local_auth.dart';
 import '../../blocs/vault/vault_bloc.dart';
 import '../../l10n/app_localizations.dart';
+
+/// Storage keys for persisting brute-force protection state.
+const _kFailedAttemptsKey = 'lock_screen_failed_attempts';
+const _kLockoutUntilKey = 'lock_screen_lockout_until';
 
 class LockScreen extends StatefulWidget {
   const LockScreen({super.key});
@@ -16,9 +22,13 @@ class LockScreen extends StatefulWidget {
 class _LockScreenState extends State<LockScreen>
     with SingleTickerProviderStateMixin {
   final _passwordController = TextEditingController();
+  final _secureStorage = const FlutterSecureStorage();
   bool _obscurePassword = true;
   String _errorMessage = '';
   int _failedAttempts = 0;
+  DateTime? _lockoutUntil;
+  Timer? _cooldownTimer;
+  int _remainingCooldownSeconds = 0;
 
   bool _isBiometricEnabled = false;
   final _localAuth = LocalAuthentication();
@@ -38,8 +48,161 @@ class _LockScreenState extends State<LockScreen>
       end: 10,
     ).chain(CurveTween(curve: Curves.elasticIn)).animate(_shakeController);
 
-    Future.microtask(_checkBiometrics);
+    Future.microtask(() async {
+      await _loadStoredAttempts();
+      _checkBiometrics();
+    });
   }
+
+  // ---------------------------------------------------------------------------
+  // Persistence & cooldown logic
+  // ---------------------------------------------------------------------------
+
+  /// Load persisted failed-attempt count and lockout timestamp from secure
+  /// storage, then check whether the cooldown timer needs to start.
+  Future<void> _loadStoredAttempts() async {
+    final countStr = await _secureStorage.read(key: _kFailedAttemptsKey);
+    final lockoutStr = await _secureStorage.read(key: _kLockoutUntilKey);
+
+    final count = int.tryParse(countStr ?? '') ?? 0;
+    DateTime? lockoutUntil;
+    if (lockoutStr != null) {
+      lockoutUntil = DateTime.tryParse(lockoutStr);
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _failedAttempts = count;
+      _lockoutUntil = lockoutUntil;
+    });
+
+    _checkAndStartCooldown();
+  }
+
+  /// If the lockout timestamp is still in the future, start the countdown
+  /// timer and disable input until it expires.
+  void _checkAndStartCooldown() {
+    if (_lockoutUntil == null) return;
+
+    final now = DateTime.now();
+    if (_lockoutUntil!.isAfter(now)) {
+      _startCooldownTimer();
+    } else {
+      setState(() {
+        _lockoutUntil = null;
+      });
+    }
+  }
+
+  /// Exponential backoff delay based on the current failure count.
+  ///
+  /// | Attempts | Delay      |
+  /// |----------|------------|
+  /// | 1 – 4    | 0          |
+  /// | 5 – 9    | 1 s        |
+  /// | 10 – 14  | 5 s        |
+  /// | 15 – 19  | 30 s       |
+  /// | 20 – 24  | 60 s       |
+  /// | 25+      | permanent  |
+  Duration _getBackoffDelay(int attempts) {
+    if (attempts >= 25) return const Duration(days: 36500); // permanent
+    if (attempts >= 20) return const Duration(seconds: 60);
+    if (attempts >= 15) return const Duration(seconds: 30);
+    if (attempts >= 10) return const Duration(seconds: 5);
+    if (attempts >= 5) return const Duration(seconds: 1);
+    return Duration.zero;
+  }
+
+  /// Whether the password field and unlock button should be enabled.
+  bool get _isUnlockAllowed {
+    if (_lockoutUntil != null && _lockoutUntil!.isAfter(DateTime.now())) {
+      return false;
+    }
+    return true;
+  }
+
+  /// Whether the vault is permanently locked (≥ 25 failed attempts).
+  bool get _isPermanentLockout => _failedAttempts >= 25;
+
+  /// Start a periodic 1-second timer that refreshes
+  /// [_remainingCooldownSeconds] and clears the lockout when it expires.
+  void _startCooldownTimer() {
+    _cooldownTimer?.cancel();
+    _tickCooldown();
+    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _tickCooldown();
+    });
+  }
+
+  void _tickCooldown() {
+    if (!mounted) {
+      _cooldownTimer?.cancel();
+      return;
+    }
+    if (_lockoutUntil == null) {
+      _cooldownTimer?.cancel();
+      return;
+    }
+
+    final remaining = _lockoutUntil!.difference(DateTime.now()).inSeconds;
+    if (remaining <= 0) {
+      _cooldownTimer?.cancel();
+      setState(() {
+        _lockoutUntil = null;
+        _remainingCooldownSeconds = 0;
+        _errorMessage = '';
+      });
+      return;
+    }
+
+    setState(() {
+      _remainingCooldownSeconds = remaining;
+    });
+  }
+
+  /// Clear the failed-attempt count from memory and secure storage.
+  Future<void> _resetFailedAttempts() async {
+    _cooldownTimer?.cancel();
+    await Future.wait([
+      _secureStorage.delete(key: _kFailedAttemptsKey),
+      _secureStorage.delete(key: _kLockoutUntilKey),
+    ]);
+    if (mounted) {
+      setState(() {
+        _failedAttempts = 0;
+        _lockoutUntil = null;
+        _remainingCooldownSeconds = 0;
+        _errorMessage = '';
+      });
+    }
+  }
+
+  /// Format the remaining cooldown into a human-readable suffix.
+  String _buildCooldownMessage(AppLocalizations l10n) {
+    if (_isPermanentLockout) {
+      return l10n.tooManyAttempts;
+    }
+    final remaining = _remainingCooldownSeconds;
+    if (remaining > 0) {
+      return '${l10n.tooManyAttempts} ${_formatCooldown(remaining)}';
+    }
+    return l10n.tooManyAttempts;
+  }
+
+  String _formatCooldown(int seconds) {
+    if (seconds >= 60) {
+      final minutes = seconds ~/ 60;
+      final secs = seconds % 60;
+      if (secs == 0) return '(${minutes}m)';
+      return '(${minutes}m ${secs}s)';
+    }
+    return '(${seconds}s)';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Biometric helper
+  // ---------------------------------------------------------------------------
 
   Future<void> _checkBiometrics() async {
     final service = context.read<VaultService>();
@@ -81,15 +244,32 @@ class _LockScreenState extends State<LockScreen>
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Lifecycle
+  // ---------------------------------------------------------------------------
+
   @override
   void dispose() {
     _passwordController.dispose();
     _shakeController.dispose();
+    _cooldownTimer?.cancel();
     super.dispose();
   }
 
+  // ---------------------------------------------------------------------------
+  // Unlock & attempt handling
+  // ---------------------------------------------------------------------------
+
   void _unlock() {
     if (_passwordController.text.isEmpty) return;
+    if (!_isUnlockAllowed) {
+      // Double-check: reject if we are still in cooldown (button should be
+      // disabled, but guard here anyway).
+      setState(() {
+        _errorMessage = _buildCooldownMessage(AppLocalizations.of(context)!);
+      });
+      return;
+    }
     context.read<VaultBloc>().add(
           VaultUnlockRequested(_passwordController.text),
         );
@@ -100,15 +280,34 @@ class _LockScreenState extends State<LockScreen>
     _shakeController.forward().then((_) => _shakeController.reset());
     HapticFeedback.heavyImpact();
 
-    setState(() {
-      if (_failedAttempts >= 5) {
-        _errorMessage = l10n.tooManyAttempts;
-      } else {
+    final delay = _getBackoffDelay(_failedAttempts);
+
+    if (delay > Duration.zero) {
+      _lockoutUntil = DateTime.now().add(delay);
+      Future.wait([
+        _secureStorage.write(
+            key: _kFailedAttemptsKey, value: _failedAttempts.toString()),
+        _secureStorage.write(
+            key: _kLockoutUntilKey, value: _lockoutUntil!.toIso8601String()),
+      ]);
+
+      setState(() {
+        _errorMessage = _buildCooldownMessage(l10n);
+      });
+      _startCooldownTimer();
+    } else {
+      _secureStorage.write(
+          key: _kFailedAttemptsKey, value: _failedAttempts.toString());
+      setState(() {
         _errorMessage =
             '${l10n.incorrectPassword} ${_failedAttempts > 1 ? '($_failedAttempts ${l10n.attempts})' : ''}';
-      }
-    });
+      });
+    }
   }
+
+  // ---------------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +318,9 @@ class _LockScreenState extends State<LockScreen>
             state.errorMessage != null &&
             state.errorMessage == 'Invalid master password') {
           _handleFailedAttempt(l10n);
+        } else if (state.status == VaultStatus.unlocked) {
+          // Clear the counter on every successful unlock (password or biometric).
+          _resetFailedAttempts();
         } else if (state.status == VaultStatus.error) {
           setState(() {
             _errorMessage = state.errorMessage ?? l10n.anErrorOccurred;
@@ -195,7 +397,7 @@ class _LockScreenState extends State<LockScreen>
                         TextField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
-                          enabled: !isLoading && _failedAttempts < 5,
+                          enabled: !isLoading && _isUnlockAllowed,
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => _unlock(),
                           decoration: InputDecoration(
@@ -247,7 +449,7 @@ class _LockScreenState extends State<LockScreen>
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: (isLoading || _failedAttempts >= 5)
+                            onPressed: (isLoading || !_isUnlockAllowed)
                                 ? null
                                 : _unlock,
                             child: isLoading
