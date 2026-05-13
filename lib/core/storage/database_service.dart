@@ -1,14 +1,17 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../models/models.dart';
+import '../crypto/crypto_core.dart';
 import '../crypto/crypto_service.dart';
 import '../events/event_store.dart';
 import '../sync/sync.dart';
 import '../diagnostics/crash_report_service.dart';
+import 'package:synchronized/synchronized.dart';
 
 /// Database Service for ZTD Password Manager
 ///
@@ -34,6 +37,11 @@ class DatabaseService {
   Database? _db;
   final CryptoService _cryptoService;
   EventStore? _eventStore;
+  /// DEK for double-envelope encryption of WebDAV passwords
+  Uint8List? _dek;
+
+  /// Lock for export/import operations to prevent race conditions
+  final Lock _exportLock = Lock();
 
   /// Get database instance
   Database get db {
@@ -51,6 +59,29 @@ class DatabaseService {
     return _eventStore!;
   }
 
+  /// Set the DEK for WebDAV password encryption (call after vault unlock)
+  void setDek(Uint8List dek) {
+    _dek = Uint8List.fromList(dek);
+  }
+
+  /// Clear the DEK from memory (call on vault lock)
+  void clearDek() {
+    if (_dek != null) {
+      _cryptoService.clearBuffer(_dek!);
+      _dek = null;
+    }
+  }
+
+  /// Whether the DEK is currently available
+  bool get hasDek => _dek != null;
+
+  /// Ensure DEK is available, throw if not
+  void _ensureDek() {
+    if (_dek == null) {
+      throw StateError('DEK not set. Unlock vault first.');
+    }
+  }
+
   /// Initialize database with encryption key
   Future<void> initialize(String encryptionKey) async {
     if (_db != null) return;
@@ -61,7 +92,7 @@ class DatabaseService {
     _db = await openDatabase(
       path,
       password: encryptionKey,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -120,6 +151,7 @@ class DatabaseService {
         url TEXT NOT NULL,
         username TEXT NOT NULL,
         password TEXT NOT NULL,
+        password_encrypted INTEGER DEFAULT 0,
         priority TEXT NOT NULL,
         sync_strategy TEXT NOT NULL,
         supports_snapshots INTEGER DEFAULT 1,
@@ -152,6 +184,10 @@ class DatabaseService {
           updated_at TEXT NOT NULL
         )
       ''');
+    }
+    if (oldVersion < 3) {
+      // Version 3: Add password_encrypted column for WebDAV double-envelope encryption
+      await db.execute('ALTER TABLE webdav_nodes ADD COLUMN password_encrypted INTEGER DEFAULT 0');
     }
   }
 
@@ -383,14 +419,34 @@ class DatabaseService {
 
   /// Save or update a WebDAV node
   Future<void> saveWebDavNode(WebDavNode node) async {
+    final dek = _dek;
+    String passwordToStore;
+    int isEncrypted;
+
+    if (dek != null) {
+      final envelope = _cryptoService.facade.encryptString(node.password, dek);
+      passwordToStore = jsonEncode(envelope.toJson());
+      isEncrypted = 1;
+    } else {
+      // DEK not available — store as plaintext and log warning
+      CrashReportService.instance.reportError(
+        Exception('Saving WebDAV node "${node.name}" without DEK — password stored as plaintext'),
+        StackTrace.current,
+        source: 'DatabaseService.saveWebDavNode',
+      );
+      passwordToStore = node.password;
+      isEncrypted = 0;
+    }
+
     await db.insert(
       'webdav_nodes',
       {
-        'node_id': node.name, // Use name as ID if no separate ID
+        'node_id': node.name,
         'name': node.name,
         'url': node.url,
         'username': node.username,
-        'password': node.password,
+        'password': passwordToStore,
+        'password_encrypted': isEncrypted,
         'priority': node.priority.name,
         'sync_strategy': node.syncStrategy.name,
         'supports_snapshots': node.supportsSnapshots ? 1 : 0,
@@ -406,11 +462,30 @@ class DatabaseService {
   Future<List<WebDavNode>> getAllWebDavNodes() async {
     final result = await db.query('webdav_nodes', where: 'is_active = 1');
     return result.map((r) {
+      final isEncrypted = (r['password_encrypted'] as int?) == 1;
+      final String password;
+
+      if (isEncrypted) {
+        _ensureDek();
+        try {
+          final envelopeJson = jsonDecode(r['password'] as String) as Map<String, dynamic>;
+          final envelope = CiphertextEnvelope.fromJson(envelopeJson);
+          password = _cryptoService.facade.decryptString(envelope, _dek!);
+        } on Exception catch (e) {
+          throw StateError(
+            'Failed to decrypt WebDAV password for node "${r['name']}": $e',
+          );
+        }
+      } else {
+        // Legacy plaintext password
+        password = r['password'] as String;
+      }
+
       return WebDavNode(
         name: r['name'] as String,
         url: r['url'] as String,
         username: r['username'] as String,
-        password: r['password'] as String,
+        password: password,
         priority: NodePriority.values.byName(r['priority'] as String),
         syncStrategy: SyncStrategy.values.byName(r['sync_strategy'] as String),
         supportsSnapshots: (r['supports_snapshots'] as int) == 1,
@@ -426,6 +501,48 @@ class DatabaseService {
       where: 'name = ?',
       whereArgs: [name],
     );
+  }
+
+  /// Migrate all legacy plaintext WebDAV passwords to encrypted format.
+  ///
+  /// This should be called once after vault unlock, before any sync operations.
+  /// Returns the number of passwords migrated.
+  Future<int> migrateWebDavPasswords() async {
+    _ensureDek();
+    final dek = _dek!;
+
+    final result = await db.query(
+      'webdav_nodes',
+      where: 'password_encrypted = 0 OR password_encrypted IS NULL',
+    );
+
+    var count = 0;
+    for (final row in result) {
+      try {
+        final plaintextPassword = row['password'] as String;
+        final envelope = _cryptoService.facade.encryptString(plaintextPassword, dek);
+        final encryptedPassword = jsonEncode(envelope.toJson());
+
+        await db.update(
+          'webdav_nodes',
+          {
+            'password': encryptedPassword,
+            'password_encrypted': 1,
+            'updated_at': DateTime.now().toIso8601String(),
+          },
+          where: 'node_id = ?',
+          whereArgs: [row['node_id'] as String],
+        );
+        count++;
+      } on Exception catch (e, stack) {
+        CrashReportService.instance.reportZoneError(
+          'Failed to migrate WebDAV password for node ${row['node_id']}',
+          stack,
+        );
+      }
+    }
+
+    return count;
   }
 
   // ==================== Maintenance Operations ====================
@@ -450,39 +567,43 @@ class DatabaseService {
   ///
   /// [encryptionKey] 须与初始化时接受的 encryptionKey 一致，用于和密图库重新建立连接。
   Future<String> exportDatabase(String encryptionKey) async {
-    final documentsDirectory = await getApplicationDocumentsDirectory();
-    final dbPath = join(documentsDirectory.path, 'ztd_vault.db');
+    return _exportLock.synchronized(() async {
+      final documentsDirectory = await getApplicationDocumentsDirectory();
+      final dbPath = join(documentsDirectory.path, 'ztd_vault.db');
 
-    final backupDir = await getTemporaryDirectory();
-    final backupPath = join(backupDir.path,
-        'ztd_backup_${DateTime.now().millisecondsSinceEpoch}.db');
+      final backupDir = await getTemporaryDirectory();
+      final backupPath = join(backupDir.path,
+          'ztd_backup_${DateTime.now().millisecondsSinceEpoch}.db');
 
-    await _db!.close();
-    _db = null;
-    _eventStore = null;
+      await _db!.close();
+      _db = null;
+      _eventStore = null;
 
-    final dbFile = File(dbPath);
-    await dbFile.copy(backupPath);
+      final dbFile = File(dbPath);
+      await dbFile.copy(backupPath);
 
-    // 重新打开数据库
-    await initialize(encryptionKey);
+      // 重新打开数据库
+      await initialize(encryptionKey);
 
-    return backupPath;
+      return backupPath;
+    });
   }
 
   /// Import database from backup
   Future<void> importDatabase(String backupPath) async {
-    final documentsDirectory = await getApplicationDocumentsDirectory();
-    final dbPath = join(documentsDirectory.path, 'ztd_vault.db');
+    return _exportLock.synchronized(() async {
+      final documentsDirectory = await getApplicationDocumentsDirectory();
+      final dbPath = join(documentsDirectory.path, 'ztd_vault.db');
 
-    await db.close();
-    _db = null;
-    _eventStore = null;
+      await db.close();
+      _db = null;
+      _eventStore = null;
 
-    final backupFile = File(backupPath);
-    await backupFile.copy(dbPath);
+      final backupFile = File(backupPath);
+      await backupFile.copy(dbPath);
 
-    // Database will be reopened on next access
+      // Database will be reopened on next access
+    });
   }
 
   /// Clear all data (DANGER)

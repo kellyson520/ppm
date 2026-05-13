@@ -26,11 +26,8 @@ class CryptoFacade {
   final CryptoPolicyEngine _policy;
   final HkdfProvider _hkdf;
 
-  // 安全随机数生成器
-  final SecureRandom _secureRandom = SecureRandom('Fortuna')
-    ..seed(KeyParameter(Uint8List.fromList(
-      List.generate(32, (_) => Random.secure().nextInt(256)),
-    )));
+  // 安全随机数生成器 — 使用平台 CSPRNG，每次调用自动从系统熵源获取
+  final Random _secureRandom = Random.secure();
 
   /// 单例
   static CryptoFacade? _instance;
@@ -56,7 +53,9 @@ class CryptoFacade {
 
   /// 生成密码学安全随机字节
   Uint8List generateRandomBytes(int length) {
-    return _secureRandom.nextBytes(length);
+    return Uint8List.fromList(
+      List.generate(length, (_) => _secureRandom.nextInt(256)),
+    );
   }
 
   // ==================== KDF（密钥派生）====================

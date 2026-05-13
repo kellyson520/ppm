@@ -74,6 +74,9 @@ class VaultService {
 
     _isUnlocked = true;
     _sessionDek = Uint8List.fromList(dek);
+
+    // Forward DEK to DatabaseService for WebDAV double-envelope encryption
+    _database.setDek(Uint8List.fromList(dek));
   }
 
   /// Unlock vault with master password
@@ -101,6 +104,9 @@ class VaultService {
     _isUnlocked = true;
     _sessionDek = Uint8List.fromList(dek);
 
+    // Forward DEK to DatabaseService for WebDAV double-envelope encryption
+    _database.setDek(Uint8List.fromList(dek));
+
     return true;
   }
 
@@ -122,6 +128,9 @@ class VaultService {
 
     // Lock key manager
     _keyManager.lock();
+
+    // Clear DEK from DatabaseService
+    _database.clearDek();
 
     // Close database
     await _database.close();
