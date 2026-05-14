@@ -472,7 +472,8 @@ class DatabaseService {
       if (isEncrypted) {
         _ensureDek();
         try {
-          final envelopeJson = jsonDecode(r['password'] as String) as Map<String, dynamic>;
+          final envelopeJson =
+              jsonDecode(r['password'] as String) as Map<String, dynamic>;
           final envelope = CiphertextEnvelope.fromJson(envelopeJson);
           password = _cryptoService.facade.decryptString(envelope, _dek!);
         } on Exception catch (e) {
@@ -524,7 +525,8 @@ class DatabaseService {
     for (final row in result) {
       try {
         final plaintextPassword = row['password'] as String;
-        final envelope = _cryptoService.facade.encryptString(plaintextPassword, dek);
+        final envelope =
+            _cryptoService.facade.encryptString(plaintextPassword, dek);
         final encryptedPassword = jsonEncode(envelope.toJson());
 
         await db.update(

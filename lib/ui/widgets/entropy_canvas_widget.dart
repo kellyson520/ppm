@@ -139,7 +139,8 @@ class _EntropyCanvasWidgetState extends State<EntropyCanvasWidget>
 
     final avgVelocity = _velocityHistory.isEmpty
         ? Offset.zero
-        : _velocityHistory.reduce((a, b) => a + b) / _velocityHistory.length.toDouble();
+        : _velocityHistory.reduce((a, b) => a + b) /
+              _velocityHistory.length.toDouble();
 
     _visualPoints.add(_VisualPathPoint(
       position: event.position,
