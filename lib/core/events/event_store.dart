@@ -169,7 +169,7 @@ class EventStore {
     final result = await _db.query(
       _eventsTable,
       where: '''
-        hlc_physical > ? OR 
+        hlc_physical > ? OR
         (hlc_physical = ? AND hlc_logical > ?) OR
         (hlc_physical = ? AND hlc_logical = ? AND hlc_device > ?)
       ''',
@@ -262,7 +262,7 @@ class EventStore {
     await _db.delete(
       _eventsTable,
       where: '''
-        hlc_physical < ? OR 
+        hlc_physical < ? OR
         (hlc_physical = ? AND hlc_logical < ?) OR
         (hlc_physical = ? AND hlc_logical = ? AND hlc_device <= ?)
       ''',
@@ -420,8 +420,8 @@ class EventStore {
   Future<void> _incrementPendingCount({Transaction? txn}) async {
     final executor = txn ?? _db;
     await executor.rawUpdate('''
-      UPDATE $_syncStateTable 
-      SET pending_count = pending_count + 1 
+      UPDATE $_syncStateTable
+      SET pending_count = pending_count + 1
       WHERE id = 1
     ''');
   }
@@ -429,8 +429,8 @@ class EventStore {
   Future<void> _updatePendingCount(int delta, {Transaction? txn}) async {
     final executor = txn ?? _db;
     await executor.rawUpdate('''
-      UPDATE $_syncStateTable 
-      SET pending_count = pending_count + ? 
+      UPDATE $_syncStateTable
+      SET pending_count = pending_count + ?
       WHERE id = 1
     ''', [delta]);
   }

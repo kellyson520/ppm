@@ -87,7 +87,7 @@ analyze:
 # Format code
 format:
 	@echo "Formatting code..."
-	@flutter format lib/
+	@flutter format lib/ test/
 
 # Generate code (if using code generation)
 generate:

@@ -15,7 +15,7 @@ void main() {
       // 1. 构建测试环境 (这里需要包裹 MaterialApp 和 MockProvider)
       // TODO: 完整的 BLoC Mocking 示例
 
-      /* 
+      /*
       await tester.pumpWidget(
         MaterialApp(
           home: VaultScreen(), // 假设已注入 Mock 服务
