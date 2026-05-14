@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ztd_password_manager/core/crypto/crypto_facade.dart';
 import 'package:ztd_password_manager/core/crypto/crypto_service.dart';
@@ -118,7 +117,7 @@ void main() {
         final decrypted = cryptoFacade.decryptString(envelope, key);
         expect(decrypted, equals(payload),
             reason: 'Path traversal payload should round-trip');
-      });
+      }
     });
 
     test('encryptString handles extremely long strings', () {
