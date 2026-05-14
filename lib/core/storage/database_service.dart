@@ -187,7 +187,9 @@ class DatabaseService {
     }
     if (oldVersion < 3) {
       // Version 3: Add password_encrypted column for WebDAV double-envelope encryption
-      await db.execute('ALTER TABLE webdav_nodes ADD COLUMN password_encrypted INTEGER DEFAULT 0');
+      await db.execute(
+        'ALTER TABLE webdav_nodes ADD COLUMN password_encrypted INTEGER DEFAULT 0',
+      );
     }
   }
 
@@ -242,7 +244,7 @@ class DatabaseService {
       'password_cards',
       where: '''
         is_deleted = 0 AND (
-          updated_at_physical > ? OR 
+          updated_at_physical > ? OR
           (updated_at_physical = ? AND updated_at_logical > ?) OR
           (updated_at_physical = ? AND updated_at_logical = ? AND updated_at_device > ?)
         )
@@ -430,7 +432,9 @@ class DatabaseService {
     } else {
       // DEK not available — store as plaintext and log warning
       CrashReportService.instance.reportError(
-        Exception('Saving WebDAV node "${node.name}" without DEK — password stored as plaintext'),
+        Exception(
+          'Saving WebDAV node "${node.name}" without DEK — password stored as plaintext',
+        ),
         StackTrace.current,
         source: 'DatabaseService.saveWebDavNode',
       );

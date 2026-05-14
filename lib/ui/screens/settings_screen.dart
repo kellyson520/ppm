@@ -500,7 +500,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: _buildSection(
             title: l10n.about,
             children: [
-              _buildInfoTile(Icons.info_outline_rounded, l10n.version, _packageInfo?.version ?? '...'),
+              _buildInfoTile(
+                Icons.info_outline_rounded,
+                l10n.version,
+                _packageInfo?.version ?? '...',
+              ),
               _buildDivider(),
               _buildListTile(
                 icon: Icons.description_outlined,
