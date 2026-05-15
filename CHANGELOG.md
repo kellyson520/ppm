@@ -6,6 +6,7 @@
 - **修复 dart 分析错误**: 修正 `security_test.dart` 中 `const` 表达式中的字符串乘法操作（改用 `final`），删除未使用的局部变量。
 - **修复弃用 API**: 将 `vault_screen.dart` 中弃用的 `Matrix4.scaled()` 替换为 `scale()`。
 - **代码格式化**: 全量执行 `dart format --line-length 100`，消除 CI 格式化检查失败。
+- **统一 Flutter 版本**: CI 全环境从 3.41.2 升级到 3.41.9，消除 dart format 结果不一致问题。
 
 ## [0.2.18] - 2026-03-01
 
