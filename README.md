@@ -1,6 +1,224 @@
-# ZTD Password Manager
+<div align="center">
+  <img src="assets/icons/icon.png" alt="ZTD Password Manager" width="120"/>
+  <h1>🔐 ZTD Password Manager</h1>
+  <p><strong>Zero-Trust Distributed Password Manager</strong></p>
+  <p>AES-256-GCM cryptographically secured • Offline-first • CRDT synchronized</p>
 
-Zero-Trust Distributed Password Manager - A secure, offline-first password manager with WebDAV synchronization.
+  <!-- Badges -->
+  <p>
+    <img src="https://img.shields.io/badge/Flutter-3.41-02569B?logo=flutter" alt="Flutter"/>
+    <img src="https://img.shields.io/badge/Dart-3.11-0175C2?logo=dart" alt="Dart"/>
+    <img src="https://img.shields.io/badge/license-MIT-green" alt="License"/>
+    <img src="https://img.shields.io/badge/security-AES--256--GCM-blueviolet" alt="Security"/>
+    <img src="https://img.shields.io/badge/architecture-Clean%20Architecture-important" alt="Architecture"/>
+    <img src="https://img.shields.io/badge/sync-CRDT-9cf" alt="Sync"/>
+  </p>
+
+  <p>
+    <a href="#-features">Features</a> •
+    <a href="#-architecture">Architecture</a> •
+    <a href="#-quick-start">Quick Start</a> •
+    <a href="#-security">Security</a> •
+    <a href="#-development">Development</a>
+  </p>
+</div>
+
+---
+
+> **⚡ The password manager that doesn't trust anyone — not even itself.**
+>
+> Your secrets are encrypted with **AES-256-GCM** before they touch disk. Keys are locked in **hardware-backed TEE**. Sync is conflict-free via **CRDT**. Zero knowledge. Zero trust. Zero compromises.
+
+---
+
+## ✨ Features
+
+### 🛡️ Military-Grade Security
+
+| Layer | Protection |
+|-------|-----------|
+| **Cipher** | AES-256-GCM with authenticated encryption |
+| **Key Derivation** | Argon2id — device-specific parameters, side-channel resistant |
+| **Key Hierarchy** | Double envelope (KEK ↔ DEK) — rotate keys without re-encrypting everything |
+| **Hardware** | Secure Enclave / StrongBox TEE integration |
+| **Memory** | DoD 5220.22-M compliant secure wiping |
+| **Search** | Blind index — search without exposing plaintext |
+
+### 🌐 Distributed & Offline-First
+
+- **Event Sourcing** — Immutable event log; every change is recorded forever
+- **CRDT Merge** — Conflict-free replicated data types let you edit offline, merge seamlessly
+- **HLC Timestamps** — Hybrid Logical Clocks for causal ordering across devices
+- **WebDAV Sync** — Bring your own cloud (Nextcloud, ownCloud, any WebDAV server)
+- **Snapshot Compaction** — Automatic state snapshots keep sync lean
+
+### 📱 Cross-Platform
+
+| Platform | Status |
+|----------|--------|
+| Android | ✅ |
+| iOS | ✅ |
+| Web | ✅ |
+| Linux | ✅ |
+| macOS | ✅ |
+| Windows | ✅ |
+
+---
+
+## 🏗️ Architecture
+
+```
+  ┌───────────────────────────────────────────────────────┐
+  │                   🎨 UI Layer                         │
+  │    Flutter Widgets · BLoC State Management            │
+  │    Animations · Responsive Layout · Glassmorphism     │
+  └───────────────────────┬───────────────────────────────┘
+                          │ depends on
+  ┌───────────────────────▼───────────────────────────────┐
+  │                ⚙️ Application Layer                    │
+  │    VaultService · SyncService · AuthService            │
+  │    Orchestrates all business operations                │
+  └───────────────────────┬───────────────────────────────┘
+                          │ depends on
+  ┌───────────────────────▼───────────────────────────────┐
+  │                 🧠 Domain Layer                        │
+  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐  │
+  │  │ Crypto Core  │ │ Event Store  │ │ CRDT Merger  │  │
+  │  │ AES-GCM      │ │ Event Log    │ │ Conflict Res.│  │
+  │  │ Argon2id     │ │ Snapshots    │ │ HLC Clock    │  │
+  │  └──────────────┘ └──────────────┘ └──────────────┘  │
+  └───────────────────────┬───────────────────────────────┘
+                          │ depends on
+  ┌───────────────────────▼───────────────────────────────┐
+  │               🔌 Infrastructure Layer                  │
+  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐  │
+  │  │ SQLCipher    │ │ WebDAV       │ │ TEE / HSM    │  │
+  │  │ Encrypted DB │ │ Sync Gateway │ │ Key Storage  │  │
+  │  └──────────────┘ └──────────────┘ └──────────────┘  │
+  └───────────────────────────────────────────────────────┘
+```
+
+**Layering rules:** UI → BLoC → Repository → Data Source. Never skip a layer. Never import infrastructure into UI.
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+```bash
+# Flutter SDK >= 3.27.0
+flutter --version
+
+# Dart SDK >= 3.0.0
+dart --version
+```
+
+### Run It
+
+```bash
+git clone https://github.com/kellyson520/ppm.git
+cd ppm
+flutter pub get
+flutter run
+```
+
+### Build for Production
+
+```bash
+# Android APK
+flutter build apk --release
+
+# Android AppBundle
+flutter build appbundle --release
+
+# Web
+flutter build web
+```
+
+---
+
+## 🛡️ Security
+
+### Threat Model
+
+| Threat | Mitigation |
+|--------|-----------|
+| 📱 Physical device access | TEE-backed key storage + memory wiping |
+| 🌐 Network eavesdropping | End-to-end encryption, zero plaintext on wire |
+| 🔨 Brute force | Argon2id with device-specific parameters |
+| ⚡ Side-channel attacks | Constant-time algorithms |
+| 💥 Data loss | Multi-node WebDAV backup + CRDT recovery |
+
+### Key Hierarchy
+
+```
+  Master Password
+       ↓ (Argon2id)
+  KEK (Key Encryption Key) ─── stored in TEE
+       ↓ (AES-256-GCM)
+  DEK (Data Encryption Key) ─── encrypts all vault data
+       ↓
+  Encrypted Vault Items
+```
+
+---
+
+## 🧪 Development
+
+### Project Structure
+
+```
+lib/
+├── blocs/           # BLoC state management
+│   ├── auth/
+│   ├── password/
+│   ├── sync/
+│   └── vault/
+├── core/            # Pure domain logic
+│   ├── crdt/        # Conflict resolution
+│   ├── crypto/      # AES-GCM, Argon2id, key management
+│   ├── models/      # Domain entities
+│   ├── security/    # Secure buffer, constant-time utils
+│   ├── storage/     # SQLCipher database
+│   └── sync/        # WebDAV sync engine
+├── services/        # Application orchestration
+├── ui/              # Flutter screens & widgets
+│   ├── screens/
+│   └── widgets/
+└── main.dart
+```
+
+### Before You Commit
+
+```bash
+flutter analyze          # 0 errors, 0 warnings
+dart format --line-length 100 .   # formatting compliance
+flutter test             # all tests green
+```
+
+### CI/CD
+
+Every push triggers automated checks via **GitHub Actions**:
+- ✅ `dart format` compliance (line-length 100)
+- ✅ `flutter analyze` static analysis
+- ✅ `flutter test` full test suite
+- ✅ Android APK + AppBundle build
+- ✅ Web build
+- ✅ GitHub Release on tags
+
+---
+
+## 📄 License
+
+MIT — see [LICENSE](LICENSE)
+
+---
+
+<p align="center">
+  <strong>Zero Trust. Zero Knowledge. Zero Compromises.</strong><br>
+  <sub>Built with ❤️ for people who take their secrets seriously.</sub>
+</p>
 
 ## Features
 

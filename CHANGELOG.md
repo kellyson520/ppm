@@ -7,6 +7,7 @@
 - **修复弃用 API**: 将 `vault_screen.dart` 中弃用的 `Matrix4.scaled()` 替换为 `scale()`。
 - **代码格式化**: 全量执行 `dart format --line-length 100`，消除 CI 格式化检查失败。
 - **统一 Flutter 版本**: CI 全环境从 3.41.2 升级到 3.41.9，消除 dart format 结果不一致问题。
+- **README 重写**: 全新炫酷设计 — shields.io 徽章、架构图、威胁模型表、快速入门指南。
 
 ## [0.2.18] - 2026-03-01
 
