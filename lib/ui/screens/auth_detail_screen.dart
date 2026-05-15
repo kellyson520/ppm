@@ -68,12 +68,8 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
         digits: widget.payload.digits,
         period: widget.payload.period,
       );
-      _remaining = TOTPGenerator.getRemainingSeconds(
-        period: widget.payload.period,
-      );
-      _progress = TOTPGenerator.getProgress(
-        period: widget.payload.period,
-      );
+      _remaining = TOTPGenerator.getRemainingSeconds(period: widget.payload.period);
+      _progress = TOTPGenerator.getProgress(period: widget.payload.period);
     });
   }
 
@@ -109,10 +105,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l10n.exportWarning,
-              style: const TextStyle(color: Colors.orange, fontSize: 13),
-            ),
+            Text(l10n.exportWarning, style: const TextStyle(color: Colors.orange, fontSize: 13)),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
@@ -132,10 +125,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
           ElevatedButton.icon(
             onPressed: () {
               _copyToClipboard(uri, 'URI');
@@ -161,10 +151,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              l10n.qrWarning,
-              style: const TextStyle(color: Colors.orange, fontSize: 13),
-            ),
+            Text(l10n.qrWarning, style: const TextStyle(color: Colors.orange, fontSize: 13)),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(16),
@@ -182,17 +169,13 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
             const SizedBox(height: 12),
             Text(
               l10n.qrScanTip,
-              style: TextStyle(
-                  fontSize: 12, color: Colors.white.withValues(alpha: 0.5)),
+              style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5)),
               textAlign: TextAlign.center,
             ),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
           ElevatedButton.icon(
             onPressed: () {
               _copyToClipboard(uri, 'URI');
@@ -239,15 +222,10 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
           '⚠️ ${l10n.deleteAuthenticatorWarning}',
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.withValues(alpha: 0.8),
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red.withValues(alpha: 0.8)),
             child: Text(l10n.delete),
           ),
         ],
@@ -255,10 +233,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
     );
 
     if (confirmed == true) {
-      widget.authService.deleteCard(
-        widget.card.cardId,
-        widget.deviceId ?? 'default',
-      );
+      widget.authService.deleteCard(widget.card.cardId, widget.deviceId ?? 'default');
       if (mounted) {
         Navigator.pop(context, true);
       }
@@ -274,10 +249,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF101018).withValues(alpha: 0.95),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-          width: 0.5,
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 0.5),
       ),
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -315,8 +287,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                       ),
                     ),
                     PopupMenuButton<String>(
-                      icon: Icon(Icons.more_horiz,
-                          color: Colors.white.withValues(alpha: 0.6)),
+                      icon: Icon(Icons.more_horiz, color: Colors.white.withValues(alpha: 0.6)),
                       onSelected: (value) {
                         switch (value) {
                           case 'edit':
@@ -362,18 +333,15 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                         PopupMenuItem(
                           value: 'delete',
                           child: ListTile(
-                            leading: const Icon(Icons.delete,
-                                color: Colors.red, size: 20),
-                            title: Text(l10n.delete,
-                                style: const TextStyle(color: Colors.red)),
+                            leading: const Icon(Icons.delete, color: Colors.red, size: 20),
+                            title: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
                             dense: true,
                           ),
                         ),
                       ],
                     ),
                     IconButton(
-                      icon: Icon(Icons.close_rounded,
-                          color: Colors.white.withValues(alpha: 0.5)),
+                      icon: Icon(Icons.close_rounded, color: Colors.white.withValues(alpha: 0.5)),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -389,16 +357,13 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.08),
-                        ),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                       ),
                       child: Column(
                         children: [
                           // 验证码
                           GestureDetector(
-                            onTap: () =>
-                                _copyToClipboard(_currentCode, l10n.code),
+                            onTap: () => _copyToClipboard(_currentCode, l10n.code),
                             child: Column(
                               children: [
                                 Text(
@@ -418,16 +383,14 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                                     Icon(
                                       Icons.copy_rounded,
                                       size: 14,
-                                      color:
-                                          Colors.white.withValues(alpha: 0.4),
+                                      color: Colors.white.withValues(alpha: 0.4),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
                                       '点击复制',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color:
-                                            Colors.white.withValues(alpha: 0.4),
+                                        color: Colors.white.withValues(alpha: 0.4),
                                       ),
                                     ),
                                   ],
@@ -445,14 +408,12 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                                   child: LinearProgressIndicator(
                                     value: 1.0 - _progress,
                                     minHeight: 6,
-                                    backgroundColor:
-                                        Colors.white.withValues(alpha: 0.1),
+                                    backgroundColor: Colors.white.withValues(alpha: 0.1),
                                     valueColor: AlwaysStoppedAnimation<Color>(
                                       _remaining <= 5
                                           ? Colors.red.withValues(alpha: 0.8)
                                           : _remaining <= 10
-                                              ? Colors.orange
-                                                  .withValues(alpha: 0.8)
+                                              ? Colors.orange.withValues(alpha: 0.8)
                                               : const Color(0xFF00BFA6),
                                     ),
                                   ),
@@ -464,9 +425,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: _remaining <= 5
-                                      ? Colors.red
-                                      : Colors.white60,
+                                  color: _remaining <= 5 ? Colors.red : Colors.white60,
                                 ),
                               ),
                             ],
@@ -485,30 +444,30 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
                       ),
                       child: Column(
                         children: [
-                          _buildInfoTile(l10n.issuer, widget.payload.issuer,
-                              Icons.business),
-                          _buildDivider(),
-                          _buildInfoTile(l10n.account, widget.payload.account,
-                              Icons.person_outline),
-                          _buildDivider(),
-                          _buildInfoTile(l10n.algorithm,
-                              widget.payload.algorithm, Icons.settings),
+                          _buildInfoTile(l10n.issuer, widget.payload.issuer, Icons.business),
                           _buildDivider(),
                           _buildInfoTile(
-                              l10n.digits,
-                              '${widget.payload.digits} ${l10n.digitSpan}',
-                              Icons.pin_outlined),
+                            l10n.account,
+                            widget.payload.account,
+                            Icons.person_outline,
+                          ),
+                          _buildDivider(),
+                          _buildInfoTile(l10n.algorithm, widget.payload.algorithm, Icons.settings),
+                          _buildDivider(),
+                          _buildInfoTile(
+                            l10n.digits,
+                            '${widget.payload.digits} ${l10n.digitSpan}',
+                            Icons.pin_outlined,
+                          ),
                           _buildDivider(),
                           _buildInfoTile(
                             l10n.refreshPeriod,
                             '${widget.payload.period} ${l10n.secondSpan}',
                             Icons.timer_outlined,
                           ),
-                          if (widget.payload.notes != null &&
-                              widget.payload.notes!.isNotEmpty) ...[
+                          if (widget.payload.notes != null && widget.payload.notes!.isNotEmpty) ...[
                             _buildDivider(),
-                            _buildInfoTile(l10n.notes, widget.payload.notes!,
-                                Icons.notes_rounded),
+                            _buildInfoTile(l10n.notes, widget.payload.notes!, Icons.notes_rounded),
                           ],
                         ],
                       ),
@@ -591,16 +550,13 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
         ),
         child: Icon(icon, color: const Color(0xFF6C63FF), size: 18),
       ),
-      title: Text(label,
-          style: TextStyle(
-              fontSize: 13, color: Colors.white.withValues(alpha: 0.5))),
+      title: Text(
+        label,
+        style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.5)),
+      ),
       trailing: Text(
         value,
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: Colors.white,
-        ),
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white),
       ),
     );
   }
@@ -621,9 +577,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
         foregroundColor: textColor,
         elevation: 0,
         padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }

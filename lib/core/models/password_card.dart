@@ -47,10 +47,7 @@ class PasswordCard extends Equatable {
     return PasswordCard(
       cardId: map['card_id'] as String,
       encryptedPayload: map['encrypted_payload'] as String,
-      blindIndexes: (map['blind_indexes'] as String)
-          .split(',')
-          .where((s) => s.isNotEmpty)
-          .toList(),
+      blindIndexes: (map['blind_indexes'] as String).split(',').where((s) => s.isNotEmpty).toList(),
       createdAt: HLC.fromJson({
         'physicalTime': map['created_at_physical'] as int,
         'logicalCounter': map['created_at_logical'] as int,
@@ -100,11 +97,8 @@ class PasswordCard extends Equatable {
       );
 
   /// Mark as deleted (tombstone)
-  PasswordCard markDeleted(String deviceId, String eventId) => copyWith(
-        isDeleted: true,
-        updatedAt: HLC.now(deviceId),
-        currentEventId: eventId,
-      );
+  PasswordCard markDeleted(String deviceId, String eventId) =>
+      copyWith(isDeleted: true, updatedAt: HLC.now(deviceId), currentEventId: eventId);
 
   @override
   List<Object?> get props => [
@@ -114,7 +108,7 @@ class PasswordCard extends Equatable {
         createdAt,
         updatedAt,
         currentEventId,
-        isDeleted
+        isDeleted,
       ];
 }
 
@@ -146,9 +140,7 @@ class PasswordPayload extends Equatable {
       url: json['url'] as String?,
       notes: json['notes'] as String?,
       tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
-      expiresAt: json['expiresAt'] != null
-          ? DateTime.parse(json['expiresAt'] as String)
-          : null,
+      expiresAt: json['expiresAt'] != null ? DateTime.parse(json['expiresAt'] as String) : null,
     );
   }
 
@@ -182,6 +174,5 @@ class PasswordPayload extends Equatable {
       );
 
   @override
-  List<Object?> get props =>
-      [title, username, password, url, notes, tags, expiresAt];
+  List<Object?> get props => [title, username, password, url, notes, tags, expiresAt];
 }

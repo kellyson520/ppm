@@ -25,9 +25,7 @@ class CrdtMerger {
     } else {
       // Equal timestamps - use device ID for tie-breaking
       // This is deterministic across all devices
-      return local.updatedAt.deviceId.compareTo(remote.updatedAt.deviceId) >= 0
-          ? local
-          : remote;
+      return local.updatedAt.deviceId.compareTo(remote.updatedAt.deviceId) >= 0 ? local : remote;
     }
   }
 
@@ -54,10 +52,7 @@ class CrdtMerger {
 
   /// Apply event to card state
   /// Returns the new card state after applying the event
-  static PasswordCard? applyEvent(
-    PasswordCard? currentState,
-    PasswordEvent event,
-  ) {
+  static PasswordCard? applyEvent(PasswordCard? currentState, PasswordEvent event) {
     switch (event.type) {
       case EventType.cardCreated:
         if (currentState != null) {
@@ -126,10 +121,7 @@ class CrdtMerger {
 
   /// Merge two sets of events
   /// Returns a sorted list of all unique events
-  static List<PasswordEvent> mergeEventSets(
-    List<PasswordEvent> local,
-    List<PasswordEvent> remote,
-  ) {
+  static List<PasswordEvent> mergeEventSets(List<PasswordEvent> local, List<PasswordEvent> remote) {
     // Create a map for deduplication (keyed by event ID)
     final eventMap = <String, PasswordEvent>{};
 
@@ -157,12 +149,9 @@ class CrdtMerger {
 
   /// Build card state from event history
   /// Applies all events in causal order to reconstruct state
-  static Map<String, PasswordCard> buildStateFromEvents(
-    List<PasswordEvent> events,
-  ) {
+  static Map<String, PasswordCard> buildStateFromEvents(List<PasswordEvent> events) {
     // Sort events by HLC
-    final sortedEvents = List<PasswordEvent>.from(events)
-      ..sort((a, b) => a.hlc.compareTo(b.hlc));
+    final sortedEvents = List<PasswordEvent>.from(events)..sort((a, b) => a.hlc.compareTo(b.hlc));
 
     final state = <String, PasswordCard>{};
 
@@ -179,10 +168,7 @@ class CrdtMerger {
 
   /// Detect conflicts between two event sets
   /// Returns pairs of conflicting events (same card, concurrent updates)
-  static List<Conflict> detectConflicts(
-    List<PasswordEvent> local,
-    List<PasswordEvent> remote,
-  ) {
+  static List<Conflict> detectConflicts(List<PasswordEvent> local, List<PasswordEvent> remote) {
     final conflicts = <Conflict>[];
 
     // Group events by card ID
@@ -190,9 +176,7 @@ class CrdtMerger {
     final remoteByCard = _groupByCardId(remote);
 
     // Find cards with events in both sets
-    final commonCards = localByCard.keys.where(
-      (id) => remoteByCard.containsKey(id),
-    );
+    final commonCards = localByCard.keys.where((id) => remoteByCard.containsKey(id));
 
     for (final cardId in commonCards) {
       final localEvents = localByCard[cardId]!;
@@ -206,11 +190,7 @@ class CrdtMerger {
       if (latestLocal != null &&
           latestRemote != null &&
           latestLocal.hlc.isConcurrent(latestRemote.hlc)) {
-        conflicts.add(Conflict(
-          cardId: cardId,
-          localEvent: latestLocal,
-          remoteEvent: latestRemote,
-        ));
+        conflicts.add(Conflict(cardId: cardId, localEvent: latestLocal, remoteEvent: latestRemote));
       }
     }
 
@@ -219,25 +199,18 @@ class CrdtMerger {
 
   /// Resolve conflicts using LWW semantics
   /// Returns the winning event for each conflict
-  static Map<String, PasswordEvent> resolveConflicts(
-    List<Conflict> conflicts,
-  ) {
+  static Map<String, PasswordEvent> resolveConflicts(List<Conflict> conflicts) {
     final resolutions = <String, PasswordEvent>{};
 
     for (final conflict in conflicts) {
-      resolutions[conflict.cardId] = mergeEvents(
-        conflict.localEvent,
-        conflict.remoteEvent,
-      );
+      resolutions[conflict.cardId] = mergeEvents(conflict.localEvent, conflict.remoteEvent);
     }
 
     return resolutions;
   }
 
   /// Group events by card ID
-  static Map<String, List<PasswordEvent>> _groupByCardId(
-    List<PasswordEvent> events,
-  ) {
+  static Map<String, List<PasswordEvent>> _groupByCardId(List<PasswordEvent> events) {
     final result = <String, List<PasswordEvent>>{};
     for (final event in events) {
       result.putIfAbsent(event.cardId, () => []).add(event);
@@ -275,9 +248,7 @@ class CrdtMerger {
       final card = currentState[cardId];
 
       // Keep if event matches current state
-      if (card != null &&
-          card.currentEventId == event.eventId &&
-          !card.isDeleted) {
+      if (card != null && card.currentEventId == event.eventId && !card.isDeleted) {
         compacted.add(event);
       }
     }
@@ -295,11 +266,7 @@ class Conflict {
   final PasswordEvent localEvent;
   final PasswordEvent remoteEvent;
 
-  const Conflict({
-    required this.cardId,
-    required this.localEvent,
-    required this.remoteEvent,
-  });
+  const Conflict({required this.cardId, required this.localEvent, required this.remoteEvent});
 
   @override
   String toString() =>
@@ -312,27 +279,17 @@ class CrdtState {
   final List<PasswordEvent> events;
   final HLC latestHlc;
 
-  const CrdtState({
-    required this.cards,
-    required this.events,
-    required this.latestHlc,
-  });
+  const CrdtState({required this.cards, required this.events, required this.latestHlc});
 
   factory CrdtState.empty(String deviceId) {
-    return CrdtState(
-      cards: {},
-      events: [],
-      latestHlc: HLC.now(deviceId),
-    );
+    return CrdtState(cards: {}, events: [], latestHlc: HLC.now(deviceId));
   }
 
   /// Get non-deleted cards
-  List<PasswordCard> get activeCards =>
-      cards.values.where((c) => !c.isDeleted).toList();
+  List<PasswordCard> get activeCards => cards.values.where((c) => !c.isDeleted).toList();
 
   /// Get deleted cards
-  List<PasswordCard> get deletedCards =>
-      cards.values.where((c) => c.isDeleted).toList();
+  List<PasswordCard> get deletedCards => cards.values.where((c) => c.isDeleted).toList();
 
   /// Get card by ID
   PasswordCard? getCard(String cardId) => cards[cardId];

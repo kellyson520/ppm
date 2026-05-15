@@ -15,10 +15,7 @@ class AuthLoaded extends AuthState {
   final List<AuthCard> cards;
   final String query;
 
-  const AuthLoaded({
-    required this.cards,
-    this.query = '',
-  });
+  const AuthLoaded({required this.cards, this.query = ''});
 
   @override
   List<Object?> get props => [cards, query];

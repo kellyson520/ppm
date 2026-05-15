@@ -17,8 +17,7 @@ class QrScannerScreen extends StatefulWidget {
   State<QrScannerScreen> createState() => _QrScannerScreenState();
 }
 
-class _QrScannerScreenState extends State<QrScannerScreen>
-    with SingleTickerProviderStateMixin {
+class _QrScannerScreenState extends State<QrScannerScreen> with SingleTickerProviderStateMixin {
   final MobileScannerController _cameraController = MobileScannerController(
     detectionSpeed: DetectionSpeed.normal,
     facing: CameraFacing.back,
@@ -33,17 +32,13 @@ class _QrScannerScreenState extends State<QrScannerScreen>
   void initState() {
     super.initState();
     // 扫描线动画
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
+    _animationController = AnimationController(vsync: this, duration: const Duration(seconds: 2))
+      ..repeat(reverse: true);
 
-    _scanLineAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _scanLineAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
   }
 
   @override
@@ -85,10 +80,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
       body: Stack(
         children: [
           // 相机预览
-          MobileScanner(
-            controller: _cameraController,
-            onDetect: _onDetect,
-          ),
+          MobileScanner(controller: _cameraController, onDetect: _onDetect),
 
           // 扫描框遮罩
           _buildScanOverlay(l10n),
@@ -118,10 +110,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
           children: [
             // 半透明遮罩
             ColorFiltered(
-              colorFilter: const ColorFilter.mode(
-                Colors.black54,
-                BlendMode.srcOut,
-              ),
+              colorFilter: const ColorFilter.mode(Colors.black54, BlendMode.srcOut),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -148,20 +137,13 @@ class _QrScannerScreenState extends State<QrScannerScreen>
             ),
 
             // 扫描框四角装饰
-            Positioned(
-              left: left,
-              top: top,
-              child: _buildCornerDecoration(scanAreaSize),
-            ),
+            Positioned(left: left, top: top, child: _buildCornerDecoration(scanAreaSize)),
 
             // 扫描线动画
             Positioned(
               left: left + 16,
               top: top,
-              child: _ScanLineWidget(
-                animation: _scanLineAnimation,
-                scanAreaSize: scanAreaSize,
-              ),
+              child: _ScanLineWidget(animation: _scanLineAnimation, scanAreaSize: scanAreaSize),
             ),
 
             // 提示文字
@@ -187,10 +169,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
               child: Text(
                 l10n.autoRecognizeQr,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white38,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Colors.white38, fontSize: 12),
               ),
             ),
           ],
@@ -263,10 +242,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Colors.transparent,
-                Colors.black.withValues(alpha: 0.7),
-              ],
+              colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
             ),
           ),
           child: Row(
@@ -324,11 +300,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 width: 1.5,
               ),
             ),
-            child: Icon(
-              icon,
-              color: isActive ? const Color(0xFF00BFA6) : Colors.white70,
-              size: 26,
-            ),
+            child: Icon(icon, color: isActive ? const Color(0xFF00BFA6) : Colors.white70, size: 26),
           ),
           const SizedBox(height: 8),
           Text(
@@ -358,11 +330,7 @@ class _QrScannerScreenState extends State<QrScannerScreen>
                 color: const Color(0xFF00BFA6).withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.check_circle,
-                color: Color(0xFF00BFA6),
-                size: 56,
-              ),
+              child: const Icon(Icons.check_circle, color: Color(0xFF00BFA6), size: 56),
             ),
             const SizedBox(height: 16),
             Text(
@@ -384,10 +352,8 @@ class _QrScannerScreenState extends State<QrScannerScreen>
 class _ScanLineWidget extends AnimatedWidget {
   final double scanAreaSize;
 
-  const _ScanLineWidget({
-    required Animation<double> animation,
-    required this.scanAreaSize,
-  }) : super(listenable: animation);
+  const _ScanLineWidget({required Animation<double> animation, required this.scanAreaSize})
+      : super(listenable: animation);
 
   @override
   Widget build(BuildContext context) {

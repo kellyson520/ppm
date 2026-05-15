@@ -552,8 +552,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deleteAuthenticatorConfirmPart2 => '的验证器吗？';
 
   @override
-  String get deleteAuthenticatorWarning =>
-      '删除后将无法恢复！请确保您已备份 2FA 密钥或在对应服务中禁用了它。';
+  String get deleteAuthenticatorWarning => '删除后将无法恢复！请确保您已备份 2FA 密钥或在对应服务中禁用了它。';
 
   @override
   String get addAuthenticator => '添加验证器';

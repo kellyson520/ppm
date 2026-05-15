@@ -20,10 +20,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
     on<VaultChangePasswordRequested>(_onVaultChangePasswordRequested);
   }
 
-  Future<void> _onVaultCheckRequested(
-    VaultCheckRequested event,
-    Emitter<VaultState> emit,
-  ) async {
+  Future<void> _onVaultCheckRequested(VaultCheckRequested event, Emitter<VaultState> emit) async {
     emit(state.copyWith(status: VaultStatus.loading));
     try {
       final isInitialized = await _vaultService.isInitialized();
@@ -33,10 +30,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
         emit(state.copyWith(status: VaultStatus.locked));
       }
     } on Object catch (e) {
-      emit(state.copyWith(
-        status: VaultStatus.error,
-        errorMessage: e.toString(),
-      ));
+      emit(state.copyWith(status: VaultStatus.error, errorMessage: e.toString()));
     }
   }
 
@@ -46,44 +40,28 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
   ) async {
     emit(state.copyWith(status: VaultStatus.loading));
     try {
-      await _vaultService.initialize(event.masterPassword,
-          entropy: event.entropy);
+      await _vaultService.initialize(event.masterPassword, entropy: event.entropy);
       emit(state.copyWith(status: VaultStatus.unlocked));
     } on Object catch (e) {
-      emit(state.copyWith(
-        status: VaultStatus.error,
-        errorMessage: e.toString(),
-      ));
+      emit(state.copyWith(status: VaultStatus.error, errorMessage: e.toString()));
     }
   }
 
-  Future<void> _onVaultUnlockRequested(
-    VaultUnlockRequested event,
-    Emitter<VaultState> emit,
-  ) async {
+  Future<void> _onVaultUnlockRequested(VaultUnlockRequested event, Emitter<VaultState> emit) async {
     emit(state.copyWith(status: VaultStatus.loading));
     try {
       final success = await _vaultService.unlock(event.masterPassword);
       if (success) {
         emit(state.copyWith(status: VaultStatus.unlocked));
       } else {
-        emit(state.copyWith(
-          status: VaultStatus.locked,
-          errorMessage: 'Invalid master password',
-        ));
+        emit(state.copyWith(status: VaultStatus.locked, errorMessage: 'Invalid master password'));
       }
     } on Object catch (e) {
-      emit(state.copyWith(
-        status: VaultStatus.error,
-        errorMessage: e.toString(),
-      ));
+      emit(state.copyWith(status: VaultStatus.error, errorMessage: e.toString()));
     }
   }
 
-  Future<void> _onVaultLockRequested(
-    VaultLockRequested event,
-    Emitter<VaultState> emit,
-  ) async {
+  Future<void> _onVaultLockRequested(VaultLockRequested event, Emitter<VaultState> emit) async {
     await _vaultService.lock();
     emit(state.copyWith(status: VaultStatus.locked));
   }
@@ -101,17 +79,15 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
       if (success) {
         emit(state.copyWith(status: VaultStatus.unlocked));
       } else {
-        emit(state.copyWith(
-          status: VaultStatus.unlocked, // Remain unlocked
-          errorMessage:
-              'Failed to change password. Please verify current password.',
-        ));
+        emit(
+          state.copyWith(
+            status: VaultStatus.unlocked, // Remain unlocked
+            errorMessage: 'Failed to change password. Please verify current password.',
+          ),
+        );
       }
     } on Object catch (e) {
-      emit(state.copyWith(
-        status: VaultStatus.unlocked,
-        errorMessage: e.toString(),
-      ));
+      emit(state.copyWith(status: VaultStatus.unlocked, errorMessage: e.toString()));
     }
   }
 }

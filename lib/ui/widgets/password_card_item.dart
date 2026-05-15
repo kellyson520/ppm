@@ -8,12 +8,7 @@ class PasswordCardItem extends StatelessWidget {
   final PasswordPayload? payload;
   final VoidCallback onTap;
 
-  const PasswordCardItem({
-    super.key,
-    required this.card,
-    this.payload,
-    required this.onTap,
-  });
+  const PasswordCardItem({super.key, required this.card, this.payload, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -40,16 +35,9 @@ class PasswordCardItem extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFF6C63FF).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12), // iOS 连续圆角风
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  width: 0.5,
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 0.5),
               ),
-              child: const Icon(
-                Icons.lock,
-                color: Color(0xFF6C63FF),
-                size: 22,
-              ),
+              child: const Icon(Icons.lock, color: Color(0xFF6C63FF), size: 22),
             ),
             const SizedBox(width: 16),
             // 内容排版
@@ -69,8 +57,7 @@ class PasswordCardItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    payload?.username ??
-                        'ID: ${card.cardId.substring(0, 8)}...',
+                    payload?.username ?? 'ID: ${card.cardId.substring(0, 8)}...',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.white.withValues(alpha: 0.55),
@@ -81,11 +68,7 @@ class PasswordCardItem extends StatelessWidget {
               ),
             ),
             // 弱化的向右箭头（可选移除，保留提供暗示）
-            Icon(
-              Icons.chevron_right,
-              color: Colors.white.withValues(alpha: 0.2),
-              size: 20,
-            ),
+            Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.2), size: 20),
           ],
         ),
       ),

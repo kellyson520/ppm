@@ -80,37 +80,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
             TextField(
               controller: oldPasswordController,
               obscureText: true,
-              decoration: InputDecoration(
-                labelText: l10n.currentPassword,
-              ),
+              decoration: InputDecoration(labelText: l10n.currentPassword),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: newPasswordController,
               obscureText: true,
-              decoration: InputDecoration(
-                labelText: l10n.newPassword,
-              ),
+              decoration: InputDecoration(labelText: l10n.newPassword),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: confirmController,
               obscureText: true,
-              decoration: InputDecoration(
-                labelText: l10n.confirmNewPassword,
-              ),
+              decoration: InputDecoration(labelText: l10n.confirmNewPassword),
             ),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.change),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.change)),
         ],
       ),
     );
@@ -146,15 +134,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           content: TextField(
             controller: passwordController,
             obscureText: true,
-            decoration: InputDecoration(
-              labelText: l10n.masterPassword,
-            ),
+            decoration: InputDecoration(labelText: l10n.masterPassword),
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, null),
-              child: Text(l10n.cancel),
-            ),
+            TextButton(onPressed: () => Navigator.pop(context, null), child: Text(l10n.cancel)),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, passwordController.text),
               child: const Text('Enable'),
@@ -201,37 +184,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              l10n.exportEmergencyKitDesc,
-              style: const TextStyle(fontSize: 14),
-            ),
+            Text(l10n.exportEmergencyKitDesc, style: const TextStyle(fontSize: 14)),
             const SizedBox(height: 16),
             TextField(
               controller: passwordController,
               obscureText: true,
-              decoration: InputDecoration(
-                labelText: l10n.masterPassword,
-              ),
+              decoration: InputDecoration(labelText: l10n.masterPassword),
             ),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.export),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.export)),
         ],
       ),
     );
 
     if (result == true) {
-      final kit = await widget.vaultService.exportEmergencyKit(
-        passwordController.text,
-      );
+      final kit = await widget.vaultService.exportEmergencyKit(passwordController.text);
 
       if (kit != null) {
         _showSuccess(l10n.emergencyKitExported);
@@ -249,14 +219,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: Text(l10n.compactStorageQuestion),
         content: Text(l10n.compactStorageDesc),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.compact),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.compact)),
         ],
       ),
     );
@@ -291,27 +255,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showComingSoon() {
     final l10n = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.comingSoon),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.comingSoon), behavior: SnackBarBehavior.floating));
   }
 
   Future<void> _exportBackup() async {
     final l10n = AppLocalizations.of(context)!;
     try {
       // Use encrypted export by default
-      final jsonStr =
-          await widget.vaultService.exportVaultAsJson(encrypted: true);
+      final jsonStr = await widget.vaultService.exportVaultAsJson(encrypted: true);
 
       // Pass bytes so FilePicker handles writing on supported mobile platforms
       final bytes = utf8.encode(jsonStr);
       final String? outputFile = await FilePicker.platform.saveFile(
         dialogTitle: l10n.exportBackup,
-        fileName:
-            'ztd_vault_export_${DateTime.now().millisecondsSinceEpoch}.json',
+        fileName: 'ztd_vault_export_${DateTime.now().millisecondsSinceEpoch}.json',
         type: FileType.custom,
         allowedExtensions: ['json'],
         bytes: Uint8List.fromList(bytes),
@@ -375,10 +334,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             titlePadding: const EdgeInsets.only(left: 24, bottom: 16),
             title: Text(
               l10n.settings,
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
             ),
             background: Container(color: Colors.transparent),
           ),
@@ -390,17 +346,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: _buildSection(
               title: l10n.vaultStatistics,
               children: [
-                _buildStatTile(l10n.passwords, '${_stats!.cardCount}',
-                    Icons.password_rounded),
+                _buildStatTile(l10n.passwords, '${_stats!.cardCount}', Icons.password_rounded),
                 _buildDivider(),
-                _buildStatTile(l10n.totalEvents, '${_stats!.eventCount}',
-                    Icons.history_rounded),
+                _buildStatTile(l10n.totalEvents, '${_stats!.eventCount}', Icons.history_rounded),
                 _buildDivider(),
-                _buildStatTile(l10n.pendingSync, '${_stats!.pendingSyncCount}',
-                    Icons.sync_rounded),
+                _buildStatTile(l10n.pendingSync, '${_stats!.pendingSyncCount}', Icons.sync_rounded),
                 _buildDivider(),
-                _buildStatTile(l10n.snapshots, '${_stats!.snapshotCount}',
-                    Icons.backup_rounded),
+                _buildStatTile(l10n.snapshots, '${_stats!.snapshotCount}', Icons.backup_rounded),
               ],
             ),
           ),
@@ -447,8 +399,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (_) => const WebDavSettingsScreen()),
+                    MaterialPageRoute(builder: (_) => const WebDavSettingsScreen()),
                   );
                 },
               ),
@@ -526,8 +477,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         // Lock Action
         SliverToBoxAdapter(
           child: Padding(
-            padding:
-                const EdgeInsets.fromLTRB(24, 32, 24, 32 + 80), // 为 Dock 留白
+            padding: const EdgeInsets.fromLTRB(24, 32, 24, 32 + 80), // 为 Dock 留白
             child: ElevatedButton.icon(
               onPressed: () {
                 widget.onLockRequested();
@@ -540,8 +490,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 foregroundColor: Colors.redAccent,
                 elevation: 0,
                 minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
             ),
           ),
@@ -551,14 +500,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (widget.isEmbedded) return content;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF101018),
-      body: content,
-    );
+    return Scaffold(backgroundColor: const Color(0xFF101018), body: content);
   }
 
-  Widget _buildSection(
-      {required String title, required List<Widget> children}) {
+  Widget _buildSection({required String title, required List<Widget> children}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -589,10 +534,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildDivider() {
     return Divider(
-        height: 1,
-        indent: 56,
-        endIndent: 16,
-        color: Colors.white.withValues(alpha: 0.05));
+      height: 1,
+      indent: 56,
+      endIndent: 16,
+      color: Colors.white.withValues(alpha: 0.05),
+    );
   }
 
   Widget _buildListTile({
@@ -607,21 +553,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(8)),
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Icon(icon, color: const Color(0xFF6C63FF), size: 18),
       ),
-      title: Text(title,
-          style: const TextStyle(
-              fontSize: 15, fontWeight: FontWeight.w500, color: Colors.white)),
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.white),
+      ),
       subtitle: subtitle != null
-          ? Text(subtitle,
-              style: TextStyle(
-                  fontSize: 12, color: Colors.white.withValues(alpha: 0.4)))
+          ? Text(
+              subtitle,
+              style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.4)),
+            )
           : null,
       trailing: showArrow
-          ? Icon(Icons.chevron_right_rounded,
-              color: Colors.white.withValues(alpha: 0.2))
+          ? Icon(Icons.chevron_right_rounded, color: Colors.white.withValues(alpha: 0.2))
           : null,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
@@ -638,16 +586,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(8)),
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Icon(icon, color: const Color(0xFF6C63FF), size: 18),
       ),
-      title: Text(title,
-          style: const TextStyle(
-              fontSize: 15, fontWeight: FontWeight.w500, color: Colors.white)),
-      subtitle: Text(subtitle,
-          style: TextStyle(
-              fontSize: 12, color: Colors.white.withValues(alpha: 0.4))),
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.white),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.4)),
+      ),
       trailing: Switch.adaptive(
         value: value,
         onChanged: onChanged,
@@ -662,15 +613,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(8)),
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Icon(icon, color: const Color(0xFF6C63FF), size: 18),
       ),
-      title: Text(label,
-          style: const TextStyle(fontSize: 15, color: Colors.white)),
-      trailing: Text(value,
-          style: TextStyle(
-              fontSize: 14, color: Colors.white.withValues(alpha: 0.4))),
+      title: Text(label, style: const TextStyle(fontSize: 15, color: Colors.white)),
+      trailing: Text(
+        value,
+        style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.4)),
+      ),
     );
   }
 
@@ -679,15 +631,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(8)),
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Icon(icon, color: const Color(0xFF00BFA6), size: 18),
       ),
-      title: Text(label,
-          style: const TextStyle(fontSize: 15, color: Colors.white)),
-      trailing: Text(value,
-          style: const TextStyle(
-              fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+      title: Text(label, style: const TextStyle(fontSize: 15, color: Colors.white)),
+      trailing: Text(
+        value,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+      ),
     );
   }
 }

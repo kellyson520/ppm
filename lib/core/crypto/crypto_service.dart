@@ -84,11 +84,7 @@ class CryptoService {
   /// AES-256-GCM 加密（兼容旧 EncryptedData 格式）
   EncryptedData encryptAESGCM(Uint8List plaintext, Uint8List key) {
     final box = _facade.encryptAESGCM(plaintext, key);
-    return EncryptedData(
-      ciphertext: box.ciphertext,
-      iv: box.nonce,
-      authTag: box.authTag,
-    );
+    return EncryptedData(ciphertext: box.ciphertext, iv: box.nonce, authTag: box.authTag);
   }
 
   /// AES-256-GCM 解密（兼容旧 EncryptedData 格式）
@@ -115,12 +111,7 @@ class CryptoService {
   // ==================== HKDF ====================
 
   /// HKDF-SHA256 密钥拉伸
-  Uint8List hkdfSha256(
-    Uint8List ikm, {
-    Uint8List? salt,
-    Uint8List? info,
-    int length = 32,
-  }) {
+  Uint8List hkdfSha256(Uint8List ikm, {Uint8List? salt, Uint8List? info, int length = 32}) {
     return _facade.hkdfSha256(ikm, salt: salt, info: info, length: length);
   }
 
@@ -173,11 +164,7 @@ class CryptoService {
     Uint8List searchKey, {
     int minTokenLength = 2,
   }) {
-    return _facade.generateBlindIndexes(
-      plaintext,
-      searchKey,
-      minTokenLength: minTokenLength,
-    );
+    return _facade.generateBlindIndexes(plaintext, searchKey, minTokenLength: minTokenLength);
   }
 
   // ==================== 工具函数 ====================
@@ -241,11 +228,7 @@ class EncryptedData {
   final Uint8List iv;
   final Uint8List authTag;
 
-  const EncryptedData({
-    required this.ciphertext,
-    required this.iv,
-    required this.authTag,
-  });
+  const EncryptedData({required this.ciphertext, required this.iv, required this.authTag});
 
   /// 从旧格式 JSON 反序列化
   Map<String, String> toJson() => {

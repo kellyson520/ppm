@@ -24,10 +24,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     );
   }
 
-  Future<void> _onSyncNodesRequested(
-    SyncNodesRequested event,
-    Emitter<SyncState> emit,
-  ) async {
+  Future<void> _onSyncNodesRequested(SyncNodesRequested event, Emitter<SyncState> emit) async {
     emit(state.copyWith(isLoading: true));
     try {
       final nodes = await _syncService.getNodes();
@@ -37,10 +34,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
   }
 
-  Future<void> _onSyncStarted(
-    SyncStarted event,
-    Emitter<SyncState> emit,
-  ) async {
+  Future<void> _onSyncStarted(SyncStarted event, Emitter<SyncState> emit) async {
     emit(state.copyWith(isLoading: true));
     try {
       final result = await _syncService.syncAll();
@@ -54,10 +48,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
   }
 
-  Future<void> _onSyncNodeAdded(
-    SyncNodeAdded event,
-    Emitter<SyncState> emit,
-  ) async {
+  Future<void> _onSyncNodeAdded(SyncNodeAdded event, Emitter<SyncState> emit) async {
     emit(state.copyWith(isLoading: true));
     try {
       await _syncService.addNode(event.node);
@@ -68,10 +59,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
   }
 
-  Future<void> _onSyncNodeRemoved(
-    SyncNodeRemoved event,
-    Emitter<SyncState> emit,
-  ) async {
+  Future<void> _onSyncNodeRemoved(SyncNodeRemoved event, Emitter<SyncState> emit) async {
     emit(state.copyWith(isLoading: true));
     try {
       await _syncService.removeNode(event.nodeName);
@@ -82,10 +70,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
   }
 
-  void _onSyncProgressUpdated(
-    SyncProgressUpdated event,
-    Emitter<SyncState> emit,
-  ) {
+  void _onSyncProgressUpdated(SyncProgressUpdated event, Emitter<SyncState> emit) {
     emit(state.copyWith(currentProgress: event.progress));
   }
 

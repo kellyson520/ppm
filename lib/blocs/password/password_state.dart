@@ -15,10 +15,7 @@ class PasswordLoaded extends PasswordState {
   final List<PasswordCard> cards;
   final String query;
 
-  const PasswordLoaded({
-    required this.cards,
-    this.query = '',
-  });
+  const PasswordLoaded({required this.cards, this.query = ''});
 
   @override
   List<Object?> get props => [cards, query];

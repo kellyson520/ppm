@@ -14,20 +14,10 @@ class HkdfProvider {
   /// [salt]: 盐值（可选）
   /// [info]: 上下文信息（区分不同用途的子密钥）
   /// [length]: 输出密钥长度（字节）
-  Uint8List derive(
-    Uint8List ikm, {
-    Uint8List? salt,
-    Uint8List? info,
-    int length = 32,
-  }) {
+  Uint8List derive(Uint8List ikm, {Uint8List? salt, Uint8List? info, int length = 32}) {
     final hkdf = HKDFKeyDerivator(SHA256Digest());
 
-    hkdf.init(HkdfParameters(
-      ikm,
-      length,
-      salt ?? Uint8List(0),
-      info ?? Uint8List(0),
-    ));
+    hkdf.init(HkdfParameters(ikm, length, salt ?? Uint8List(0), info ?? Uint8List(0)));
 
     return hkdf.process(Uint8List(0));
   }

@@ -9,11 +9,7 @@ class AddPasswordScreen extends StatefulWidget {
   final VaultService vaultService;
   final PasswordCard? editCard;
 
-  const AddPasswordScreen({
-    super.key,
-    required this.vaultService,
-    this.editCard,
-  });
+  const AddPasswordScreen({super.key, required this.vaultService, this.editCard});
 
   @override
   State<AddPasswordScreen> createState() => _AddPasswordScreenState();
@@ -111,12 +107,8 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
         title: _titleController.text.trim(),
         username: _usernameController.text.trim(),
         password: _passwordController.text,
-        url: _urlController.text.trim().isEmpty
-            ? null
-            : _urlController.text.trim(),
-        notes: _notesController.text.trim().isEmpty
-            ? null
-            : _notesController.text.trim(),
+        url: _urlController.text.trim().isEmpty ? null : _urlController.text.trim(),
+        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
       );
 
       if (widget.editCard != null) {
@@ -129,17 +121,13 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
         Navigator.pop(context, true);
       }
     } on Exception catch (e, stack) {
-      CrashReportService.instance
-          .reportError(e, stack, source: 'AddPasswordScreen');
+      CrashReportService.instance.reportError(e, stack, source: 'AddPasswordScreen');
       setState(() {
         _isLoading = false;
       });
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${l10n.unknownError}: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('${l10n.unknownError}: $e'), backgroundColor: Colors.red),
       );
     }
   }
@@ -151,14 +139,10 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
 
     final content = Container(
       decoration: BoxDecoration(
-          color:
-              const Color(0xFF16213E).withValues(alpha: 0.95), // Xcode 风格暗黑玻璃
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          border: Border(
-              top: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-            width: 0.5,
-          ))),
+        color: const Color(0xFF16213E).withValues(alpha: 0.95), // Xcode 风格暗黑玻璃
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 0.5)),
+      ),
       child: Column(
         children: [
           // 悬浮在顶部的拖拽胶囊指示器
@@ -197,17 +181,16 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
                         height: 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     else
                       TextButton(
                         onPressed: _save,
                         style: TextButton.styleFrom(
-                            foregroundColor: const Color(0xFF6C63FF),
-                            textStyle: const TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 17)),
+                          foregroundColor: const Color(0xFF6C63FF),
+                          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
+                        ),
                         child: Text(l10n.save),
                       ),
                     // 给模态框加一个关闭按钮
@@ -226,8 +209,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
             child: Form(
               key: _formKey,
               child: ListView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                 children: [
                   // Title
                   TextFormField(
@@ -277,11 +259,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
+                            icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
                             onPressed: () {
                               setState(() {
                                 _obscurePassword = !_obscurePassword;
@@ -315,9 +293,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
                         child: LinearProgressIndicator(
                           value: _passwordStrength,
                           backgroundColor: Colors.white10,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            _getStrengthColor(),
-                          ),
+                          valueColor: AlwaysStoppedAnimation<Color>(_getStrengthColor()),
                           minHeight: 4,
                           borderRadius: BorderRadius.circular(2),
                         ),
@@ -329,10 +305,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
                             : _passwordStrength < 0.7
                                 ? l10n.medium
                                 : l10n.strong,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: _getStrengthColor(),
-                        ),
+                        style: TextStyle(fontSize: 12, color: _getStrengthColor()),
                       ),
                     ],
                   ),

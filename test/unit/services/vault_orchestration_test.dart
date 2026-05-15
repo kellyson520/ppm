@@ -15,8 +15,7 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../../helpers/test_helpers.dart';
 
 // 生成 Mock
-@GenerateMocks(
-    [DatabaseService, CryptoService, KeyManager, EventStore, Transaction])
+@GenerateMocks([DatabaseService, CryptoService, KeyManager, EventStore, Transaction])
 import 'vault_orchestration_test.mocks.dart'; // ignore_for_file: dangling_library_doc_comments
 
 void main() {
@@ -52,8 +51,7 @@ void main() {
       final payload = makePasswordPayload();
 
       // 验证：如果尚未解锁，应该抛出异常而【不】执行后续逻辑
-      expect(
-          () => vaultService.createCard(payload), throwsA(isA<StateError>()));
+      expect(() => vaultService.createCard(payload), throwsA(isA<StateError>()));
 
       verifyNever(mockCrypto.encryptString(any, any));
       verifyNever(mockDb.saveCard(any));
@@ -66,8 +64,7 @@ void main() {
       // 模拟 unlock 成功的副作用
       when(mockKeyManager.unlock(any)).thenAnswer((_) async => true);
       when(mockKeyManager.dek).thenReturn(key);
-      when(mockKeyManager.getSearchKey())
-          .thenAnswer((_) async => Uint8List(32));
+      when(mockKeyManager.getSearchKey()).thenAnswer((_) async => Uint8List(32));
       when(mockKeyManager.getDeviceId()).thenAnswer((_) async => 'test-device');
       when(mockCrypto.sha256String(any)).thenReturn('mock-db-key');
       when(mockDb.initialize(any)).thenAnswer((_) async => Future.value());
@@ -89,10 +86,10 @@ void main() {
         await callback(MockTransaction()); // 传递 MockTransaction 而非 null
       });
 
-      when(mockDb.saveCard(any, txn: anyNamed('txn')))
-          .thenAnswer((_) async => Future.value());
-      when(mockEventStore.appendEvent(any, txn: anyNamed('txn')))
-          .thenAnswer((_) async => Future.value());
+      when(mockDb.saveCard(any, txn: anyNamed('txn'))).thenAnswer((_) async => Future.value());
+      when(
+        mockEventStore.appendEvent(any, txn: anyNamed('txn')),
+      ).thenAnswer((_) async => Future.value());
 
       // 执行创建动作
       await vaultService.createCard(payload);

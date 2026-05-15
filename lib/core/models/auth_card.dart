@@ -29,10 +29,7 @@ class AuthCard extends Equatable {
     return AuthCard(
       cardId: map['card_id'] as String,
       encryptedPayload: map['encrypted_payload'] as String,
-      blindIndexes: (map['blind_indexes'] as String)
-          .split(',')
-          .where((s) => s.isNotEmpty)
-          .toList(),
+      blindIndexes: (map['blind_indexes'] as String).split(',').where((s) => s.isNotEmpty).toList(),
       createdAt: HLC.fromJson({
         'physicalTime': map['created_at_physical'] as int,
         'logicalCounter': map['created_at_logical'] as int,
@@ -78,14 +75,17 @@ class AuthCard extends Equatable {
       );
 
   /// Mark as deleted (tombstone)
-  AuthCard markDeleted(String deviceId) => copyWith(
-        isDeleted: true,
-        updatedAt: HLC.now(deviceId),
-      );
+  AuthCard markDeleted(String deviceId) => copyWith(isDeleted: true, updatedAt: HLC.now(deviceId));
 
   @override
-  List<Object?> get props =>
-      [cardId, encryptedPayload, blindIndexes, createdAt, updatedAt, isDeleted];
+  List<Object?> get props => [
+        cardId,
+        encryptedPayload,
+        blindIndexes,
+        createdAt,
+        updatedAt,
+        isDeleted,
+      ];
 }
 
 /// Decrypted authenticator payload (in memory only, never stored)
@@ -120,7 +120,8 @@ class AuthPayload extends Equatable {
 
     // 解析 path 中的 label (issuer:account)
     final String rawLabel = Uri.decodeComponent(
-        parsed.path.replaceFirst('/totp/', '').replaceFirst('/hotp/', ''));
+      parsed.path.replaceFirst('/totp/', '').replaceFirst('/hotp/', ''),
+    );
     String issuer = '';
     String account = rawLabel;
 
@@ -169,9 +170,8 @@ class AuthPayload extends Equatable {
       params['issuer'] = issuer;
     }
 
-    final queryString = params.entries
-        .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
-        .join('&');
+    final queryString =
+        params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&');
 
     return 'otpauth://totp/$label?$queryString';
   }
@@ -222,6 +222,14 @@ class AuthPayload extends Equatable {
       );
 
   @override
-  List<Object?> get props =>
-      [issuer, account, secret, algorithm, digits, period, otpauthUri, notes];
+  List<Object?> get props => [
+        issuer,
+        account,
+        secret,
+        algorithm,
+        digits,
+        period,
+        otpauthUri,
+        notes,
+      ];
 }

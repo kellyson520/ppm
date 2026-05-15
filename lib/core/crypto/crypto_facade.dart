@@ -31,10 +31,7 @@ class CryptoFacade {
 
   /// 单例
   static CryptoFacade? _instance;
-  factory CryptoFacade({
-    CryptoRegistry? registry,
-    CryptoPolicyEngine? policy,
-  }) {
+  factory CryptoFacade({CryptoRegistry? registry, CryptoPolicyEngine? policy}) {
     _instance ??= CryptoFacade._internal(
       registry: registry ?? CryptoRegistry(),
       policy: policy ?? CryptoPolicyEngine(),
@@ -42,10 +39,8 @@ class CryptoFacade {
     return _instance!;
   }
 
-  CryptoFacade._internal({
-    required CryptoRegistry registry,
-    required CryptoPolicyEngine policy,
-  })  : _registry = registry,
+  CryptoFacade._internal({required CryptoRegistry registry, required CryptoPolicyEngine policy})
+      : _registry = registry,
         _policy = policy,
         _hkdf = HkdfProvider();
 
@@ -53,9 +48,7 @@ class CryptoFacade {
 
   /// 生成密码学安全随机字节
   Uint8List generateRandomBytes(int length) {
-    return Uint8List.fromList(
-      List.generate(length, (_) => _secureRandom.nextInt(256)),
-    );
+    return Uint8List.fromList(List.generate(length, (_) => _secureRandom.nextInt(256)));
   }
 
   // ==================== KDF（密钥派生）====================
@@ -71,31 +64,17 @@ class CryptoFacade {
   }
 
   /// 从主密码派生 KEK
-  Uint8List deriveKEK(
-    String password,
-    Uint8List salt, {
-    KdfParams? params,
-  }) {
+  Uint8List deriveKEK(String password, Uint8List salt, {KdfParams? params}) {
     final suite = _policy.defaultSuite;
     final kdf = _registry.getKdf(suite.kdfId);
     if (kdf == null) {
       throw StateError('KDF "${suite.kdfId}" 未注册');
     }
 
-    final effectiveParams = params ??
-        KdfParams(
-          kdfId: suite.kdfId,
-          memoryKB: 65536,
-          iterations: 3,
-          parallelism: 4,
-        );
+    final effectiveParams =
+        params ?? KdfParams(kdfId: suite.kdfId, memoryKB: 65536, iterations: 3, parallelism: 4);
 
-    return kdf.deriveKey(
-      password: password,
-      salt: salt,
-      params: effectiveParams,
-      length: 32,
-    );
+    return kdf.deriveKey(password: password, salt: salt, params: effectiveParams, length: 32);
   }
 
   // ==================== AEAD 加密/解密 ====================
@@ -122,16 +101,9 @@ class CryptoFacade {
     final nonce = generateRandomBytes(aead.nonceLength);
 
     // 构造 AAD（将 aadMeta 序列化为 AAD）
-    final aad = aadMeta != null
-        ? Uint8List.fromList(utf8.encode(jsonEncode(aadMeta)))
-        : null;
+    final aad = aadMeta != null ? Uint8List.fromList(utf8.encode(jsonEncode(aadMeta))) : null;
 
-    final box = aead.seal(
-      plaintext: plaintext,
-      key: key,
-      nonce: nonce,
-      aad: aad,
-    );
+    final box = aead.seal(plaintext: plaintext, key: key, nonce: nonce, aad: aad);
 
     return CiphertextEnvelope(
       schemaVersion: 1,
@@ -181,11 +153,7 @@ class CryptoFacade {
     Uint8List key, {
     Map<String, String>? aadMeta,
   }) {
-    return encrypt(
-      Uint8List.fromList(utf8.encode(plaintext)),
-      key,
-      aadMeta: aadMeta,
-    );
+    return encrypt(Uint8List.fromList(utf8.encode(plaintext)), key, aadMeta: aadMeta);
   }
 
   /// 解密为字符串（便捷方法）
@@ -205,11 +173,7 @@ class CryptoFacade {
     }
 
     final nonce = generateRandomBytes(aead.nonceLength);
-    return aead.seal(
-      plaintext: plaintext,
-      key: key,
-      nonce: nonce,
-    );
+    return aead.seal(plaintext: plaintext, key: key, nonce: nonce);
   }
 
   /// 从旧格式解密（兼容 CryptoService 的调用方式）
@@ -225,12 +189,7 @@ class CryptoFacade {
   // ==================== HKDF ====================
 
   /// HKDF-SHA256 密钥拉伸
-  Uint8List hkdfSha256(
-    Uint8List ikm, {
-    Uint8List? salt,
-    Uint8List? info,
-    int length = 32,
-  }) {
+  Uint8List hkdfSha256(Uint8List ikm, {Uint8List? salt, Uint8List? info, int length = 32}) {
     return _hkdf.derive(ikm, salt: salt, info: info, length: length);
   }
 
@@ -246,10 +205,7 @@ class CryptoFacade {
   String hmacSha256String(String key, String data) {
     final keyBytes = utf8.encode(key);
     final dataBytes = utf8.encode(data);
-    final result = hmacSha256(
-      Uint8List.fromList(keyBytes),
-      Uint8List.fromList(dataBytes),
-    );
+    final result = hmacSha256(Uint8List.fromList(keyBytes), Uint8List.fromList(dataBytes));
     return base64Encode(result);
   }
 
@@ -302,8 +258,7 @@ class CryptoFacade {
   }) {
     final tokens = _tokenize(plaintext.toLowerCase(), minTokenLength);
     return tokens.map((token) {
-      final hmacResult =
-          hmacSha256(searchKey, Uint8List.fromList(utf8.encode(token)));
+      final hmacResult = hmacSha256(searchKey, Uint8List.fromList(utf8.encode(token)));
       return base64Encode(hmacResult);
     }).toList();
   }
@@ -317,9 +272,7 @@ class CryptoFacade {
         tokens.add(word);
         if (word.length > minLength) {
           for (int i = 0; i <= word.length - minLength; i++) {
-            for (int len = minLength;
-                len <= min(word.length - i, minLength + 3);
-                len++) {
+            for (int len = minLength; len <= min(word.length - i, minLength + 3); len++) {
               tokens.add(word.substring(i, i + len));
             }
           }

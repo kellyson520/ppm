@@ -106,10 +106,7 @@ class _SetupScreenState extends State<SetupScreen> {
     });
 
     context.read<VaultBloc>().add(
-          VaultInitializeRequested(
-            _passwordController.text,
-            entropy: _collectedEntropy,
-          ),
+          VaultInitializeRequested(_passwordController.text, entropy: _collectedEntropy),
         );
   }
 
@@ -137,8 +134,7 @@ class _SetupScreenState extends State<SetupScreen> {
                   LinearProgressIndicator(
                     value: (_currentPage + 1) / 4,
                     backgroundColor: Colors.white10,
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
                   ),
                   Expanded(
                     child: PageView(
@@ -169,11 +165,7 @@ class _SetupScreenState extends State<SetupScreen> {
           const SizedBox(height: 32),
           const Text(
             '注入混沌能量',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 12),
           const Text(
@@ -185,15 +177,9 @@ class _SetupScreenState extends State<SetupScreen> {
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : EntropyCanvasWidget(
-                    onComplete: _onEntropyCollected,
-                  ),
+                : EntropyCanvasWidget(onComplete: _onEntropyCollected),
           ),
-          if (!isLoading)
-            TextButton(
-              onPressed: _previousPage,
-              child: Text(l10n.back),
-            ),
+          if (!isLoading) TextButton(onPressed: _previousPage, child: Text(l10n.back)),
           const SizedBox(height: 32),
         ],
       ),
@@ -204,36 +190,21 @@ class _SetupScreenState extends State<SetupScreen> {
     return ListView(
       padding: const EdgeInsets.all(32),
       children: [
-        const Icon(
-          Icons.shield_outlined,
-          size: 80,
-          color: Color(0xFF6C63FF),
-        ),
+        const Icon(Icons.shield_outlined, size: 80, color: Color(0xFF6C63FF)),
         const SizedBox(height: 32),
         Text(
           l10n.welcomeToZTD,
-          style: const TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
         Text(
           l10n.appTitle,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.white70,
-          ),
+          style: const TextStyle(fontSize: 16, color: Colors.white70),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 48),
-        _buildFeatureItem(
-          Icons.lock_outline,
-          l10n.e2eEncryption,
-          l10n.e2eEncryptionDesc,
-        ),
+        _buildFeatureItem(Icons.lock_outline, l10n.e2eEncryption, l10n.e2eEncryptionDesc),
         const SizedBox(height: 16),
         _buildFeatureItem(
           Icons.cloud_sync_outlined,
@@ -241,16 +212,9 @@ class _SetupScreenState extends State<SetupScreen> {
           l10n.distributedSyncDesc,
         ),
         const SizedBox(height: 16),
-        _buildFeatureItem(
-          Icons.offline_bolt_outlined,
-          l10n.offlineFirst,
-          l10n.offlineFirstDesc,
-        ),
+        _buildFeatureItem(Icons.offline_bolt_outlined, l10n.offlineFirst, l10n.offlineFirstDesc),
         const SizedBox(height: 32),
-        ElevatedButton(
-          onPressed: _nextPage,
-          child: Text(l10n.getStarted),
-        ),
+        ElevatedButton(onPressed: _nextPage, child: Text(l10n.getStarted)),
       ],
     );
   }
@@ -279,13 +243,7 @@ class _SetupScreenState extends State<SetupScreen> {
                   color: Colors.white,
                 ),
               ),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.white60,
-                ),
-              ),
+              Text(subtitle, style: const TextStyle(fontSize: 13, color: Colors.white60)),
             ],
           ),
         ),
@@ -300,20 +258,10 @@ class _SetupScreenState extends State<SetupScreen> {
         const SizedBox(height: 32),
         Text(
           l10n.createMasterPassword,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         const SizedBox(height: 8),
-        Text(
-          l10n.masterPasswordDesc,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.white60,
-          ),
-        ),
+        Text(l10n.masterPasswordDesc, style: const TextStyle(fontSize: 14, color: Colors.white60)),
         const SizedBox(height: 32),
         TextField(
           controller: _passwordController,
@@ -340,10 +288,7 @@ class _SetupScreenState extends State<SetupScreen> {
             const SizedBox(width: 12),
             Text(
               _getStrengthText(l10n),
-              style: TextStyle(
-                color: _getStrengthColor(),
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: _getStrengthColor(), fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -353,10 +298,7 @@ class _SetupScreenState extends State<SetupScreen> {
         Row(
           children: [
             Expanded(
-              child: OutlinedButton(
-                onPressed: _previousPage,
-                child: Text(l10n.back),
-              ),
+              child: OutlinedButton(onPressed: _previousPage, child: Text(l10n.back)),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -379,22 +321,10 @@ class _SetupScreenState extends State<SetupScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildRequirement(
-          l10n.atLeast8Chars,
-          password.length >= 8,
-        ),
-        _buildRequirement(
-          l10n.containsUpper,
-          password.contains(RegExp(r'[A-Z]')),
-        ),
-        _buildRequirement(
-          l10n.containsLower,
-          password.contains(RegExp(r'[a-z]')),
-        ),
-        _buildRequirement(
-          l10n.containsNumber,
-          password.contains(RegExp(r'[0-9]')),
-        ),
+        _buildRequirement(l10n.atLeast8Chars, password.length >= 8),
+        _buildRequirement(l10n.containsUpper, password.contains(RegExp(r'[A-Z]'))),
+        _buildRequirement(l10n.containsLower, password.contains(RegExp(r'[a-z]'))),
+        _buildRequirement(l10n.containsNumber, password.contains(RegExp(r'[0-9]'))),
         _buildRequirement(
           l10n.containsSpecial,
           password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]')),
@@ -414,13 +344,7 @@ class _SetupScreenState extends State<SetupScreen> {
             color: met ? Colors.green : Colors.white.withValues(alpha: 0.4),
           ),
           const SizedBox(width: 8),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 13,
-              color: met ? Colors.green : Colors.white60,
-            ),
-          ),
+          Text(text, style: TextStyle(fontSize: 13, color: met ? Colors.green : Colors.white60)),
         ],
       ),
     );
@@ -433,20 +357,10 @@ class _SetupScreenState extends State<SetupScreen> {
         const SizedBox(height: 32),
         Text(
           l10n.confirmPassword,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         const SizedBox(height: 8),
-        Text(
-          l10n.enterPasswordAgain,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.white60,
-          ),
-        ),
+        Text(l10n.enterPasswordAgain, style: const TextStyle(fontSize: 14, color: Colors.white60)),
         const SizedBox(height: 32),
         TextField(
           controller: _confirmController,
@@ -469,10 +383,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 const Icon(Icons.error_outline, color: Colors.red, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    _errorMessage,
-                    style: const TextStyle(color: Colors.red),
-                  ),
+                  child: Text(_errorMessage, style: const TextStyle(color: Colors.red)),
                 ),
               ],
             ),
@@ -482,10 +393,7 @@ class _SetupScreenState extends State<SetupScreen> {
         Row(
           children: [
             Expanded(
-              child: OutlinedButton(
-                onPressed: _previousPage,
-                child: Text(l10n.back),
-              ),
+              child: OutlinedButton(onPressed: _previousPage, child: Text(l10n.back)),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -498,8 +406,7 @@ class _SetupScreenState extends State<SetupScreen> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : Text(l10n.createVault),

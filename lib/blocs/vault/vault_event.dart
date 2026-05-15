@@ -32,10 +32,7 @@ class VaultChangePasswordRequested extends VaultEvent {
   final String oldPassword;
   final String newPassword;
 
-  const VaultChangePasswordRequested({
-    required this.oldPassword,
-    required this.newPassword,
-  });
+  const VaultChangePasswordRequested({required this.oldPassword, required this.newPassword});
 
   @override
   List<Object?> get props => [oldPassword, newPassword];

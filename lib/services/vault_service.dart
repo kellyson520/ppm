@@ -27,11 +27,8 @@ class VaultService {
   Uint8List? _sessionSearchKey;
   String? _deviceId;
 
-  VaultService({
-    KeyManager? keyManager,
-    DatabaseService? database,
-    CryptoService? cryptoService,
-  })  : _keyManager = keyManager ?? KeyManager(),
+  VaultService({KeyManager? keyManager, DatabaseService? database, CryptoService? cryptoService})
+      : _keyManager = keyManager ?? KeyManager(),
         _database = database ?? DatabaseService(),
         _cryptoService = cryptoService ?? CryptoService();
 
@@ -39,8 +36,7 @@ class VaultService {
 
   bool get isUnlocked => _isUnlocked;
 
-  Uint8List? get sessionDek =>
-      _sessionDek != null ? Uint8List.fromList(_sessionDek!) : null;
+  Uint8List? get sessionDek => _sessionDek != null ? Uint8List.fromList(_sessionDek!) : null;
 
   Uint8List? get sessionSearchKey =>
       _sessionSearchKey != null ? Uint8List.fromList(_sessionSearchKey!) : null;
@@ -148,15 +144,10 @@ class VaultService {
     // Generate blind indexes for search
     final searchKey = _sessionSearchKey;
     if (searchKey == null) {
-      throw StateError(
-          'Search key is not initialized. Ensure vault is unlocked.');
+      throw StateError('Search key is not initialized. Ensure vault is unlocked.');
     }
-    final searchableText =
-        '${payload.title} ${payload.username} ${payload.url ?? ''}';
-    final blindIndexes = _cryptoService.generateBlindIndexes(
-      searchableText,
-      searchKey,
-    );
+    final searchableText = '${payload.title} ${payload.username} ${payload.url ?? ''}';
+    final blindIndexes = _cryptoService.generateBlindIndexes(searchableText, searchKey);
 
     // Create event
     final event = PasswordEvent.create(
@@ -195,10 +186,7 @@ class VaultService {
   }
 
   /// Update an existing password card
-  Future<PasswordCard?> updateCard(
-    String cardId,
-    PasswordPayload newPayload,
-  ) async {
+  Future<PasswordCard?> updateCard(String cardId, PasswordPayload newPayload) async {
     _ensureUnlocked();
 
     // Get existing card
@@ -213,15 +201,10 @@ class VaultService {
     // Generate new blind indexes
     final searchKey = _sessionSearchKey;
     if (searchKey == null) {
-      throw StateError(
-          'Search key is not initialized. Ensure vault is unlocked.');
+      throw StateError('Search key is not initialized. Ensure vault is unlocked.');
     }
-    final searchableText =
-        '${newPayload.title} ${newPayload.username} ${newPayload.url ?? ''}';
-    final blindIndexes = _cryptoService.generateBlindIndexes(
-      searchableText,
-      searchKey,
-    );
+    final searchableText = '${newPayload.title} ${newPayload.username} ${newPayload.url ?? ''}';
+    final blindIndexes = _cryptoService.generateBlindIndexes(searchableText, searchKey);
 
     // Create update event
     final event = PasswordEvent.create(
@@ -269,11 +252,7 @@ class VaultService {
     final event = PasswordEvent.create(
       type: EventType.cardDeleted,
       cardId: cardId,
-      payload: const EncryptedPayload(
-        ciphertext: '',
-        iv: '',
-        authTag: '',
-      ),
+      payload: const EncryptedPayload(ciphertext: '', iv: '', authTag: ''),
       deviceId: _deviceId!,
       prevEventHash: card.currentEventId,
     );
@@ -317,14 +296,9 @@ class VaultService {
       // 反序列化完整三段（ciphertext + iv + authTag），不再使用硬编码零字节
       final encryptedData = EncryptedData.deserialize(card.encryptedPayload);
 
-      final decrypted = _cryptoService.decryptString(
-        encryptedData,
-        _sessionDek!,
-      );
+      final decrypted = _cryptoService.decryptString(encryptedData, _sessionDek!);
 
-      return PasswordPayload.fromJson(
-        jsonDecode(decrypted) as Map<String, dynamic>,
-      );
+      return PasswordPayload.fromJson(jsonDecode(decrypted) as Map<String, dynamic>);
     } on Object catch (e, stack) {
       CrashReportService.instance.reportError(
         e,
@@ -348,13 +322,9 @@ class VaultService {
     // Generate search hashes
     final searchKey = _sessionSearchKey;
     if (searchKey == null) {
-      throw StateError(
-          'Search key is not initialized. Ensure vault is unlocked.');
+      throw StateError('Search key is not initialized. Ensure vault is unlocked.');
     }
-    final searchHashes = _cryptoService.generateBlindIndexes(
-      query.toLowerCase(),
-      searchKey,
-    );
+    final searchHashes = _cryptoService.generateBlindIndexes(query.toLowerCase(), searchKey);
 
     // Search using blind indexes
     return await _database.searchByBlindIndexes(searchHashes);
@@ -402,10 +372,8 @@ class VaultService {
     final compactedEvents = CrdtMerger.compactEvents(events, state);
 
     // Get event range
-    final eventRangeStart =
-        events.isNotEmpty ? events.first.hlc : HLC.now(_deviceId!);
-    final eventRangeEnd =
-        events.isNotEmpty ? events.last.hlc : HLC.now(_deviceId!);
+    final eventRangeStart = events.isNotEmpty ? events.first.hlc : HLC.now(_deviceId!);
+    final eventRangeEnd = events.isNotEmpty ? events.last.hlc : HLC.now(_deviceId!);
 
     // Get latest snapshot version
     final latestSnapshot = await _database.eventStore.getLatestSnapshot();
@@ -479,10 +447,7 @@ class VaultService {
       if (!inputString.trim().startsWith('[')) {
         try {
           final encryptedData = EncryptedData.deserialize(inputString);
-          jsonString = _cryptoService.decryptString(
-            encryptedData,
-            _sessionDek!,
-          );
+          jsonString = _cryptoService.decryptString(encryptedData, _sessionDek!);
         } on Exception catch (_) {
           // If decryption fails or it's not EncryptedData, search for plain JSON array
           if (!inputString.trim().startsWith('[')) {
@@ -508,11 +473,7 @@ class VaultService {
       }
       return importedCount;
     } on Exception catch (e, stack) {
-      CrashReportService.instance.reportError(
-        e,
-        stack,
-        source: 'VaultService.importVaultFromJson',
-      );
+      CrashReportService.instance.reportError(e, stack, source: 'VaultService.importVaultFromJson');
       rethrow;
     }
   }
@@ -520,10 +481,7 @@ class VaultService {
   // ==================== Security Operations ====================
 
   /// Change master password
-  Future<bool> changeMasterPassword(
-    String oldPassword,
-    String newPassword,
-  ) async {
+  Future<bool> changeMasterPassword(String oldPassword, String newPassword) async {
     return await _keyManager.changeMasterPassword(oldPassword, newPassword);
   }
 
@@ -564,8 +522,7 @@ class VaultService {
       eventCount: eventCount,
       pendingSyncCount: pendingCount,
       snapshotCount: snapshots.length,
-      latestSnapshotVersion:
-          snapshots.isNotEmpty ? snapshots.first.version : null,
+      latestSnapshotVersion: snapshots.isNotEmpty ? snapshots.first.version : null,
     );
   }
 

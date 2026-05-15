@@ -90,8 +90,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clickToAdd => 'Click the + button to add your first password';
 
   @override
-  String get clickToAddAuth =>
-      'Click the + button to add your first authenticator';
+  String get clickToAddAuth => 'Click the + button to add your first authenticator';
 
   @override
   String get passwordSaved => 'Password saved successfully';
@@ -533,19 +532,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportURI => 'Export URI';
 
   @override
-  String get exportWarning =>
-      '⚠️ This URI contains your secret key, keep it safe!';
+  String get exportWarning => '⚠️ This URI contains your secret key, keep it safe!';
 
   @override
   String get qrCodeExport => 'QR Code Export';
 
   @override
-  String get qrWarning =>
-      '⚠️ This QR code contains your secret key, do not leak it!';
+  String get qrWarning => '⚠️ This QR code contains your secret key, do not leak it!';
 
   @override
-  String get qrScanTip =>
-      'Tip: Use another authenticator to scan this QR code.';
+  String get qrScanTip => 'Tip: Use another authenticator to scan this QR code.';
 
   @override
   String get copyURI => 'Copy URI';
@@ -583,15 +579,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidURIMessage => 'Please enter a valid otpauth:// URI';
 
   @override
-  String get uriParsedSuccessfully =>
-      'URI parsed successfully, please confirm the details.';
+  String get uriParsedSuccessfully => 'URI parsed successfully, please confirm the details.';
 
   @override
   String get uriParseFailed => 'URI parse failed';
 
   @override
-  String get qrParsedSuccessfully =>
-      'QR code parsed successfully, please confirm the details.';
+  String get qrParsedSuccessfully => 'QR code parsed successfully, please confirm the details.';
 
   @override
   String get qrParseFailed => 'QR code parse failed';

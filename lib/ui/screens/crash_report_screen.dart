@@ -10,10 +10,7 @@ import '../../main.dart';
 class CrashReportScreen extends StatelessWidget {
   final CrashInfo crashInfo;
 
-  const CrashReportScreen({
-    super.key,
-    required this.crashInfo,
-  });
+  const CrashReportScreen({super.key, required this.crashInfo});
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +47,7 @@ class CrashReportScreen extends StatelessWidget {
             color: const Color(0xFFFF4C5B).withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: const Icon(
-            Icons.bug_report_outlined,
-            color: Color(0xFFFF4C5B),
-            size: 28,
-          ),
+          child: const Icon(Icons.bug_report_outlined, color: Color(0xFFFF4C5B), size: 28),
         ),
         const SizedBox(width: 14),
         Column(
@@ -91,9 +84,7 @@ class CrashReportScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1A1A2E),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFFFF4C5B).withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: const Color(0xFFFF4C5B).withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,8 +148,7 @@ class CrashReportScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.list_alt_outlined,
-                    size: 15, color: Color(0xFF8888AA)),
+                const Icon(Icons.list_alt_outlined, size: 15, color: Color(0xFF8888AA)),
                 const SizedBox(width: 6),
                 Text(
                   l10n.stackTrace,
@@ -176,9 +166,7 @@ class CrashReportScreen extends StatelessWidget {
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(14),
               child: SelectableText(
-                crashInfo.stackTrace.isNotEmpty
-                    ? crashInfo.stackTrace
-                    : l10n.noStackTrace,
+                crashInfo.stackTrace.isNotEmpty ? crashInfo.stackTrace : l10n.noStackTrace,
                 style: const TextStyle(
                   fontSize: 11,
                   color: Color(0xFF9999BB),
@@ -219,11 +207,7 @@ class CrashReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _infoChip({
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
+  Widget _infoChip({required IconData icon, required String label, required Color color}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -237,11 +221,7 @@ class CrashReportScreen extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 11,
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -260,16 +240,14 @@ class CrashReportScreen extends StatelessWidget {
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.check_circle_outline,
-                  color: Colors.white, size: 18),
+              const Icon(Icons.check_circle_outline, color: Colors.white, size: 18),
               const SizedBox(width: 8),
               Text(l10n.reportCopied),
             ],
           ),
           backgroundColor: const Color(0xFF6C63FF),
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -317,11 +295,7 @@ class _ActionButton extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 label,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600),
               ),
             ],
           ),

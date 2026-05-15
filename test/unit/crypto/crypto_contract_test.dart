@@ -66,9 +66,11 @@ void main() {
         'A' * 10000, // 长字符串
       ];
       for (final s in strings) {
-        expect(s, encryptsAndDecrypts(key, cs),
-            reason:
-                'Failed for: "${s.substring(0, s.length > 30 ? 30 : s.length)}..."');
+        expect(
+          s,
+          encryptsAndDecrypts(key, cs),
+          reason: 'Failed for: "${s.substring(0, s.length > 30 ? 30 : s.length)}..."',
+        );
       }
     });
 
@@ -102,9 +104,7 @@ void main() {
       final encrypted = cs.encryptString('integrity test', key);
       // 翻转一个比特
       final tampered = EncryptedData(
-        ciphertext: Uint8List.fromList(
-          encrypted.ciphertext.toList()..[0] ^= 0xFF,
-        ),
+        ciphertext: Uint8List.fromList(encrypted.ciphertext.toList()..[0] ^= 0xFF),
         iv: encrypted.iv,
         authTag: encrypted.authTag,
       );
@@ -169,10 +169,8 @@ void main() {
 
     test('不同 info 产生不同输出（密钥隔离）', () {
       final ikm = cs.generateRandomBytes(32);
-      final d1 = cs.hkdfSha256(ikm,
-          info: Uint8List.fromList(utf8.encode('purpose-a')));
-      final d2 = cs.hkdfSha256(ikm,
-          info: Uint8List.fromList(utf8.encode('purpose-b')));
+      final d1 = cs.hkdfSha256(ikm, info: Uint8List.fromList(utf8.encode('purpose-a')));
+      final d2 = cs.hkdfSha256(ikm, info: Uint8List.fromList(utf8.encode('purpose-b')));
       expect(d1, isNot(equals(d2)));
     });
   });
@@ -193,8 +191,7 @@ void main() {
     test('字符串哈希与字节哈希一致', () {
       const data = 'test string';
       final fromString = cs.sha256String(data);
-      final fromBytes =
-          cs.bytesToHex(cs.sha256Hash(Uint8List.fromList(utf8.encode(data))));
+      final fromBytes = cs.bytesToHex(cs.sha256Hash(Uint8List.fromList(utf8.encode(data))));
       expect(fromString, equals(fromBytes));
     });
   });

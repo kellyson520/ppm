@@ -15,8 +15,7 @@ class WebDavSettingsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(l10n.webdavNodes,
-            style: const TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.webdavNodes, style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
       body: BlocBuilder<SyncBloc, SyncState>(
         builder: (context, state) {
@@ -29,12 +28,16 @@ class WebDavSettingsScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.cloud_off_rounded,
-                      size: 80, color: Colors.white.withValues(alpha: 0.1)),
+                  Icon(
+                    Icons.cloud_off_rounded,
+                    size: 80,
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
                   const SizedBox(height: 24),
-                  Text(l10n.noWebDavNodes,
-                      style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5))),
+                  Text(
+                    l10n.noWebDavNodes,
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                  ),
                   const SizedBox(height: 32),
                   ElevatedButton.icon(
                     onPressed: () => _showAddNodeBottomSheet(context),
@@ -43,10 +46,8 @@ class WebDavSettingsScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF6C63FF),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 32, vertical: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                   ),
                 ],
@@ -64,37 +65,34 @@ class WebDavSettingsScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(20),
-                  border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                 ),
                 child: ListTile(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   leading: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: const Color(0xFF6C63FF).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.dns_rounded,
-                        color: Color(0xFF6C63FF), size: 24),
+                    child: const Icon(Icons.dns_rounded, color: Color(0xFF6C63FF), size: 24),
                   ),
-                  title: Text(node.name,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w600, color: Colors.white)),
+                  title: Text(
+                    node.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+                  ),
                   subtitle: Text(
                     node.url,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style:
-                        TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
                   ),
                   trailing: IconButton(
-                    icon: Icon(Icons.delete_outline_rounded,
-                        color: Colors.red.withValues(alpha: 0.6)),
-                    onPressed: () => context
-                        .read<SyncBloc>()
-                        .add(SyncNodeRemoved(node.name)),
+                    icon: Icon(
+                      Icons.delete_outline_rounded,
+                      color: Colors.red.withValues(alpha: 0.6),
+                    ),
+                    onPressed: () => context.read<SyncBloc>().add(SyncNodeRemoved(node.name)),
                   ),
                 ),
               );
@@ -122,9 +120,7 @@ class WebDavSettingsScreen extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         decoration: BoxDecoration(
           color: const Color(0xFF161622),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
@@ -150,30 +146,44 @@ class WebDavSettingsScreen extends StatelessWidget {
               Text(
                 l10n.addWebDavNode,
                 style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 24),
               _buildTextField(
-                  nameController, l10n.nodeName, Icons.label_outline_rounded,
-                  next: true),
-              const SizedBox(height: 16),
-              _buildTextField(urlController, l10n.urlHint, Icons.link_rounded,
-                  next: true, type: TextInputType.url),
-              const SizedBox(height: 16),
-              _buildTextField(
-                  userController, l10n.username, Icons.person_outline_rounded,
-                  next: true),
+                nameController,
+                l10n.nodeName,
+                Icons.label_outline_rounded,
+                next: true,
+              ),
               const SizedBox(height: 16),
               _buildTextField(
-                  passController, l10n.password, Icons.lock_outline_rounded,
-                  obscure: true),
+                urlController,
+                l10n.urlHint,
+                Icons.link_rounded,
+                next: true,
+                type: TextInputType.url,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                userController,
+                l10n.username,
+                Icons.person_outline_rounded,
+                next: true,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                passController,
+                l10n.password,
+                Icons.lock_outline_rounded,
+                obscure: true,
+              ),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
-                  if (nameController.text.isEmpty ||
-                      urlController.text.isEmpty) {
+                  if (nameController.text.isEmpty || urlController.text.isEmpty) {
                     return;
                   }
                   final node = WebDavNode(
@@ -189,12 +199,12 @@ class WebDavSettingsScreen extends StatelessWidget {
                   backgroundColor: const Color(0xFF6C63FF),
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 56),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: Text(l10n.add,
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w600)),
+                child: Text(
+                  l10n.add,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
               ),
             ],
           ),
@@ -220,13 +230,13 @@ class WebDavSettingsScreen extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
-        prefixIcon: Icon(icon,
-            size: 20, color: const Color(0xFF6C63FF).withValues(alpha: 0.7)),
+        prefixIcon: Icon(icon, size: 20, color: const Color(0xFF6C63FF).withValues(alpha: 0.7)),
         filled: true,
         fillColor: Colors.white.withValues(alpha: 0.05),
         border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: Color(0xFF6C63FF), width: 1),

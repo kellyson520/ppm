@@ -22,10 +22,7 @@ void main() {
       final cases = [
         makeHLC(physicalTime: 0, logicalCounter: 0, deviceId: 'a'),
         makeHLC(physicalTime: 2147483647, logicalCounter: 999, deviceId: 'z'),
-        makeHLC(
-            physicalTime: 1000,
-            logicalCounter: 1,
-            deviceId: 'device-with-dashes'),
+        makeHLC(physicalTime: 1000, logicalCounter: 1, deviceId: 'device-with-dashes'),
       ];
       for (final hlc in cases) {
         expect(hlc, isHlcJsonSerializable, reason: 'Failed for $hlc');
@@ -77,10 +74,8 @@ void main() {
 
   group('HLC — 并发检测', () {
     test('来自不同设备、相同时间戳的 HLC 识别为并发', () {
-      final a =
-          makeHLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'dev-a');
-      final b =
-          makeHLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'dev-b');
+      final a = makeHLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'dev-a');
+      final b = makeHLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'dev-b');
       expect(a.isConcurrent(b), isTrue);
     });
 
@@ -173,8 +168,7 @@ void main() {
     test('所有事件类型的序列化', () {
       for (final type in EventType.values) {
         final event = makePasswordEvent(type: type);
-        expect(event, isPasswordEventSerializable,
-            reason: 'Failed for type $type');
+        expect(event, isPasswordEventSerializable, reason: 'Failed for type $type');
       }
     });
   });
@@ -284,10 +278,8 @@ void main() {
     });
 
     test('latest 返回 HLC 更大的事件', () {
-      final earlier =
-          makePasswordEvent(hlc: makeHLC(physicalTime: 1000), eventId: 'e1');
-      final later =
-          makePasswordEvent(hlc: makeHLC(physicalTime: 2000), eventId: 'e2');
+      final earlier = makePasswordEvent(hlc: makeHLC(physicalTime: 1000), eventId: 'e1');
+      final later = makePasswordEvent(hlc: makeHLC(physicalTime: 2000), eventId: 'e2');
       expect(EventUtils.latest(earlier, later), equals(later));
       expect(EventUtils.latest(later, earlier), equals(later));
     });

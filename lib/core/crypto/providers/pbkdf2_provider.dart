@@ -30,12 +30,7 @@ class Pbkdf2Provider implements Kdf {
     deriveKey(
       password: 'benchmark_test',
       salt: testSalt,
-      params: KdfParams(
-        kdfId: id,
-        memoryKB: 16384,
-        iterations: 1,
-        parallelism: 1,
-      ),
+      params: KdfParams(kdfId: id, memoryKB: 16384, iterations: 1, parallelism: 1),
       length: 32,
     );
 
@@ -62,12 +57,7 @@ class Pbkdf2Provider implements Kdf {
       );
     } else {
       // 低端设备
-      return KdfParams(
-        kdfId: id,
-        memoryKB: 32768,
-        iterations: 2,
-        parallelism: 2,
-      );
+      return KdfParams(kdfId: id, memoryKB: 32768, iterations: 2, parallelism: 2);
     }
   }
 
@@ -80,15 +70,15 @@ class Pbkdf2Provider implements Kdf {
   }) {
     final passwordBytes = utf8.encode(password);
 
-    final derivator = PBKDF2KeyDerivator(
-      HMac(SHA256Digest(), 64),
-    );
+    final derivator = PBKDF2KeyDerivator(HMac(SHA256Digest(), 64));
 
-    derivator.init(Pbkdf2Parameters(
-      salt,
-      params.iterations * 1000, // 将 Argon2id 等效 iterations 放大
-      length,
-    ));
+    derivator.init(
+      Pbkdf2Parameters(
+        salt,
+        params.iterations * 1000, // 将 Argon2id 等效 iterations 放大
+        length,
+      ),
+    );
 
     return derivator.process(Uint8List.fromList(passwordBytes));
   }

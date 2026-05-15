@@ -12,14 +12,9 @@ import 'package:equatable/equatable.dart';
 class HLC extends Equatable implements Comparable<HLC> {
   final int physicalTime; // Physical timestamp in milliseconds (NTP-synced)
   final int logicalCounter; // Logical counter for concurrent events
-  final String
-      deviceId; // Device unique identifier (dictionary order tie-breaker)
+  final String deviceId; // Device unique identifier (dictionary order tie-breaker)
 
-  const HLC({
-    required this.physicalTime,
-    required this.logicalCounter,
-    required this.deviceId,
-  });
+  const HLC({required this.physicalTime, required this.logicalCounter, required this.deviceId});
 
   /// Create HLC from current time
   factory HLC.now(String deviceId) {
@@ -71,15 +66,12 @@ class HLC extends Equatable implements Comparable<HLC> {
   /// Merge with remote HLC (HLC algorithm)
   HLC merge(HLC remote) {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final newPhysical = [physicalTime, remote.physicalTime, now]
-        .reduce((a, b) => a > b ? a : b);
+    final newPhysical = [physicalTime, remote.physicalTime, now].reduce((a, b) => a > b ? a : b);
 
     int newLogical;
     if (newPhysical == physicalTime && newPhysical == remote.physicalTime) {
       // Both at same physical time, increment max logical counter
-      newLogical = logicalCounter > remote.logicalCounter
-          ? logicalCounter
-          : remote.logicalCounter;
+      newLogical = logicalCounter > remote.logicalCounter ? logicalCounter : remote.logicalCounter;
       newLogical++;
     } else if (newPhysical == physicalTime) {
       // Local event is latest, increment local counter
@@ -92,27 +84,15 @@ class HLC extends Equatable implements Comparable<HLC> {
       newLogical = 0;
     }
 
-    return HLC(
-      physicalTime: newPhysical,
-      logicalCounter: newLogical,
-      deviceId: deviceId,
-    );
+    return HLC(physicalTime: newPhysical, logicalCounter: newLogical, deviceId: deviceId);
   }
 
   /// Increment logical counter for local events
-  HLC increment() => HLC(
-        physicalTime: physicalTime,
-        logicalCounter: logicalCounter + 1,
-        deviceId: deviceId,
-      );
+  HLC increment() =>
+      HLC(physicalTime: physicalTime, logicalCounter: logicalCounter + 1, deviceId: deviceId);
 
   /// Create a copy with updated values
-  HLC copyWith({
-    int? physicalTime,
-    int? logicalCounter,
-    String? deviceId,
-  }) =>
-      HLC(
+  HLC copyWith({int? physicalTime, int? logicalCounter, String? deviceId}) => HLC(
         physicalTime: physicalTime ?? this.physicalTime,
         logicalCounter: logicalCounter ?? this.logicalCounter,
         deviceId: deviceId ?? this.deviceId,

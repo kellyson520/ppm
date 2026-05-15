@@ -35,9 +35,7 @@ void main() {
         crashService.setHandler((CrashInfo info) {
           if (navigatorKey.currentState != null) {
             navigatorKey.currentState?.pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (_) => CrashReportScreen(crashInfo: info),
-              ),
+              MaterialPageRoute(builder: (_) => CrashReportScreen(crashInfo: info)),
               (route) => false, // 清空历史路由，防止用户回退到损坏状态
             );
           } else {
@@ -129,18 +127,12 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) => VaultBloc(vaultService: _vaultService)
-              ..add(VaultCheckRequested()),
+            create: (context) => VaultBloc(vaultService: _vaultService)..add(VaultCheckRequested()),
           ),
+          BlocProvider(create: (context) => PasswordBloc(vaultService: _vaultService)),
+          BlocProvider(create: (context) => AuthBloc(authService: _authService)),
           BlocProvider(
-            create: (context) => PasswordBloc(vaultService: _vaultService),
-          ),
-          BlocProvider(
-            create: (context) => AuthBloc(authService: _authService),
-          ),
-          BlocProvider(
-            create: (context) =>
-                SyncBloc(syncService: _syncService)..add(SyncNodesRequested()),
+            create: (context) => SyncBloc(syncService: _syncService)..add(SyncNodesRequested()),
           ),
         ],
         child: MaterialApp(
@@ -153,10 +145,7 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: const [
-            Locale('zh', 'CN'),
-            Locale('en', 'US'),
-          ],
+          supportedLocales: const [Locale('zh', 'CN'), Locale('en', 'US')],
           theme: ThemeData(
             useMaterial3: true,
             // 彻底移除 Material 按钮的水波纹和高亮点击反馈，为弹簧动画让路
@@ -184,19 +173,18 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
             // Apple HIG 排版系统
             textTheme: const TextTheme(
               displayLarge: TextStyle(
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5), // LargeTitle
-              titleLarge:
-                  TextStyle(fontSize: 22, fontWeight: FontWeight.w700), // Title
-              bodyLarge: TextStyle(
-                  fontSize: 17, fontWeight: FontWeight.w400), // Body/Action
-              bodyMedium: TextStyle(
-                  fontSize: 15, fontWeight: FontWeight.w400), // Secondary
+                fontSize: 34,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ), // LargeTitle
+              titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w700), // Title
+              bodyLarge: TextStyle(fontSize: 17, fontWeight: FontWeight.w400), // Body/Action
+              bodyMedium: TextStyle(fontSize: 15, fontWeight: FontWeight.w400), // Secondary
               labelSmall: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.5), // Caption
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.5,
+              ), // Caption
             ),
             inputDecorationTheme: InputDecorationTheme(
               filled: true,
@@ -211,27 +199,19 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    const BorderSide(color: Color(0xFF6C63FF), width: 2),
+                borderSide: const BorderSide(color: Color(0xFF6C63FF), width: 2),
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
             elevatedButtonTheme: ElevatedButtonThemeData(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF6C63FF),
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16), // 稍微增加圆角
                 ),
-                textStyle: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                ),
+                textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
                 elevation: 0, // 去除硬朗的高光阴影
                 splashFactory: NoSplash.splashFactory, // 强杀涟漪
               ),
@@ -242,9 +222,7 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
                 splashFactory: NoSplash.splashFactory, // 强杀涟漪
               ),
             ),
-            iconTheme: const IconThemeData(
-              color: Colors.white70,
-            ),
+            iconTheme: const IconThemeData(color: Colors.white70),
             fontFamily: 'Inter',
           ),
           home: const AppNavigator(),
@@ -287,11 +265,7 @@ class AppNavigator extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red,
-                    ),
+                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
                     const SizedBox(height: 16),
                     Text(
                       state.errorMessage ?? l10n.failedToInitializeVault,

@@ -24,9 +24,7 @@ class DatabaseService {
   // 单例实例：避免多实例共享同一数据库连接
   static DatabaseService? _instance;
   factory DatabaseService({CryptoService? cryptoService}) {
-    _instance ??= DatabaseService._internal(
-      cryptoService: cryptoService ?? CryptoService(),
-    );
+    _instance ??= DatabaseService._internal(cryptoService: cryptoService ?? CryptoService());
     return _instance!;
   }
 
@@ -37,6 +35,7 @@ class DatabaseService {
   Database? _db;
   final CryptoService _cryptoService;
   EventStore? _eventStore;
+
   /// DEK for double-envelope encryption of WebDAV passwords
   Uint8List? _dek;
 
@@ -187,9 +186,7 @@ class DatabaseService {
     }
     if (oldVersion < 3) {
       // Version 3: Add password_encrypted column for WebDAV double-envelope encryption
-      await db.execute(
-        'ALTER TABLE webdav_nodes ADD COLUMN password_encrypted INTEGER DEFAULT 0',
-      );
+      await db.execute('ALTER TABLE webdav_nodes ADD COLUMN password_encrypted INTEGER DEFAULT 0');
     }
   }
 
@@ -264,8 +261,12 @@ class DatabaseService {
   }
 
   /// Delete a card (soft delete with tombstone)
-  Future<void> deleteCard(String cardId, String deviceId, String eventId,
-      {Transaction? txn}) async {
+  Future<void> deleteCard(
+    String cardId,
+    String deviceId,
+    String eventId, {
+    Transaction? txn,
+  }) async {
     final card = await getCard(cardId);
     if (card == null) return;
 
@@ -277,17 +278,9 @@ class DatabaseService {
   Future<void> permanentlyDeleteCard(String cardId, {Transaction? txn}) async {
     final executor = txn ?? db;
 
-    await executor.delete(
-      'blind_index_entries',
-      where: 'card_id = ?',
-      whereArgs: [cardId],
-    );
+    await executor.delete('blind_index_entries', where: 'card_id = ?', whereArgs: [cardId]);
 
-    await executor.delete(
-      'password_cards',
-      where: 'card_id = ?',
-      whereArgs: [cardId],
-    );
+    await executor.delete('password_cards', where: 'card_id = ?', whereArgs: [cardId]);
   }
 
   /// Get card count
@@ -304,9 +297,7 @@ class DatabaseService {
   ///
   /// [searchHashes]: List of HMAC hashes from search query
   /// Returns cards that match any of the search hashes
-  Future<List<PasswordCard>> searchByBlindIndexes(
-    List<String> searchHashes,
-  ) async {
+  Future<List<PasswordCard>> searchByBlindIndexes(List<String> searchHashes) async {
     if (searchHashes.isEmpty) return [];
 
     // Build IN clause
@@ -365,40 +356,30 @@ class DatabaseService {
   // ==================== Blind Index Operations ====================
 
   /// Update blind index entries for a card
-  Future<void> _updateBlindIndexes(PasswordCard card,
-      {Transaction? txn}) async {
+  Future<void> _updateBlindIndexes(PasswordCard card, {Transaction? txn}) async {
     final executor = txn ?? db;
 
     // Delete existing entries
-    await executor.delete(
-      'blind_index_entries',
-      where: 'card_id = ?',
-      whereArgs: [card.cardId],
-    );
+    await executor.delete('blind_index_entries', where: 'card_id = ?', whereArgs: [card.cardId]);
 
     // Insert new entries
     if (card.blindIndexes.isNotEmpty && !card.isDeleted) {
       final batch = executor.batch();
       for (final indexHash in card.blindIndexes) {
         batch.insert(
-          'blind_index_entries',
-          {
-            'index_hash': indexHash,
-            'card_id': card.cardId,
-          },
-          conflictAlgorithm: ConflictAlgorithm.ignore,
-        );
+            'blind_index_entries',
+            {
+              'index_hash': indexHash,
+              'card_id': card.cardId,
+            },
+            conflictAlgorithm: ConflictAlgorithm.ignore);
       }
       await batch.commit(noResult: true);
     }
   }
 
   /// Generate and store blind indexes for a card
-  Future<void> generateBlindIndexes(
-    String cardId,
-    String plaintext,
-    Uint8List searchKey,
-  ) async {
+  Future<void> generateBlindIndexes(String cardId, String plaintext, Uint8List searchKey) async {
     final indexes = _cryptoService.generateBlindIndexes(plaintext, searchKey);
 
     final card = await getCard(cardId);
@@ -432,9 +413,7 @@ class DatabaseService {
     } else {
       // DEK not available — store as plaintext and log warning
       CrashReportService.instance.reportError(
-        Exception(
-          'Saving WebDAV node "${node.name}" without DEK — password stored as plaintext',
-        ),
+        Exception('Saving WebDAV node "${node.name}" without DEK — password stored as plaintext'),
         StackTrace.current,
         source: 'DatabaseService.saveWebDavNode',
       );
@@ -443,23 +422,22 @@ class DatabaseService {
     }
 
     await db.insert(
-      'webdav_nodes',
-      {
-        'node_id': node.name,
-        'name': node.name,
-        'url': node.url,
-        'username': node.username,
-        'password': passwordToStore,
-        'password_encrypted': isEncrypted,
-        'priority': node.priority.name,
-        'sync_strategy': node.syncStrategy.name,
-        'supports_snapshots': node.supportsSnapshots ? 1 : 0,
-        'is_active': 1,
-        'created_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+        'webdav_nodes',
+        {
+          'node_id': node.name,
+          'name': node.name,
+          'url': node.url,
+          'username': node.username,
+          'password': passwordToStore,
+          'password_encrypted': isEncrypted,
+          'priority': node.priority.name,
+          'sync_strategy': node.syncStrategy.name,
+          'supports_snapshots': node.supportsSnapshots ? 1 : 0,
+          'is_active': 1,
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   /// Get all WebDAV nodes
@@ -472,14 +450,11 @@ class DatabaseService {
       if (isEncrypted) {
         _ensureDek();
         try {
-          final envelopeJson =
-              jsonDecode(r['password'] as String) as Map<String, dynamic>;
+          final envelopeJson = jsonDecode(r['password'] as String) as Map<String, dynamic>;
           final envelope = CiphertextEnvelope.fromJson(envelopeJson);
           password = _cryptoService.facade.decryptString(envelope, _dek!);
         } on Exception catch (e) {
-          throw StateError(
-            'Failed to decrypt WebDAV password for node "${r['name']}": $e',
-          );
+          throw StateError('Failed to decrypt WebDAV password for node "${r['name']}": $e');
         }
       } else {
         // Legacy plaintext password
@@ -525,8 +500,7 @@ class DatabaseService {
     for (final row in result) {
       try {
         final plaintextPassword = row['password'] as String;
-        final envelope =
-            _cryptoService.facade.encryptString(plaintextPassword, dek);
+        final envelope = _cryptoService.facade.encryptString(plaintextPassword, dek);
         final encryptedPassword = jsonEncode(envelope.toJson());
 
         await db.update(
@@ -578,8 +552,10 @@ class DatabaseService {
       final dbPath = join(documentsDirectory.path, 'ztd_vault.db');
 
       final backupDir = await getTemporaryDirectory();
-      final backupPath = join(backupDir.path,
-          'ztd_backup_${DateTime.now().millisecondsSinceEpoch}.db');
+      final backupPath = join(
+        backupDir.path,
+        'ztd_backup_${DateTime.now().millisecondsSinceEpoch}.db',
+      );
 
       await _db!.close();
       _db = null;

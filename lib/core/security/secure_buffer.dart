@@ -27,8 +27,7 @@ class SecureBuffer {
   DateTime? _lastAccess;
 
   /// Create secure buffer with default TTL
-  SecureBuffer({Duration ttl = const Duration(seconds: 30)})
-      : _defaultTtl = ttl;
+  SecureBuffer({Duration ttl = const Duration(seconds: 30)}) : _defaultTtl = ttl;
 
   /// Store sensitive data with optional custom TTL
   Future<void> set(Uint8List data, {Duration? ttl}) async {

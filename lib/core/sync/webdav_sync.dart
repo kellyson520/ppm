@@ -62,11 +62,9 @@ class WebDavSyncManager {
     }
 
     _isSyncing = true;
-    _syncController.add(SyncProgress(
-      status: SyncStatus.inProgress,
-      message: 'Starting sync...',
-      progress: 0.0,
-    ));
+    _syncController.add(
+      SyncProgress(status: SyncStatus.inProgress, message: 'Starting sync...', progress: 0.0),
+    );
 
     final results = <String, NodeSyncResult>{};
     var totalDownloaded = 0;
@@ -79,12 +77,14 @@ class WebDavSyncManager {
         final node = _nodes[i];
         final progress = (i / _nodes.length) * 100;
 
-        _syncController.add(SyncProgress(
-          status: SyncStatus.inProgress,
-          message: 'Syncing with ${node.name}...',
-          progress: progress,
-          currentNode: node.name,
-        ));
+        _syncController.add(
+          SyncProgress(
+            status: SyncStatus.inProgress,
+            message: 'Syncing with ${node.name}...',
+            progress: progress,
+            currentNode: node.name,
+          ),
+        );
 
         final nodeResult = await _syncNode(node);
         results[node.name] = nodeResult;
@@ -100,13 +100,15 @@ class WebDavSyncManager {
         await _eventStore.updateLastSync(latestHlc);
       }
 
-      _syncController.add(SyncProgress(
-        status: SyncStatus.completed,
-        message: 'Sync completed successfully',
-        progress: 100.0,
-        downloadedCount: totalDownloaded,
-        uploadedCount: totalUploaded,
-      ));
+      _syncController.add(
+        SyncProgress(
+          status: SyncStatus.completed,
+          message: 'Sync completed successfully',
+          progress: 100.0,
+          downloadedCount: totalDownloaded,
+          uploadedCount: totalUploaded,
+        ),
+      );
 
       return SyncResult.success(
         nodeResults: results,
@@ -115,12 +117,14 @@ class WebDavSyncManager {
         conflicts: conflicts,
       );
     } on Exception catch (e) {
-      _syncController.add(SyncProgress(
-        status: SyncStatus.failed,
-        message: 'Sync failed: $e',
-        progress: 0.0,
-        error: e.toString(),
-      ));
+      _syncController.add(
+        SyncProgress(
+          status: SyncStatus.failed,
+          message: 'Sync failed: $e',
+          progress: 0.0,
+          error: e.toString(),
+        ),
+      );
 
       return SyncResult.failure(error: e.toString());
     } finally {
@@ -147,31 +151,21 @@ class WebDavSyncManager {
       final eventsToDownload = <PasswordEvent>[];
       if (remoteManifest != null) {
         // Compare manifests
-        if (latestLocalHlc == null ||
-            remoteManifest.lastModified.compareTo(latestLocalHlc) > 0) {
-          eventsToDownload.addAll(
-            await _downloadEvents(client, remoteManifest),
-          );
+        if (latestLocalHlc == null || remoteManifest.lastModified.compareTo(latestLocalHlc) > 0) {
+          eventsToDownload.addAll(await _downloadEvents(client, remoteManifest));
         }
       }
 
       // Merge events
       final localEvents = await _eventStore.getAllEvents();
-      final mergedEvents = CrdtMerger.mergeEventSets(
-        localEvents,
-        eventsToDownload,
-      );
+      final mergedEvents = CrdtMerger.mergeEventSets(localEvents, eventsToDownload);
 
       // Detect conflicts
-      final conflicts =
-          CrdtMerger.detectConflicts(localEvents, eventsToDownload);
+      final conflicts = CrdtMerger.detectConflicts(localEvents, eventsToDownload);
 
       // Apply merged events to local store
-      final newEvents = mergedEvents
-          .where(
-            (e) => !localEvents.any((le) => le.eventId == e.eventId),
-          )
-          .toList();
+      final newEvents =
+          mergedEvents.where((e) => !localEvents.any((le) => le.eventId == e.eventId)).toList();
 
       if (newEvents.isNotEmpty) {
         await _eventStore.appendEvents(newEvents);
@@ -181,9 +175,7 @@ class WebDavSyncManager {
       var uploadedCount = 0;
       if (unsyncedEvents.isNotEmpty) {
         uploadedCount = await _uploadEvents(client, unsyncedEvents);
-        await _eventStore.markEventsAsSynced(
-          unsyncedEvents.map((e) => e.eventId).toList(),
-        );
+        await _eventStore.markEventsAsSynced(unsyncedEvents.map((e) => e.eventId).toList());
       }
 
       // Update remote manifest
@@ -197,22 +189,13 @@ class WebDavSyncManager {
         conflicts: conflicts,
       );
     } on Exception catch (e) {
-      return NodeSyncResult(
-        nodeName: node.name,
-        success: false,
-        error: e.toString(),
-      );
+      return NodeSyncResult(nodeName: node.name, success: false, error: e.toString());
     }
   }
 
   /// Create WebDAV client
   Future<webdav.Client> _createClient(WebDavNode node) async {
-    return webdav.newClient(
-      node.url,
-      user: node.username,
-      password: node.password,
-      debug: false,
-    );
+    return webdav.newClient(node.url, user: node.username, password: node.password, debug: false);
   }
 
   /// Ensure directory structure exists on remote
@@ -241,17 +224,12 @@ class WebDavSyncManager {
   /// Get remote manifest
   Future<SyncManifest?> _getRemoteManifest(webdav.Client client) async {
     try {
-      final response = await client.read(
-        'ztd-password-manager/manifest.json',
-      );
+      final response = await client.read('ztd-password-manager/manifest.json');
       final json = jsonDecode(utf8.decode(response)) as Map<String, dynamic>;
       return SyncManifest.fromJson(json);
     } on Exception catch (e, stack) {
       if (!e.toString().contains('404')) {
-        CrashReportService.instance.reportZoneError(
-          'Failed to read WebDAV manifest',
-          stack,
-        );
+        CrashReportService.instance.reportZoneError('Failed to read WebDAV manifest', stack);
       }
       return null;
     }
@@ -275,17 +253,13 @@ class WebDavSyncManager {
     );
   }
 
-  Future<List<PasswordEvent>> _downloadEvents(
-    webdav.Client client,
-    SyncManifest manifest,
-  ) async {
+  Future<List<PasswordEvent>> _downloadEvents(webdav.Client client, SyncManifest manifest) async {
     final events = <PasswordEvent>[];
 
     try {
       // List event files
-      final files = await client
-          .readDir('ztd-password-manager/events')
-          .timeout(const Duration(seconds: 30));
+      final files =
+          await client.readDir('ztd-password-manager/events').timeout(const Duration(seconds: 30));
 
       for (final file in files) {
         if (file.name?.endsWith('.json') ?? false) {
@@ -293,8 +267,7 @@ class WebDavSyncManager {
             final content = await client
                 .read('ztd-password-manager/events/${file.name}')
                 .timeout(const Duration(seconds: 15));
-            final json =
-                jsonDecode(utf8.decode(content)) as Map<String, dynamic>;
+            final json = jsonDecode(utf8.decode(content)) as Map<String, dynamic>;
             events.add(PasswordEvent.fromJson(json));
           } on Exception catch (e, stack) {
             CrashReportService.instance.reportZoneError(
@@ -305,19 +278,13 @@ class WebDavSyncManager {
         }
       }
     } on Exception catch (e, stack) {
-      CrashReportService.instance.reportZoneError(
-        'Failed to list WebDAV events directory',
-        stack,
-      );
+      CrashReportService.instance.reportZoneError('Failed to list WebDAV events directory', stack);
     }
 
     return events;
   }
 
-  Future<int> _uploadEvents(
-    webdav.Client client,
-    List<PasswordEvent> events,
-  ) async {
+  Future<int> _uploadEvents(webdav.Client client, List<PasswordEvent> events) async {
     var uploaded = 0;
 
     for (final event in events) {
@@ -326,10 +293,7 @@ class WebDavSyncManager {
         final content = jsonEncode(event.toJson());
 
         await client
-            .write(
-              'ztd-password-manager/events/$fileName',
-              utf8.encode(content),
-            )
+            .write('ztd-password-manager/events/$fileName', utf8.encode(content))
             .timeout(const Duration(seconds: 15));
         uploaded++;
       } on Exception catch (e, stack) {
@@ -343,10 +307,7 @@ class WebDavSyncManager {
     return uploaded;
   }
 
-  Future<void> uploadSnapshot(
-    String snapshotPath,
-    String snapshotName,
-  ) async {
+  Future<void> uploadSnapshot(String snapshotPath, String snapshotName) async {
     for (final node in _nodes.where((n) => n.supportsSnapshots)) {
       try {
         final client = await _createClient(node);
@@ -354,10 +315,7 @@ class WebDavSyncManager {
         final content = await file.readAsBytes();
 
         await client
-            .write(
-              'ztd-password-manager/snapshots/$snapshotName',
-              Uint8List.fromList(content),
-            )
+            .write('ztd-password-manager/snapshots/$snapshotName', Uint8List.fromList(content))
             .timeout(const Duration(seconds: 60));
       } on Exception catch (e, stack) {
         CrashReportService.instance.reportZoneError(
@@ -513,15 +471,10 @@ class SyncResult {
         conflicts: conflicts,
       );
 
-  factory SyncResult.failure({required String error}) => SyncResult._(
-        success: false,
-        error: error,
-      );
+  factory SyncResult.failure({required String error}) => SyncResult._(success: false, error: error);
 
-  factory SyncResult.alreadySyncing() => SyncResult._(
-        success: false,
-        error: 'Sync already in progress',
-      );
+  factory SyncResult.alreadySyncing() =>
+      SyncResult._(success: false, error: 'Sync already in progress');
 }
 
 /// Node Sync Result

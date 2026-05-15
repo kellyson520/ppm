@@ -95,14 +95,9 @@ class CrashReportService {
   }
 
   /// 内部统一上报入口
-  void _report({
-    required Object error,
-    required StackTrace stack,
-    required String source,
-  }) {
+  void _report({required Object error, required StackTrace stack, required String source}) {
     final now = DateTime.now();
-    final timestamp =
-        now.toIso8601String().replaceFirst('T', ' ').substring(0, 19);
+    final timestamp = now.toIso8601String().replaceFirst('T', ' ').substring(0, 19);
 
     final info = CrashInfo(
       errorMessage: error.toString(),

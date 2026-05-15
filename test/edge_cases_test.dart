@@ -76,8 +76,7 @@ void main() {
 
     test('Null bytes and control characters', () {
       final key = cryptoFacade.generateDEK();
-      final binaryData = Uint8List.fromList(
-          [0x00, 0x01, 0x02, 0x03, 0xFF, 0xFE, 0x7F]);
+      final binaryData = Uint8List.fromList([0x00, 0x01, 0x02, 0x03, 0xFF, 0xFE, 0x7F]);
 
       final envelope = cryptoFacade.encrypt(binaryData, key);
       final decrypted = cryptoFacade.decrypt(envelope, key);
@@ -202,16 +201,15 @@ void main() {
     // ==================== Constant-Time Comparison Edge Cases ====================
 
     test('constantTimeEquals edge cases', () {
+      expect(cryptoFacade.constantTimeEquals(Uint8List(0), Uint8List(0)), isTrue);
       expect(
-          cryptoFacade.constantTimeEquals(Uint8List(0), Uint8List(0)), isTrue);
+        cryptoFacade.constantTimeEquals(Uint8List.fromList([42]), Uint8List.fromList([42])),
+        isTrue,
+      );
       expect(
-          cryptoFacade.constantTimeEquals(
-              Uint8List.fromList([42]), Uint8List.fromList([42])),
-          isTrue);
-      expect(
-          cryptoFacade.constantTimeEquals(
-              Uint8List.fromList([42]), Uint8List.fromList([43])),
-          isFalse);
+        cryptoFacade.constantTimeEquals(Uint8List.fromList([42]), Uint8List.fromList([43])),
+        isFalse,
+      );
     });
 
     test('constantTimeEqualsHex edge cases', () {
@@ -265,9 +263,7 @@ void main() {
       final ikm = Uint8List.fromList(utf8.encode('input key'));
       final salt = cryptoFacade.generateRandomBytes(32);
 
-      expect(
-          () => cryptoFacade.hkdfSha256(ikm, salt: salt, length: 32),
-          returnsNormally);
+      expect(() => cryptoFacade.hkdfSha256(ikm, salt: salt, length: 32), returnsNormally);
     });
 
     test('HKDF minimum/maximum lengths', () {
@@ -275,8 +271,7 @@ void main() {
 
       expect(() => cryptoFacade.hkdfSha256(ikm, length: 1), returnsNormally);
       expect(() => cryptoFacade.hkdfSha256(ikm, length: 100), returnsNormally);
-      expect(
-          () => cryptoFacade.hkdfSha256(ikm, length: 255), returnsNormally);
+      expect(() => cryptoFacade.hkdfSha256(ikm, length: 255), returnsNormally);
     });
 
     test('HKDF deterministic with same inputs', () {
@@ -311,8 +306,7 @@ void main() {
 
     test('Blind index with short tokens', () {
       final searchKey = cryptoFacade.generateRandomBytes(32);
-      final indexes =
-          cryptoFacade.generateBlindIndexes('a', searchKey, minTokenLength: 2);
+      final indexes = cryptoFacade.generateBlindIndexes('a', searchKey, minTokenLength: 2);
 
       expect(indexes, isEmpty);
     });
@@ -321,10 +315,8 @@ void main() {
       final searchKey = cryptoFacade.generateRandomBytes(32);
       const text = 'testing';
 
-      final indexes1 =
-          cryptoFacade.generateBlindIndexes(text, searchKey, minTokenLength: 2);
-      final indexes2 =
-          cryptoFacade.generateBlindIndexes(text, searchKey, minTokenLength: 3);
+      final indexes1 = cryptoFacade.generateBlindIndexes(text, searchKey, minTokenLength: 2);
+      final indexes2 = cryptoFacade.generateBlindIndexes(text, searchKey, minTokenLength: 3);
 
       expect(indexes1.length, greaterThan(indexes2.length));
     });
@@ -375,12 +367,7 @@ void main() {
         schemaVersion: 1,
         suiteId: 'TEST_SUITE',
         aeadId: 'aes-256-gcm',
-        kdfParams: const KdfParams(
-          kdfId: 'pbkdf2',
-          memoryKB: 65536,
-          iterations: 3,
-          parallelism: 4,
-        ),
+        kdfParams: const KdfParams(kdfId: 'pbkdf2', memoryKB: 65536, iterations: 3, parallelism: 4),
         nonce: Uint8List.fromList([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
         ciphertext: Uint8List.fromList([100, 101, 102]),
         authTag: Uint8List.fromList(List.filled(16, 0xAA)),
@@ -510,10 +497,7 @@ void main() {
 
     test('SecureString fromBytes', () async {
       final bytes = Uint8List.fromList([0xDE, 0xAD, 0xBE, 0xEF]);
-      final secureStr = await SecureString.fromBytes(
-        bytes,
-        ttl: const Duration(hours: 1),
-      );
+      final secureStr = await SecureString.fromBytes(bytes, ttl: const Duration(hours: 1));
 
       final value = await secureStr.get();
       expect(value, isNotNull);
@@ -595,10 +579,8 @@ void main() {
     });
 
     test('HLC merge: remote is in the past', () {
-      const local =
-          HLC(physicalTime: 2000, logicalCounter: 5, deviceId: 'local');
-      const remote =
-          HLC(physicalTime: 1000, logicalCounter: 10, deviceId: 'remote');
+      const local = HLC(physicalTime: 2000, logicalCounter: 5, deviceId: 'local');
+      const remote = HLC(physicalTime: 1000, logicalCounter: 10, deviceId: 'remote');
 
       final merged = local.merge(remote);
 
@@ -608,10 +590,8 @@ void main() {
     });
 
     test('HLC merge: same device ID', () {
-      const local =
-          HLC(physicalTime: 1500, logicalCounter: 3, deviceId: 'same');
-      const remote =
-          HLC(physicalTime: 1500, logicalCounter: 7, deviceId: 'same');
+      const local = HLC(physicalTime: 1500, logicalCounter: 3, deviceId: 'same');
+      const remote = HLC(physicalTime: 1500, logicalCounter: 7, deviceId: 'same');
 
       final merged = local.merge(remote);
 
@@ -619,27 +599,22 @@ void main() {
     });
 
     test('HLC isConcurrent detection', () {
-      const hlc1 =
-          HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'device-a');
-      const hlc2 =
-          HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'device-b');
+      const hlc1 = HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'device-a');
+      const hlc2 = HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'device-b');
 
       expect(hlc1.isConcurrent(hlc2), isTrue);
       expect(hlc2.isConcurrent(hlc1), isTrue);
     });
 
     test('HLC isConcurrent: different physical time', () {
-      const hlc1 =
-          HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'device-a');
-      const hlc2 =
-          HLC(physicalTime: 2000, logicalCounter: 0, deviceId: 'device-b');
+      const hlc1 = HLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'device-a');
+      const hlc2 = HLC(physicalTime: 2000, logicalCounter: 0, deviceId: 'device-b');
 
       expect(hlc1.isConcurrent(hlc2), isFalse);
     });
 
     test('HLC: copyWith preserves unspecified fields', () {
-      const original =
-          HLC(physicalTime: 5000, logicalCounter: 3, deviceId: 'orig');
+      const original = HLC(physicalTime: 5000, logicalCounter: 3, deviceId: 'orig');
 
       final updated = original.copyWith(logicalCounter: 10);
 
@@ -649,10 +624,8 @@ void main() {
     });
 
     test('HLCUtils.max with equal timestamps', () {
-      const hlc1 =
-          HLC(physicalTime: 1000, logicalCounter: 5, deviceId: 'aaa');
-      const hlc2 =
-          HLC(physicalTime: 1000, logicalCounter: 5, deviceId: 'bbb');
+      const hlc1 = HLC(physicalTime: 1000, logicalCounter: 5, deviceId: 'aaa');
+      const hlc2 = HLC(physicalTime: 1000, logicalCounter: 5, deviceId: 'bbb');
 
       final max = HLCUtils.max(hlc1, hlc2);
       // 'aaa' < 'bbb' lexicographically
@@ -694,12 +667,6 @@ void main() {
   // ===================================================================
 
   group('Edge Cases: CryptoService Compatibility', () {
-    late CryptoService cryptoService;
-
-    setUp(() {
-      cryptoService = CryptoService();
-    });
-
     test('EncryptedData with zero-length fields', () {
       final data = EncryptedData(
         ciphertext: Uint8List(0),
@@ -716,11 +683,7 @@ void main() {
     });
 
     test('Argon2Parameters JSON round-trip', () {
-      const params = Argon2Parameters(
-        memoryKB: 131072,
-        iterations: 5,
-        parallelism: 4,
-      );
+      const params = Argon2Parameters(memoryKB: 131072, iterations: 5, parallelism: 4);
 
       final json = params.toJson();
       final restored = Argon2Parameters.fromJson(json);
@@ -731,11 +694,7 @@ void main() {
     });
 
     test('Argon2Parameters toKdfParams conversion', () {
-      const params = Argon2Parameters(
-        memoryKB: 65536,
-        iterations: 3,
-        parallelism: 4,
-      );
+      const params = Argon2Parameters(memoryKB: 65536, iterations: 3, parallelism: 4);
 
       final kdfParams = params.toKdfParams();
       expect(kdfParams.kdfId, equals('pbkdf2-hmac-sha256'));
@@ -749,12 +708,7 @@ void main() {
 
   group('Edge Cases: KdfParams & KeyVersionInfo', () {
     test('KdfParams JSON round-trip', () {
-      const params = KdfParams(
-        kdfId: 'argon2id',
-        memoryKB: 131072,
-        iterations: 4,
-        parallelism: 8,
-      );
+      const params = KdfParams(kdfId: 'argon2id', memoryKB: 131072, iterations: 4, parallelism: 8);
 
       final json = params.toJson();
       final restored = KdfParams.fromJson(json);
@@ -775,10 +729,7 @@ void main() {
     });
 
     test('KeyVersionInfo JSON round-trip', () {
-      const info = KeyVersionInfo(
-        dekVersion: 3,
-        kekBinding: 'kek-hash-abc123',
-      );
+      const info = KeyVersionInfo(dekVersion: 3, kekBinding: 'kek-hash-abc123');
 
       final json = info.toJson();
       final restored = KeyVersionInfo.fromJson(json);

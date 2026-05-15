@@ -22,10 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthDeleteRequested>(_onAuthDeleteRequested);
   }
 
-  Future<void> _onAuthLoadRequested(
-    AuthLoadRequested event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onAuthLoadRequested(AuthLoadRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
       final cards = _authService.getActiveCards();
@@ -35,10 +32,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthSearchRequested(
-    AuthSearchRequested event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onAuthSearchRequested(AuthSearchRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
       // In a real scenario, we'd need the searchKey here.
@@ -60,10 +54,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthAddRequested(
-    AuthAddRequested event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onAuthAddRequested(AuthAddRequested event, Emitter<AuthState> emit) async {
     emit(AuthOperationInProgress());
     try {
       _authService.createCard(
@@ -78,10 +69,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthUpdateRequested(
-    AuthUpdateRequested event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onAuthUpdateRequested(AuthUpdateRequested event, Emitter<AuthState> emit) async {
     emit(AuthOperationInProgress());
     try {
       _authService.updateCard(
@@ -97,10 +85,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthDeleteRequested(
-    AuthDeleteRequested event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onAuthDeleteRequested(AuthDeleteRequested event, Emitter<AuthState> emit) async {
     emit(AuthOperationInProgress());
     try {
       _authService.deleteCard(event.cardId, event.deviceId);

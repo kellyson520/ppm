@@ -73,11 +73,7 @@ abstract interface class AeadCipher {
   });
 
   /// 解密
-  Uint8List open({
-    required EncryptedBox box,
-    required Uint8List key,
-    Uint8List? aad,
-  });
+  Uint8List open({required EncryptedBox box, required Uint8List key, Uint8List? aad});
 }
 
 /// 加密盒子（AEAD 输出）
@@ -86,11 +82,7 @@ class EncryptedBox {
   final Uint8List nonce;
   final Uint8List authTag;
 
-  const EncryptedBox({
-    required this.ciphertext,
-    required this.nonce,
-    required this.authTag,
-  });
+  const EncryptedBox({required this.ciphertext, required this.nonce, required this.authTag});
 }
 
 /// 密钥包装接口
@@ -202,9 +194,7 @@ class CiphertextEnvelope {
       nonce: _base64ToBytes(json['nonce'] as String),
       ciphertext: _base64ToBytes(json['ciphertext'] as String),
       authTag: _base64ToBytes(json['authTag'] as String),
-      aadMeta: json['aadMeta'] != null
-          ? Map<String, String>.from(json['aadMeta'] as Map)
-          : null,
+      aadMeta: json['aadMeta'] != null ? Map<String, String>.from(json['aadMeta'] as Map) : null,
     );
   }
 
@@ -223,10 +213,7 @@ class KeyVersionInfo {
   final int dekVersion;
   final String? kekBinding;
 
-  const KeyVersionInfo({
-    required this.dekVersion,
-    this.kekBinding,
-  });
+  const KeyVersionInfo({required this.dekVersion, this.kekBinding});
 
   Map<String, dynamic> toJson() => {
         'dekVersion': dekVersion,

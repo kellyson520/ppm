@@ -32,39 +32,23 @@ class SplashScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.shield,
-                size: 60,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.shield, size: 60, color: Colors.white),
             ),
             const SizedBox(height: 32),
             // App name
             const Text(
               'ZTD Password',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const Text(
               'Manager',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF6C63FF),
-              ),
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF6C63FF)),
             ),
             const SizedBox(height: 16),
             // Tagline
             Text(
               l10n.offlineFirstDesc,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.white60,
-                letterSpacing: 1.2,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.white60, letterSpacing: 1.2),
             ),
             const SizedBox(height: 48),
             // Loading indicator

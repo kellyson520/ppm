@@ -63,8 +63,7 @@ class TOTPGenerator {
   }
 
   /// 计算 HMAC
-  static List<int> _computeHmac(
-      String algorithm, Uint8List key, Uint8List data) {
+  static List<int> _computeHmac(String algorithm, Uint8List key, Uint8List data) {
     Hash hashAlgo;
     switch (algorithm.toUpperCase()) {
       case 'SHA256':

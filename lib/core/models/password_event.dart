@@ -18,11 +18,7 @@ class EncryptedPayload extends Equatable {
   final String iv; // Base64 encoded initialization vector
   final String authTag; // Base64 encoded authentication tag
 
-  const EncryptedPayload({
-    required this.ciphertext,
-    required this.iv,
-    required this.authTag,
-  });
+  const EncryptedPayload({required this.ciphertext, required this.iv, required this.authTag});
 
   factory EncryptedPayload.fromJson(Map<String, dynamic> json) {
     return EncryptedPayload(
@@ -32,18 +28,13 @@ class EncryptedPayload extends Equatable {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'ciphertext': ciphertext,
-        'iv': iv,
-        'authTag': authTag,
-      };
+  Map<String, dynamic> toJson() => {'ciphertext': ciphertext, 'iv': iv, 'authTag': authTag};
 
   /// Combine all components for storage/transmission
   String serialize() => base64Encode(utf8.encode(jsonEncode(toJson())));
 
   factory EncryptedPayload.deserialize(String data) {
-    final json =
-        jsonDecode(utf8.decode(base64Decode(data))) as Map<String, dynamic>;
+    final json = jsonDecode(utf8.decode(base64Decode(data))) as Map<String, dynamic>;
     return EncryptedPayload.fromJson(json);
   }
 
@@ -158,8 +149,7 @@ class PasswordEvent extends Equatable {
       deviceId: json['deviceId'] as String,
       type: EventType.values.byName(json['type'] as String),
       cardId: json['cardId'] as String,
-      payload:
-          EncryptedPayload.fromJson(json['payload'] as Map<String, dynamic>),
+      payload: EncryptedPayload.fromJson(json['payload'] as Map<String, dynamic>),
       prevEventHash: json['prevEventHash'] as String?,
       signature: json['signature'] as String?,
     );
@@ -167,15 +157,17 @@ class PasswordEvent extends Equatable {
 
   /// Calculate hash of this event for chain validation
   String calculateHash() {
-    final data = utf8.encode(jsonEncode({
-      'hlc': hlc.toJson(),
-      'eventId': eventId,
-      'deviceId': deviceId,
-      'type': type.name,
-      'cardId': cardId,
-      'payload': payload.toJson(),
-      'prevEventHash': prevEventHash,
-    }));
+    final data = utf8.encode(
+      jsonEncode({
+        'hlc': hlc.toJson(),
+        'eventId': eventId,
+        'deviceId': deviceId,
+        'type': type.name,
+        'cardId': cardId,
+        'payload': payload.toJson(),
+        'prevEventHash': prevEventHash,
+      }),
+    );
     return sha256.convert(data).toString();
   }
 
@@ -192,23 +184,29 @@ class PasswordEvent extends Equatable {
       );
 
   @override
-  List<Object?> get props =>
-      [hlc, eventId, deviceId, type, cardId, payload, prevEventHash, signature];
+  List<Object?> get props => [
+        hlc,
+        eventId,
+        deviceId,
+        type,
+        cardId,
+        payload,
+        prevEventHash,
+        signature,
+      ];
 }
 
 /// Event comparison utilities
 class EventUtils {
   /// Compare two events by HLC (for sorting)
-  static int compareByHLC(PasswordEvent a, PasswordEvent b) =>
-      a.hlc.compareTo(b.hlc);
+  static int compareByHLC(PasswordEvent a, PasswordEvent b) => a.hlc.compareTo(b.hlc);
 
   /// Get the latest event (LWW semantics)
   static PasswordEvent latest(PasswordEvent a, PasswordEvent b) =>
       a.hlc.compareTo(b.hlc) >= 0 ? a : b;
 
   /// Filter events by card ID
-  static List<PasswordEvent> filterByCardId(
-          List<PasswordEvent> events, String cardId) =>
+  static List<PasswordEvent> filterByCardId(List<PasswordEvent> events, String cardId) =>
       events.where((e) => e.cardId == cardId).toList();
 
   /// Get events sorted by HLC
@@ -227,8 +225,7 @@ class EventUtils {
       final current = sorted[i];
       final previous = sorted[i - 1];
 
-      if (current.prevEventHash != null &&
-          current.prevEventHash != previous.calculateHash()) {
+      if (current.prevEventHash != null && current.prevEventHash != previous.calculateHash()) {
         return false;
       }
     }

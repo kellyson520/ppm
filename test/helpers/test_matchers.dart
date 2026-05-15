@@ -26,14 +26,12 @@ class _ValidEncryptedDataMatcher extends Matcher {
   @override
   bool matches(Object? item, Map<dynamic, dynamic> matchState) {
     if (item is! EncryptedData) return false;
-    return item.ciphertext.isNotEmpty &&
-        item.iv.isNotEmpty &&
-        item.authTag.isNotEmpty;
+    return item.ciphertext.isNotEmpty && item.iv.isNotEmpty && item.authTag.isNotEmpty;
   }
 
   @override
-  Description describe(Description description) => description
-      .add('is valid EncryptedData with non-empty ciphertext, iv, authTag');
+  Description describe(Description description) =>
+      description.add('is valid EncryptedData with non-empty ciphertext, iv, authTag');
 }
 
 /// 验证 EncryptedData 可序列化并反序列化回相同值
@@ -57,8 +55,8 @@ class _SerializableEncryptedDataMatcher extends Matcher {
   }
 
   @override
-  Description describe(Description description) => description
-      .add('EncryptedData that survives serialize→deserialize round-trip');
+  Description describe(Description description) =>
+      description.add('EncryptedData that survives serialize→deserialize round-trip');
 }
 
 // ==================== Encryption Round-Trip Matcher ====================
@@ -88,8 +86,12 @@ class EncryptionRoundTripMatcher extends Matcher {
       description.add('string that survives encrypt→decrypt round-trip');
 
   @override
-  Description describeMismatch(Object? item, Description mismatchDescription,
-      Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(
+    Object? item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
     if (matchState.containsKey('error')) {
       return mismatchDescription.add('threw ${matchState['error']}');
     }
@@ -98,8 +100,7 @@ class EncryptionRoundTripMatcher extends Matcher {
 }
 
 /// 便捷构造函数
-Matcher encryptsAndDecrypts(Uint8List key, CryptoService cs) =>
-    EncryptionRoundTripMatcher(key, cs);
+Matcher encryptsAndDecrypts(Uint8List key, CryptoService cs) => EncryptionRoundTripMatcher(key, cs);
 
 // ==================== HLC Matchers ====================
 
@@ -122,12 +123,15 @@ class _CausallyOrderedMatcher extends Matcher {
   }
 
   @override
-  Description describe(Description description) =>
-      description.add('is causally ordered HLC list');
+  Description describe(Description description) => description.add('is causally ordered HLC list');
 
   @override
-  Description describeMismatch(Object? item, Description mismatchDescription,
-      Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(
+    Object? item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
     if (matchState.containsKey('breakIndex')) {
       final i = matchState['breakIndex'] as int;
       return mismatchDescription.add('causal order broken at index $i');
@@ -182,8 +186,7 @@ class _PasswordCardSerializableMatcher extends Matcher {
 }
 
 /// 验证 PasswordPayload 的 toJson/fromJson round-trip
-const Matcher isPasswordPayloadSerializable =
-    _PasswordPayloadSerializableMatcher();
+const Matcher isPasswordPayloadSerializable = _PasswordPayloadSerializableMatcher();
 
 class _PasswordPayloadSerializableMatcher extends Matcher {
   const _PasswordPayloadSerializableMatcher();
@@ -230,13 +233,12 @@ class _PasswordEventSerializableMatcher extends Matcher {
   }
 
   @override
-  Description describe(Description description) => description
-      .add('PasswordEvent survives toMap→fromMap round-trip (core fields)');
+  Description describe(Description description) =>
+      description.add('PasswordEvent survives toMap→fromMap round-trip (core fields)');
 }
 
 /// 验证 PasswordEvent 的 toJson/fromJson round-trip
-const Matcher isPasswordEventJsonSerializable =
-    _PasswordEventJsonSerializableMatcher();
+const Matcher isPasswordEventJsonSerializable = _PasswordEventJsonSerializableMatcher();
 
 class _PasswordEventJsonSerializableMatcher extends Matcher {
   const _PasswordEventJsonSerializableMatcher();
@@ -331,8 +333,7 @@ class CrdtCommutativeMatcher extends Matcher {
       description.add('CRDT merge is commutative (merge(a,b) == merge(b,a))');
 }
 
-Matcher isCrdtCommutativeWith(PasswordCard other) =>
-    CrdtCommutativeMatcher(other);
+Matcher isCrdtCommutativeWith(PasswordCard other) => CrdtCommutativeMatcher(other);
 
 // ==================== Utility ====================
 

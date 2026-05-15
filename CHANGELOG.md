@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.19] - 2026-05-15
+
+### 🔧 修复 (Fixes)
+- **修复 dart 分析错误**: 修正 `security_test.dart` 中 `const` 表达式中的字符串乘法操作（改用 `final`），删除未使用的局部变量。
+- **修复弃用 API**: 将 `vault_screen.dart` 中弃用的 `Matrix4.scaled()` 替换为 `scale()`。
+- **代码格式化**: 全量执行 `dart format --line-length 100`，消除 CI 格式化检查失败。
+
 ## [0.2.18] - 2026-03-01
 
 ### 🔧 修复 (Fixes)

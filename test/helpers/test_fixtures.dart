@@ -37,27 +37,15 @@ const String kTestEventId3 = 'eeeeeeee-3333-3333-3333-333333333333';
 /// [physicalTime] 物理时间（毫秒），默认 1000000
 /// [logicalCounter] 逻辑计数器，默认 0
 /// [deviceId] 设备 ID，默认 kTestDeviceA
-HLC makeHLC({
-  int physicalTime = 1000000,
-  int logicalCounter = 0,
-  String deviceId = kTestDeviceA,
-}) {
-  return HLC(
-    physicalTime: physicalTime,
-    logicalCounter: logicalCounter,
-    deviceId: deviceId,
-  );
+HLC makeHLC({int physicalTime = 1000000, int logicalCounter = 0, String deviceId = kTestDeviceA}) {
+  return HLC(physicalTime: physicalTime, logicalCounter: logicalCounter, deviceId: deviceId);
 }
 
 /// 创建一系列因果有序的 HLC（用于事件链测试）
 List<HLC> makeCausalHLCChain(int count, {String deviceId = kTestDeviceA}) {
   return List.generate(
     count,
-    (i) => HLC(
-      physicalTime: 1000000 + i * 1000,
-      logicalCounter: 0,
-      deviceId: deviceId,
-    ),
+    (i) => HLC(physicalTime: 1000000 + i * 1000, logicalCounter: 0, deviceId: deviceId),
   );
 }
 
@@ -157,21 +145,13 @@ EncryptedPayload makeEncryptedPayload({
   String iv = 'dGVzdC1pdg==', // base64 of "test-iv"
   String authTag = 'dGVzdC1hdXRoLXRhZw==', // base64 of "test-auth-tag"
 }) {
-  return EncryptedPayload(
-    ciphertext: ciphertext,
-    iv: iv,
-    authTag: authTag,
-  );
+  return EncryptedPayload(ciphertext: ciphertext, iv: iv, authTag: authTag);
 }
 
 // ==================== EncryptedData 工厂 ====================
 
 /// 创建测试用加密数据容器 (Uint8List 版本)
-EncryptedData makeEncryptedData({
-  Uint8List? ciphertext,
-  Uint8List? iv,
-  Uint8List? authTag,
-}) {
+EncryptedData makeEncryptedData({Uint8List? ciphertext, Uint8List? iv, Uint8List? authTag}) {
   return EncryptedData(
     ciphertext: ciphertext ?? Uint8List.fromList([1, 2, 3, 4]),
     iv: iv ?? Uint8List.fromList(List.filled(12, 0)),
@@ -205,10 +185,7 @@ PasswordEvent makePasswordEvent({
 }
 
 /// 创建一条卡片创建事件链：create -> update -> delete
-List<PasswordEvent> makeEventLifecycle({
-  String? cardId,
-  String deviceId = kTestDeviceA,
-}) {
+List<PasswordEvent> makeEventLifecycle({String? cardId, String deviceId = kTestDeviceA}) {
   final cid = cardId ?? kTestCardId1;
   final hlcs = makeCausalHLCChain(3, deviceId: deviceId);
 

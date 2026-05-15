@@ -33,84 +33,37 @@ import 'package:ztd_password_manager/core/sync/sync.dart' as _i11;
 // ignore_for_file: invalid_use_of_internal_member
 
 class _FakeDatabase_0 extends _i1.SmartFake implements _i2.Database {
-  _FakeDatabase_0(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeDatabase_0(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeEventStore_1 extends _i1.SmartFake implements _i3.EventStore {
-  _FakeEventStore_1(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeEventStore_1(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeFuture_2<T1> extends _i1.SmartFake implements _i4.Future<T1> {
-  _FakeFuture_2(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeFuture_2(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeCryptoFacade_3 extends _i1.SmartFake implements _i5.CryptoFacade {
-  _FakeCryptoFacade_3(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeCryptoFacade_3(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
-class _FakeArgon2Parameters_4 extends _i1.SmartFake
-    implements _i6.Argon2Parameters {
-  _FakeArgon2Parameters_4(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+class _FakeArgon2Parameters_4 extends _i1.SmartFake implements _i6.Argon2Parameters {
+  _FakeArgon2Parameters_4(Object parent, Invocation parentInvocation)
+      : super(parent, parentInvocation);
 }
 
 class _FakeEncryptedData_5 extends _i1.SmartFake implements _i6.EncryptedData {
-  _FakeEncryptedData_5(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeEncryptedData_5(Object parent, Invocation parentInvocation)
+      : super(parent, parentInvocation);
 }
 
 class _FakeQueryCursor_6 extends _i1.SmartFake implements _i2.QueryCursor {
-  _FakeQueryCursor_6(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeQueryCursor_6(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeBatch_7 extends _i1.SmartFake implements _i2.Batch {
-  _FakeBatch_7(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeBatch_7(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 /// A class which mocks [DatabaseService].
@@ -124,101 +77,56 @@ class MockDatabaseService extends _i1.Mock implements _i7.DatabaseService {
   @override
   _i2.Database get db => (super.noSuchMethod(
         Invocation.getter(#db),
-        returnValue: _FakeDatabase_0(
-          this,
-          Invocation.getter(#db),
-        ),
+        returnValue: _FakeDatabase_0(this, Invocation.getter(#db)),
       ) as _i2.Database);
 
   @override
   _i3.EventStore get eventStore => (super.noSuchMethod(
         Invocation.getter(#eventStore),
-        returnValue: _FakeEventStore_1(
-          this,
-          Invocation.getter(#eventStore),
-        ),
+        returnValue: _FakeEventStore_1(this, Invocation.getter(#eventStore)),
       ) as _i3.EventStore);
 
   @override
   _i4.Future<void> initialize(String? encryptionKey) => (super.noSuchMethod(
-        Invocation.method(
-          #initialize,
-          [encryptionKey],
-        ),
+        Invocation.method(#initialize, [encryptionKey]),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
-  _i4.Future<T> transaction<T>(
-          _i4.Future<T> Function(_i2.Transaction)? action) =>
+  _i4.Future<T> transaction<T>(_i4.Future<T> Function(_i2.Transaction)? action) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #transaction,
-          [action],
-        ),
+        Invocation.method(#transaction, [action]),
         returnValue: _i8.ifNotNull(
-              _i8.dummyValueOrNull<T>(
-                this,
-                Invocation.method(
-                  #transaction,
-                  [action],
-                ),
-              ),
+              _i8.dummyValueOrNull<T>(this, Invocation.method(#transaction, [action])),
               (T v) => _i4.Future<T>.value(v),
             ) ??
-            _FakeFuture_2<T>(
-              this,
-              Invocation.method(
-                #transaction,
-                [action],
-              ),
-            ),
+            _FakeFuture_2<T>(this, Invocation.method(#transaction, [action])),
       ) as _i4.Future<T>);
 
   @override
-  _i4.Future<void> saveCard(
-    _i9.PasswordCard? card, {
-    _i2.Transaction? txn,
-  }) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #saveCard,
-          [card],
-          {#txn: txn},
-        ),
+  _i4.Future<void> saveCard(_i9.PasswordCard? card, {_i2.Transaction? txn}) => (super.noSuchMethod(
+        Invocation.method(#saveCard, [card], {#txn: txn}),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<_i9.PasswordCard?> getCard(String? cardId) => (super.noSuchMethod(
-        Invocation.method(
-          #getCard,
-          [cardId],
-        ),
+        Invocation.method(#getCard, [cardId]),
         returnValue: _i4.Future<_i9.PasswordCard?>.value(),
       ) as _i4.Future<_i9.PasswordCard?>);
 
   @override
   _i4.Future<List<_i9.PasswordCard>> getAllActiveCards() => (super.noSuchMethod(
-        Invocation.method(
-          #getAllActiveCards,
-          [],
-        ),
-        returnValue:
-            _i4.Future<List<_i9.PasswordCard>>.value(<_i9.PasswordCard>[]),
+        Invocation.method(#getAllActiveCards, []),
+        returnValue: _i4.Future<List<_i9.PasswordCard>>.value(<_i9.PasswordCard>[]),
       ) as _i4.Future<List<_i9.PasswordCard>>);
 
   @override
-  _i4.Future<List<_i9.PasswordCard>> getCardsUpdatedAfterHlc(_i9.HLC? hlc) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getCardsUpdatedAfterHlc,
-          [hlc],
-        ),
-        returnValue:
-            _i4.Future<List<_i9.PasswordCard>>.value(<_i9.PasswordCard>[]),
+  _i4.Future<List<_i9.PasswordCard>> getCardsUpdatedAfterHlc(_i9.HLC? hlc) => (super.noSuchMethod(
+        Invocation.method(#getCardsUpdatedAfterHlc, [hlc]),
+        returnValue: _i4.Future<List<_i9.PasswordCard>>.value(<_i9.PasswordCard>[]),
       ) as _i4.Future<List<_i9.PasswordCard>>);
 
   @override
@@ -229,53 +137,30 @@ class MockDatabaseService extends _i1.Mock implements _i7.DatabaseService {
     _i2.Transaction? txn,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #deleteCard,
-          [
-            cardId,
-            deviceId,
-            eventId,
-          ],
-          {#txn: txn},
-        ),
+        Invocation.method(#deleteCard, [cardId, deviceId, eventId], {#txn: txn}),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
-  _i4.Future<void> permanentlyDeleteCard(
-    String? cardId, {
-    _i2.Transaction? txn,
-  }) =>
+  _i4.Future<void> permanentlyDeleteCard(String? cardId, {_i2.Transaction? txn}) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #permanentlyDeleteCard,
-          [cardId],
-          {#txn: txn},
-        ),
+        Invocation.method(#permanentlyDeleteCard, [cardId], {#txn: txn}),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<int> getCardCount() => (super.noSuchMethod(
-        Invocation.method(
-          #getCardCount,
-          [],
-        ),
+        Invocation.method(#getCardCount, []),
         returnValue: _i4.Future<int>.value(0),
       ) as _i4.Future<int>);
 
   @override
-  _i4.Future<List<_i9.PasswordCard>> searchByBlindIndexes(
-          List<String>? searchHashes) =>
+  _i4.Future<List<_i9.PasswordCard>> searchByBlindIndexes(List<String>? searchHashes) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #searchByBlindIndexes,
-          [searchHashes],
-        ),
-        returnValue:
-            _i4.Future<List<_i9.PasswordCard>>.value(<_i9.PasswordCard>[]),
+        Invocation.method(#searchByBlindIndexes, [searchHashes]),
+        returnValue: _i4.Future<List<_i9.PasswordCard>>.value(<_i9.PasswordCard>[]),
       ) as _i4.Future<List<_i9.PasswordCard>>);
 
   @override
@@ -284,15 +169,8 @@ class MockDatabaseService extends _i1.Mock implements _i7.DatabaseService {
     _i4.Future<String> Function(_i9.PasswordCard)? decryptFn,
   ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #searchByDecryptedContent,
-          [
-            query,
-            decryptFn,
-          ],
-        ),
-        returnValue:
-            _i4.Future<List<_i9.PasswordCard>>.value(<_i9.PasswordCard>[]),
+        Invocation.method(#searchByDecryptedContent, [query, decryptFn]),
+        returnValue: _i4.Future<List<_i9.PasswordCard>>.value(<_i9.PasswordCard>[]),
       ) as _i4.Future<List<_i9.PasswordCard>>);
 
   @override
@@ -302,109 +180,69 @@ class MockDatabaseService extends _i1.Mock implements _i7.DatabaseService {
     _i10.Uint8List? searchKey,
   ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #generateBlindIndexes,
-          [
-            cardId,
-            plaintext,
-            searchKey,
-          ],
-        ),
+        Invocation.method(#generateBlindIndexes, [cardId, plaintext, searchKey]),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<void> saveWebDavNode(_i11.WebDavNode? node) => (super.noSuchMethod(
-        Invocation.method(
-          #saveWebDavNode,
-          [node],
-        ),
+        Invocation.method(#saveWebDavNode, [node]),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<List<_i11.WebDavNode>> getAllWebDavNodes() => (super.noSuchMethod(
-        Invocation.method(
-          #getAllWebDavNodes,
-          [],
-        ),
-        returnValue:
-            _i4.Future<List<_i11.WebDavNode>>.value(<_i11.WebDavNode>[]),
+        Invocation.method(#getAllWebDavNodes, []),
+        returnValue: _i4.Future<List<_i11.WebDavNode>>.value(<_i11.WebDavNode>[]),
       ) as _i4.Future<List<_i11.WebDavNode>>);
 
   @override
   _i4.Future<void> deleteWebDavNode(String? name) => (super.noSuchMethod(
-        Invocation.method(
-          #deleteWebDavNode,
-          [name],
-        ),
+        Invocation.method(#deleteWebDavNode, [name]),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<void> compact() => (super.noSuchMethod(
-        Invocation.method(
-          #compact,
-          [],
-        ),
+        Invocation.method(#compact, []),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<int> getDatabaseSize() => (super.noSuchMethod(
-        Invocation.method(
-          #getDatabaseSize,
-          [],
-        ),
+        Invocation.method(#getDatabaseSize, []),
         returnValue: _i4.Future<int>.value(0),
       ) as _i4.Future<int>);
 
   @override
-  _i4.Future<String> exportDatabase(String? encryptionKey) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #exportDatabase,
-          [encryptionKey],
+  _i4.Future<String> exportDatabase(String? encryptionKey) => (super.noSuchMethod(
+        Invocation.method(#exportDatabase, [encryptionKey]),
+        returnValue: _i4.Future<String>.value(
+          _i8.dummyValue<String>(this, Invocation.method(#exportDatabase, [encryptionKey])),
         ),
-        returnValue: _i4.Future<String>.value(_i8.dummyValue<String>(
-          this,
-          Invocation.method(
-            #exportDatabase,
-            [encryptionKey],
-          ),
-        )),
       ) as _i4.Future<String>);
 
   @override
   _i4.Future<void> importDatabase(String? backupPath) => (super.noSuchMethod(
-        Invocation.method(
-          #importDatabase,
-          [backupPath],
-        ),
+        Invocation.method(#importDatabase, [backupPath]),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<void> clearAllData() => (super.noSuchMethod(
-        Invocation.method(
-          #clearAllData,
-          [],
-        ),
+        Invocation.method(#clearAllData, []),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<void> close() => (super.noSuchMethod(
-        Invocation.method(
-          #close,
-          [],
-        ),
+        Invocation.method(#close, []),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
@@ -421,18 +259,12 @@ class MockCryptoService extends _i1.Mock implements _i6.CryptoService {
   @override
   _i5.CryptoFacade get facade => (super.noSuchMethod(
         Invocation.getter(#facade),
-        returnValue: _FakeCryptoFacade_3(
-          this,
-          Invocation.getter(#facade),
-        ),
+        returnValue: _FakeCryptoFacade_3(this, Invocation.getter(#facade)),
       ) as _i5.CryptoFacade);
 
   @override
   _i10.Uint8List generateRandomBytes(int? length) => (super.noSuchMethod(
-        Invocation.method(
-          #generateRandomBytes,
-          [length],
-        ),
+        Invocation.method(#generateRandomBytes, [length]),
         returnValue: _i10.Uint8List(0),
       ) as _i10.Uint8List);
 
@@ -447,131 +279,56 @@ class MockCryptoService extends _i1.Mock implements _i6.CryptoService {
       (super.noSuchMethod(
         Invocation.method(
           #deriveKEK,
-          [
-            password,
-            salt,
-          ],
-          {
-            #memoryKB: memoryKB,
-            #iterations: iterations,
-            #parallelism: parallelism,
-          },
+          [password, salt],
+          {#memoryKB: memoryKB, #iterations: iterations, #parallelism: parallelism},
         ),
         returnValue: _i10.Uint8List(0),
       ) as _i10.Uint8List);
 
   @override
   _i6.Argon2Parameters benchmarkDevice() => (super.noSuchMethod(
-        Invocation.method(
-          #benchmarkDevice,
-          [],
-        ),
-        returnValue: _FakeArgon2Parameters_4(
-          this,
-          Invocation.method(
-            #benchmarkDevice,
-            [],
-          ),
-        ),
+        Invocation.method(#benchmarkDevice, []),
+        returnValue: _FakeArgon2Parameters_4(this, Invocation.method(#benchmarkDevice, [])),
       ) as _i6.Argon2Parameters);
 
   @override
-  _i10.Uint8List generateDEK() => (super.noSuchMethod(
-        Invocation.method(
-          #generateDEK,
-          [],
-        ),
-        returnValue: _i10.Uint8List(0),
-      ) as _i10.Uint8List);
+  _i10.Uint8List generateDEK() =>
+      (super.noSuchMethod(Invocation.method(#generateDEK, []), returnValue: _i10.Uint8List(0))
+          as _i10.Uint8List);
 
   @override
-  _i6.EncryptedData encryptAESGCM(
-    _i10.Uint8List? plaintext,
-    _i10.Uint8List? key,
-  ) =>
+  _i6.EncryptedData encryptAESGCM(_i10.Uint8List? plaintext, _i10.Uint8List? key) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #encryptAESGCM,
-          [
-            plaintext,
-            key,
-          ],
-        ),
+        Invocation.method(#encryptAESGCM, [plaintext, key]),
         returnValue: _FakeEncryptedData_5(
           this,
-          Invocation.method(
-            #encryptAESGCM,
-            [
-              plaintext,
-              key,
-            ],
-          ),
+          Invocation.method(#encryptAESGCM, [plaintext, key]),
         ),
       ) as _i6.EncryptedData);
 
   @override
-  _i10.Uint8List decryptAESGCM(
-    _i6.EncryptedData? encryptedData,
-    _i10.Uint8List? key,
-  ) =>
+  _i10.Uint8List decryptAESGCM(_i6.EncryptedData? encryptedData, _i10.Uint8List? key) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #decryptAESGCM,
-          [
-            encryptedData,
-            key,
-          ],
-        ),
+        Invocation.method(#decryptAESGCM, [encryptedData, key]),
         returnValue: _i10.Uint8List(0),
       ) as _i10.Uint8List);
 
   @override
-  _i6.EncryptedData encryptString(
-    String? plaintext,
-    _i10.Uint8List? key,
-  ) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #encryptString,
-          [
-            plaintext,
-            key,
-          ],
-        ),
+  _i6.EncryptedData encryptString(String? plaintext, _i10.Uint8List? key) => (super.noSuchMethod(
+        Invocation.method(#encryptString, [plaintext, key]),
         returnValue: _FakeEncryptedData_5(
           this,
-          Invocation.method(
-            #encryptString,
-            [
-              plaintext,
-              key,
-            ],
-          ),
+          Invocation.method(#encryptString, [plaintext, key]),
         ),
       ) as _i6.EncryptedData);
 
   @override
-  String decryptString(
-    _i6.EncryptedData? encryptedData,
-    _i10.Uint8List? key,
-  ) =>
+  String decryptString(_i6.EncryptedData? encryptedData, _i10.Uint8List? key) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #decryptString,
-          [
-            encryptedData,
-            key,
-          ],
-        ),
+        Invocation.method(#decryptString, [encryptedData, key]),
         returnValue: _i8.dummyValue<String>(
           this,
-          Invocation.method(
-            #decryptString,
-            [
-              encryptedData,
-              key,
-            ],
-          ),
+          Invocation.method(#decryptString, [encryptedData, key]),
         ),
       ) as String);
 
@@ -583,123 +340,50 @@ class MockCryptoService extends _i1.Mock implements _i6.CryptoService {
     int? length = 32,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #hkdfSha256,
-          [ikm],
-          {
-            #salt: salt,
-            #info: info,
-            #length: length,
-          },
-        ),
+        Invocation.method(#hkdfSha256, [ikm], {#salt: salt, #info: info, #length: length}),
         returnValue: _i10.Uint8List(0),
       ) as _i10.Uint8List);
 
   @override
-  _i10.Uint8List hmacSha256(
-    _i10.Uint8List? key,
-    _i10.Uint8List? data,
-  ) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #hmacSha256,
-          [
-            key,
-            data,
-          ],
-        ),
+  _i10.Uint8List hmacSha256(_i10.Uint8List? key, _i10.Uint8List? data) => (super.noSuchMethod(
+        Invocation.method(#hmacSha256, [key, data]),
         returnValue: _i10.Uint8List(0),
       ) as _i10.Uint8List);
 
   @override
-  String hmacSha256String(
-    String? key,
-    String? data,
-  ) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #hmacSha256String,
-          [
-            key,
-            data,
-          ],
-        ),
+  String hmacSha256String(String? key, String? data) => (super.noSuchMethod(
+        Invocation.method(#hmacSha256String, [key, data]),
         returnValue: _i8.dummyValue<String>(
           this,
-          Invocation.method(
-            #hmacSha256String,
-            [
-              key,
-              data,
-            ],
-          ),
+          Invocation.method(#hmacSha256String, [key, data]),
         ),
       ) as String);
 
   @override
-  bool constantTimeEquals(
-    _i10.Uint8List? a,
-    _i10.Uint8List? b,
-  ) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #constantTimeEquals,
-          [
-            a,
-            b,
-          ],
-        ),
-        returnValue: false,
-      ) as bool);
+  bool constantTimeEquals(_i10.Uint8List? a, _i10.Uint8List? b) =>
+      (super.noSuchMethod(Invocation.method(#constantTimeEquals, [a, b]), returnValue: false)
+          as bool);
 
   @override
-  bool constantTimeEqualsHex(
-    String? a,
-    String? b,
-  ) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #constantTimeEqualsHex,
-          [
-            a,
-            b,
-          ],
-        ),
-        returnValue: false,
-      ) as bool);
+  bool constantTimeEqualsHex(String? a, String? b) =>
+      (super.noSuchMethod(Invocation.method(#constantTimeEqualsHex, [a, b]), returnValue: false)
+          as bool);
 
   @override
-  _i10.Uint8List sha256Hash(_i10.Uint8List? data) => (super.noSuchMethod(
-        Invocation.method(
-          #sha256Hash,
-          [data],
-        ),
-        returnValue: _i10.Uint8List(0),
-      ) as _i10.Uint8List);
+  _i10.Uint8List sha256Hash(_i10.Uint8List? data) =>
+      (super.noSuchMethod(Invocation.method(#sha256Hash, [data]), returnValue: _i10.Uint8List(0))
+          as _i10.Uint8List);
 
   @override
   String sha256String(String? data) => (super.noSuchMethod(
-        Invocation.method(
-          #sha256String,
-          [data],
-        ),
-        returnValue: _i8.dummyValue<String>(
-          this,
-          Invocation.method(
-            #sha256String,
-            [data],
-          ),
-        ),
+        Invocation.method(#sha256String, [data]),
+        returnValue: _i8.dummyValue<String>(this, Invocation.method(#sha256String, [data])),
       ) as String);
 
   @override
-  _i10.Uint8List sha512Hash(_i10.Uint8List? data) => (super.noSuchMethod(
-        Invocation.method(
-          #sha512Hash,
-          [data],
-        ),
-        returnValue: _i10.Uint8List(0),
-      ) as _i10.Uint8List);
+  _i10.Uint8List sha512Hash(_i10.Uint8List? data) =>
+      (super.noSuchMethod(Invocation.method(#sha512Hash, [data]), returnValue: _i10.Uint8List(0))
+          as _i10.Uint8List);
 
   @override
   List<String> generateBlindIndexes(
@@ -710,10 +394,7 @@ class MockCryptoService extends _i1.Mock implements _i6.CryptoService {
       (super.noSuchMethod(
         Invocation.method(
           #generateBlindIndexes,
-          [
-            plaintext,
-            searchKey,
-          ],
+          [plaintext, searchKey],
           {#minTokenLength: minTokenLength},
         ),
         returnValue: <String>[],
@@ -721,34 +402,18 @@ class MockCryptoService extends _i1.Mock implements _i6.CryptoService {
 
   @override
   String bytesToHex(_i10.Uint8List? bytes) => (super.noSuchMethod(
-        Invocation.method(
-          #bytesToHex,
-          [bytes],
-        ),
-        returnValue: _i8.dummyValue<String>(
-          this,
-          Invocation.method(
-            #bytesToHex,
-            [bytes],
-          ),
-        ),
+        Invocation.method(#bytesToHex, [bytes]),
+        returnValue: _i8.dummyValue<String>(this, Invocation.method(#bytesToHex, [bytes])),
       ) as String);
 
   @override
-  _i10.Uint8List hexToBytes(String? hex) => (super.noSuchMethod(
-        Invocation.method(
-          #hexToBytes,
-          [hex],
-        ),
-        returnValue: _i10.Uint8List(0),
-      ) as _i10.Uint8List);
+  _i10.Uint8List hexToBytes(String? hex) =>
+      (super.noSuchMethod(Invocation.method(#hexToBytes, [hex]), returnValue: _i10.Uint8List(0))
+          as _i10.Uint8List);
 
   @override
   void clearBuffer(_i10.Uint8List? buffer) => super.noSuchMethod(
-        Invocation.method(
-          #clearBuffer,
-          [buffer],
-        ),
+        Invocation.method(#clearBuffer, [buffer]),
         returnValueForMissingStub: null,
       );
 }
@@ -762,153 +427,93 @@ class MockKeyManager extends _i1.Mock implements _i12.KeyManager {
   }
 
   @override
-  bool get isUnlocked => (super.noSuchMethod(
-        Invocation.getter(#isUnlocked),
-        returnValue: false,
-      ) as bool);
+  bool get isUnlocked =>
+      (super.noSuchMethod(Invocation.getter(#isUnlocked), returnValue: false) as bool);
 
   @override
-  _i4.Future<void> initialize(
-    String? masterPassword, {
-    _i10.Uint8List? userEntropy,
-  }) =>
+  _i4.Future<void> initialize(String? masterPassword, {_i10.Uint8List? userEntropy}) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #initialize,
-          [masterPassword],
-          {#userEntropy: userEntropy},
-        ),
+        Invocation.method(#initialize, [masterPassword], {#userEntropy: userEntropy}),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<bool> unlock(String? masterPassword) => (super.noSuchMethod(
-        Invocation.method(
-          #unlock,
-          [masterPassword],
-        ),
+        Invocation.method(#unlock, [masterPassword]),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 
   @override
-  void lock() => super.noSuchMethod(
-        Invocation.method(
-          #lock,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
+  void lock() => super.noSuchMethod(Invocation.method(#lock, []), returnValueForMissingStub: null);
 
   @override
   _i4.Future<_i10.Uint8List?> getSearchKey() => (super.noSuchMethod(
-        Invocation.method(
-          #getSearchKey,
-          [],
-        ),
+        Invocation.method(#getSearchKey, []),
         returnValue: _i4.Future<_i10.Uint8List?>.value(),
       ) as _i4.Future<_i10.Uint8List?>);
 
   @override
   _i4.Future<String?> getDeviceId() => (super.noSuchMethod(
-        Invocation.method(
-          #getDeviceId,
-          [],
-        ),
+        Invocation.method(#getDeviceId, []),
         returnValue: _i4.Future<String?>.value(),
       ) as _i4.Future<String?>);
 
   @override
-  _i4.Future<bool> changeMasterPassword(
-    String? oldPassword,
-    String? newPassword,
-  ) =>
+  _i4.Future<bool> changeMasterPassword(String? oldPassword, String? newPassword) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #changeMasterPassword,
-          [
-            oldPassword,
-            newPassword,
-          ],
-        ),
+        Invocation.method(#changeMasterPassword, [oldPassword, newPassword]),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 
   @override
-  _i4.Future<_i10.Uint8List?> rotateDEK(String? masterPassword) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #rotateDEK,
-          [masterPassword],
-        ),
+  _i4.Future<_i10.Uint8List?> rotateDEK(String? masterPassword) => (super.noSuchMethod(
+        Invocation.method(#rotateDEK, [masterPassword]),
         returnValue: _i4.Future<_i10.Uint8List?>.value(),
       ) as _i4.Future<_i10.Uint8List?>);
 
   @override
   _i4.Future<bool> isInitialized() => (super.noSuchMethod(
-        Invocation.method(
-          #isInitialized,
-          [],
-        ),
+        Invocation.method(#isInitialized, []),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 
   @override
   _i4.Future<void> reset() => (super.noSuchMethod(
-        Invocation.method(
-          #reset,
-          [],
-        ),
+        Invocation.method(#reset, []),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
-  _i4.Future<String?> exportEmergencyKit(String? masterPassword) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #exportEmergencyKit,
-          [masterPassword],
-        ),
+  _i4.Future<String?> exportEmergencyKit(String? masterPassword) => (super.noSuchMethod(
+        Invocation.method(#exportEmergencyKit, [masterPassword]),
         returnValue: _i4.Future<String?>.value(),
       ) as _i4.Future<String?>);
 
   @override
   _i4.Future<bool> importEmergencyKit(String? kitJson) => (super.noSuchMethod(
-        Invocation.method(
-          #importEmergencyKit,
-          [kitJson],
-        ),
+        Invocation.method(#importEmergencyKit, [kitJson]),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 
   @override
-  _i4.Future<void> savePasswordForBiometric(String? masterPassword) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #savePasswordForBiometric,
-          [masterPassword],
-        ),
+  _i4.Future<void> savePasswordForBiometric(String? masterPassword) => (super.noSuchMethod(
+        Invocation.method(#savePasswordForBiometric, [masterPassword]),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<void> clearPasswordForBiometric() => (super.noSuchMethod(
-        Invocation.method(
-          #clearPasswordForBiometric,
-          [],
-        ),
+        Invocation.method(#clearPasswordForBiometric, []),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<String?> getStoredBiometricPassword() => (super.noSuchMethod(
-        Invocation.method(
-          #getStoredBiometricPassword,
-          [],
-        ),
+        Invocation.method(#getStoredBiometricPassword, []),
         returnValue: _i4.Future<String?>.value(),
       ) as _i4.Future<String?>);
 }
@@ -922,138 +527,80 @@ class MockEventStore extends _i1.Mock implements _i3.EventStore {
   }
 
   @override
-  _i4.Future<void> appendEvent(
-    _i9.PasswordEvent? event, {
-    _i2.Transaction? txn,
-  }) =>
+  _i4.Future<void> appendEvent(_i9.PasswordEvent? event, {_i2.Transaction? txn}) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #appendEvent,
-          [event],
-          {#txn: txn},
-        ),
+        Invocation.method(#appendEvent, [event], {#txn: txn}),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
-  _i4.Future<void> appendEvents(
-    List<_i9.PasswordEvent>? events, {
-    _i2.Transaction? txn,
-  }) =>
+  _i4.Future<void> appendEvents(List<_i9.PasswordEvent>? events, {_i2.Transaction? txn}) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #appendEvents,
-          [events],
-          {#txn: txn},
-        ),
+        Invocation.method(#appendEvents, [events], {#txn: txn}),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
-  _i4.Future<_i9.PasswordEvent?> getEvent(String? eventId) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getEvent,
-          [eventId],
-        ),
+  _i4.Future<_i9.PasswordEvent?> getEvent(String? eventId) => (super.noSuchMethod(
+        Invocation.method(#getEvent, [eventId]),
         returnValue: _i4.Future<_i9.PasswordEvent?>.value(),
       ) as _i4.Future<_i9.PasswordEvent?>);
 
   @override
-  _i4.Future<List<_i9.PasswordEvent>> getEventsForCard(String? cardId) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getEventsForCard,
-          [cardId],
-        ),
-        returnValue:
-            _i4.Future<List<_i9.PasswordEvent>>.value(<_i9.PasswordEvent>[]),
+  _i4.Future<List<_i9.PasswordEvent>> getEventsForCard(String? cardId) => (super.noSuchMethod(
+        Invocation.method(#getEventsForCard, [cardId]),
+        returnValue: _i4.Future<List<_i9.PasswordEvent>>.value(<_i9.PasswordEvent>[]),
       ) as _i4.Future<List<_i9.PasswordEvent>>);
 
   @override
   _i4.Future<List<_i9.PasswordEvent>> getAllEvents() => (super.noSuchMethod(
-        Invocation.method(
-          #getAllEvents,
-          [],
-        ),
-        returnValue:
-            _i4.Future<List<_i9.PasswordEvent>>.value(<_i9.PasswordEvent>[]),
+        Invocation.method(#getAllEvents, []),
+        returnValue: _i4.Future<List<_i9.PasswordEvent>>.value(<_i9.PasswordEvent>[]),
       ) as _i4.Future<List<_i9.PasswordEvent>>);
 
   @override
-  _i4.Future<List<_i9.PasswordEvent>> getEventsAfterHlc(_i9.HLC? hlc) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getEventsAfterHlc,
-          [hlc],
-        ),
-        returnValue:
-            _i4.Future<List<_i9.PasswordEvent>>.value(<_i9.PasswordEvent>[]),
+  _i4.Future<List<_i9.PasswordEvent>> getEventsAfterHlc(_i9.HLC? hlc) => (super.noSuchMethod(
+        Invocation.method(#getEventsAfterHlc, [hlc]),
+        returnValue: _i4.Future<List<_i9.PasswordEvent>>.value(<_i9.PasswordEvent>[]),
       ) as _i4.Future<List<_i9.PasswordEvent>>);
 
   @override
-  _i4.Future<List<_i9.PasswordEvent>> getUnsyncedEvents() =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getUnsyncedEvents,
-          [],
-        ),
-        returnValue:
-            _i4.Future<List<_i9.PasswordEvent>>.value(<_i9.PasswordEvent>[]),
+  _i4.Future<List<_i9.PasswordEvent>> getUnsyncedEvents() => (super.noSuchMethod(
+        Invocation.method(#getUnsyncedEvents, []),
+        returnValue: _i4.Future<List<_i9.PasswordEvent>>.value(<_i9.PasswordEvent>[]),
       ) as _i4.Future<List<_i9.PasswordEvent>>);
 
   @override
-  _i4.Future<void> markEventsAsSynced(
-    List<String>? eventIds, {
-    _i2.Transaction? txn,
-  }) =>
+  _i4.Future<void> markEventsAsSynced(List<String>? eventIds, {_i2.Transaction? txn}) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #markEventsAsSynced,
-          [eventIds],
-          {#txn: txn},
-        ),
+        Invocation.method(#markEventsAsSynced, [eventIds], {#txn: txn}),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<_i9.HLC?> getLatestHlc() => (super.noSuchMethod(
-        Invocation.method(
-          #getLatestHlc,
-          [],
-        ),
+        Invocation.method(#getLatestHlc, []),
         returnValue: _i4.Future<_i9.HLC?>.value(),
       ) as _i4.Future<_i9.HLC?>);
 
   @override
   _i4.Future<int> getEventCount() => (super.noSuchMethod(
-        Invocation.method(
-          #getEventCount,
-          [],
-        ),
+        Invocation.method(#getEventCount, []),
         returnValue: _i4.Future<int>.value(0),
       ) as _i4.Future<int>);
 
   @override
-  _i4.Future<List<_i9.PasswordEvent>> getEventsByType(_i9.EventType? type) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getEventsByType,
-          [type],
-        ),
-        returnValue:
-            _i4.Future<List<_i9.PasswordEvent>>.value(<_i9.PasswordEvent>[]),
+  _i4.Future<List<_i9.PasswordEvent>> getEventsByType(_i9.EventType? type) => (super.noSuchMethod(
+        Invocation.method(#getEventsByType, [type]),
+        returnValue: _i4.Future<List<_i9.PasswordEvent>>.value(<_i9.PasswordEvent>[]),
       ) as _i4.Future<List<_i9.PasswordEvent>>);
 
   @override
   _i4.Future<void> deleteEventsBeforeHlc(_i9.HLC? hlc) => (super.noSuchMethod(
-        Invocation.method(
-          #deleteEventsBeforeHlc,
-          [hlc],
-        ),
+        Invocation.method(#deleteEventsBeforeHlc, [hlc]),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
@@ -1067,93 +614,64 @@ class MockEventStore extends _i1.Mock implements _i3.EventStore {
     String? previousSnapshotId,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #createSnapshot,
-          [],
-          {
-            #version: version,
-            #stateJson: stateJson,
-            #eventRangeStart: eventRangeStart,
-            #eventRangeEnd: eventRangeEnd,
-            #previousSnapshotId: previousSnapshotId,
-          },
-        ),
+        Invocation.method(#createSnapshot, [], {
+          #version: version,
+          #stateJson: stateJson,
+          #eventRangeStart: eventRangeStart,
+          #eventRangeEnd: eventRangeEnd,
+          #previousSnapshotId: previousSnapshotId,
+        }),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<_i3.Snapshot?> getLatestSnapshot() => (super.noSuchMethod(
-        Invocation.method(
-          #getLatestSnapshot,
-          [],
-        ),
+        Invocation.method(#getLatestSnapshot, []),
         returnValue: _i4.Future<_i3.Snapshot?>.value(),
       ) as _i4.Future<_i3.Snapshot?>);
 
   @override
-  _i4.Future<_i3.Snapshot?> getSnapshotByVersion(int? version) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getSnapshotByVersion,
-          [version],
-        ),
+  _i4.Future<_i3.Snapshot?> getSnapshotByVersion(int? version) => (super.noSuchMethod(
+        Invocation.method(#getSnapshotByVersion, [version]),
         returnValue: _i4.Future<_i3.Snapshot?>.value(),
       ) as _i4.Future<_i3.Snapshot?>);
 
   @override
   _i4.Future<List<_i3.Snapshot>> getAllSnapshots() => (super.noSuchMethod(
-        Invocation.method(
-          #getAllSnapshots,
-          [],
-        ),
+        Invocation.method(#getAllSnapshots, []),
         returnValue: _i4.Future<List<_i3.Snapshot>>.value(<_i3.Snapshot>[]),
       ) as _i4.Future<List<_i3.Snapshot>>);
 
   @override
   _i4.Future<void> pruneSnapshots(int? keepCount) => (super.noSuchMethod(
-        Invocation.method(
-          #pruneSnapshots,
-          [keepCount],
-        ),
+        Invocation.method(#pruneSnapshots, [keepCount]),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<void> updateLastSync(_i9.HLC? hlc) => (super.noSuchMethod(
-        Invocation.method(
-          #updateLastSync,
-          [hlc],
-        ),
+        Invocation.method(#updateLastSync, [hlc]),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<_i9.HLC?> getLastSyncHlc() => (super.noSuchMethod(
-        Invocation.method(
-          #getLastSyncHlc,
-          [],
-        ),
+        Invocation.method(#getLastSyncHlc, []),
         returnValue: _i4.Future<_i9.HLC?>.value(),
       ) as _i4.Future<_i9.HLC?>);
 
   @override
   _i4.Future<int> getPendingCount() => (super.noSuchMethod(
-        Invocation.method(
-          #getPendingCount,
-          [],
-        ),
+        Invocation.method(#getPendingCount, []),
         returnValue: _i4.Future<int>.value(0),
       ) as _i4.Future<int>);
 
   @override
   _i4.Future<void> close() => (super.noSuchMethod(
-        Invocation.method(
-          #close,
-          [],
-        ),
+        Invocation.method(#close, []),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
@@ -1170,42 +688,19 @@ class MockTransaction extends _i1.Mock implements _i2.Transaction {
   @override
   _i2.Database get database => (super.noSuchMethod(
         Invocation.getter(#database),
-        returnValue: _FakeDatabase_0(
-          this,
-          Invocation.getter(#database),
-        ),
+        returnValue: _FakeDatabase_0(this, Invocation.getter(#database)),
       ) as _i2.Database);
 
   @override
-  _i4.Future<void> execute(
-    String? sql, [
-    List<Object?>? arguments,
-  ]) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #execute,
-          [
-            sql,
-            arguments,
-          ],
-        ),
+  _i4.Future<void> execute(String? sql, [List<Object?>? arguments]) => (super.noSuchMethod(
+        Invocation.method(#execute, [sql, arguments]),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
-  _i4.Future<int> rawInsert(
-    String? sql, [
-    List<Object?>? arguments,
-  ]) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #rawInsert,
-          [
-            sql,
-            arguments,
-          ],
-        ),
+  _i4.Future<int> rawInsert(String? sql, [List<Object?>? arguments]) => (super.noSuchMethod(
+        Invocation.method(#rawInsert, [sql, arguments]),
         returnValue: _i4.Future<int>.value(0),
       ) as _i4.Future<int>);
 
@@ -1219,14 +714,8 @@ class MockTransaction extends _i1.Mock implements _i2.Transaction {
       (super.noSuchMethod(
         Invocation.method(
           #insert,
-          [
-            table,
-            values,
-          ],
-          {
-            #nullColumnHack: nullColumnHack,
-            #conflictAlgorithm: conflictAlgorithm,
-          },
+          [table, values],
+          {#nullColumnHack: nullColumnHack, #conflictAlgorithm: conflictAlgorithm},
         ),
         returnValue: _i4.Future<int>.value(0),
       ) as _i4.Future<int>);
@@ -1260,25 +749,14 @@ class MockTransaction extends _i1.Mock implements _i2.Transaction {
             #offset: offset,
           },
         ),
-        returnValue: _i4.Future<List<Map<String, Object?>>>.value(
-            <Map<String, Object?>>[]),
+        returnValue: _i4.Future<List<Map<String, Object?>>>.value(<Map<String, Object?>>[]),
       ) as _i4.Future<List<Map<String, Object?>>>);
 
   @override
-  _i4.Future<List<Map<String, Object?>>> rawQuery(
-    String? sql, [
-    List<Object?>? arguments,
-  ]) =>
+  _i4.Future<List<Map<String, Object?>>> rawQuery(String? sql, [List<Object?>? arguments]) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #rawQuery,
-          [
-            sql,
-            arguments,
-          ],
-        ),
-        returnValue: _i4.Future<List<Map<String, Object?>>>.value(
-            <Map<String, Object?>>[]),
+        Invocation.method(#rawQuery, [sql, arguments]),
+        returnValue: _i4.Future<List<Map<String, Object?>>>.value(<Map<String, Object?>>[]),
       ) as _i4.Future<List<Map<String, Object?>>>);
 
   @override
@@ -1288,25 +766,13 @@ class MockTransaction extends _i1.Mock implements _i2.Transaction {
     int? bufferSize,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #rawQueryCursor,
-          [
-            sql,
-            arguments,
-          ],
-          {#bufferSize: bufferSize},
-        ),
-        returnValue: _i4.Future<_i2.QueryCursor>.value(_FakeQueryCursor_6(
-          this,
-          Invocation.method(
-            #rawQueryCursor,
-            [
-              sql,
-              arguments,
-            ],
-            {#bufferSize: bufferSize},
+        Invocation.method(#rawQueryCursor, [sql, arguments], {#bufferSize: bufferSize}),
+        returnValue: _i4.Future<_i2.QueryCursor>.value(
+          _FakeQueryCursor_6(
+            this,
+            Invocation.method(#rawQueryCursor, [sql, arguments], {#bufferSize: bufferSize}),
           ),
-        )),
+        ),
       ) as _i4.Future<_i2.QueryCursor>);
 
   @override
@@ -1340,40 +806,32 @@ class MockTransaction extends _i1.Mock implements _i2.Transaction {
             #bufferSize: bufferSize,
           },
         ),
-        returnValue: _i4.Future<_i2.QueryCursor>.value(_FakeQueryCursor_6(
-          this,
-          Invocation.method(
-            #queryCursor,
-            [table],
-            {
-              #distinct: distinct,
-              #columns: columns,
-              #where: where,
-              #whereArgs: whereArgs,
-              #groupBy: groupBy,
-              #having: having,
-              #orderBy: orderBy,
-              #limit: limit,
-              #offset: offset,
-              #bufferSize: bufferSize,
-            },
+        returnValue: _i4.Future<_i2.QueryCursor>.value(
+          _FakeQueryCursor_6(
+            this,
+            Invocation.method(
+              #queryCursor,
+              [table],
+              {
+                #distinct: distinct,
+                #columns: columns,
+                #where: where,
+                #whereArgs: whereArgs,
+                #groupBy: groupBy,
+                #having: having,
+                #orderBy: orderBy,
+                #limit: limit,
+                #offset: offset,
+                #bufferSize: bufferSize,
+              },
+            ),
           ),
-        )),
+        ),
       ) as _i4.Future<_i2.QueryCursor>);
 
   @override
-  _i4.Future<int> rawUpdate(
-    String? sql, [
-    List<Object?>? arguments,
-  ]) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #rawUpdate,
-          [
-            sql,
-            arguments,
-          ],
-        ),
+  _i4.Future<int> rawUpdate(String? sql, [List<Object?>? arguments]) => (super.noSuchMethod(
+        Invocation.method(#rawUpdate, [sql, arguments]),
         returnValue: _i4.Future<int>.value(0),
       ) as _i4.Future<int>);
 
@@ -1388,65 +846,28 @@ class MockTransaction extends _i1.Mock implements _i2.Transaction {
       (super.noSuchMethod(
         Invocation.method(
           #update,
-          [
-            table,
-            values,
-          ],
-          {
-            #where: where,
-            #whereArgs: whereArgs,
-            #conflictAlgorithm: conflictAlgorithm,
-          },
+          [table, values],
+          {#where: where, #whereArgs: whereArgs, #conflictAlgorithm: conflictAlgorithm},
         ),
         returnValue: _i4.Future<int>.value(0),
       ) as _i4.Future<int>);
 
   @override
-  _i4.Future<int> rawDelete(
-    String? sql, [
-    List<Object?>? arguments,
-  ]) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #rawDelete,
-          [
-            sql,
-            arguments,
-          ],
-        ),
+  _i4.Future<int> rawDelete(String? sql, [List<Object?>? arguments]) => (super.noSuchMethod(
+        Invocation.method(#rawDelete, [sql, arguments]),
         returnValue: _i4.Future<int>.value(0),
       ) as _i4.Future<int>);
 
   @override
-  _i4.Future<int> delete(
-    String? table, {
-    String? where,
-    List<Object?>? whereArgs,
-  }) =>
+  _i4.Future<int> delete(String? table, {String? where, List<Object?>? whereArgs}) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #delete,
-          [table],
-          {
-            #where: where,
-            #whereArgs: whereArgs,
-          },
-        ),
+        Invocation.method(#delete, [table], {#where: where, #whereArgs: whereArgs}),
         returnValue: _i4.Future<int>.value(0),
       ) as _i4.Future<int>);
 
   @override
   _i2.Batch batch() => (super.noSuchMethod(
-        Invocation.method(
-          #batch,
-          [],
-        ),
-        returnValue: _FakeBatch_7(
-          this,
-          Invocation.method(
-            #batch,
-            [],
-          ),
-        ),
+        Invocation.method(#batch, []),
+        returnValue: _FakeBatch_7(this, Invocation.method(#batch, [])),
       ) as _i2.Batch);
 }

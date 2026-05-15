@@ -29,15 +29,12 @@ class KeyManager {
   // In-memory cache for DEK (session-only)
   Uint8List? _cachedDEK;
 
-  KeyManager({
-    FlutterSecureStorage? secureStorage,
-    CryptoService? cryptoService,
-  })  : _secureStorage = secureStorage ??
+  KeyManager({FlutterSecureStorage? secureStorage, CryptoService? cryptoService})
+      : _secureStorage = secureStorage ??
             const FlutterSecureStorage(
               aOptions: AndroidOptions(
                 keyCipherAlgorithm: KeyCipherAlgorithm.RSA_ECB_PKCS1Padding,
-                storageCipherAlgorithm:
-                    StorageCipherAlgorithm.AES_GCM_NoPadding,
+                storageCipherAlgorithm: StorageCipherAlgorithm.AES_GCM_NoPadding,
               ),
               iOptions: IOSOptions(
                 accountName: 'ztd_password_manager',
@@ -55,8 +52,7 @@ class KeyManager {
   /// 5. Generate random DEK
   /// 6. Encrypt DEK with KEK
   /// 7. Store encrypted DEK and salt in secure storage
-  Future<void> initialize(String masterPassword,
-      {Uint8List? userEntropy}) async {
+  Future<void> initialize(String masterPassword, {Uint8List? userEntropy}) async {
     // Generate random system salt (32 bytes)
     var salt = _cryptoService.generateRandomBytes(32);
 
@@ -94,18 +90,9 @@ class KeyManager {
 
     // Store in secure storage
     await _secureStorage.write(key: _saltKeyName, value: base64Encode(salt));
-    await _secureStorage.write(
-      key: _argonParamsKeyName,
-      value: jsonEncode(argonParams.toJson()),
-    );
-    await _secureStorage.write(
-      key: _dekKeyName,
-      value: encryptedDEK.serialize(),
-    );
-    await _secureStorage.write(
-      key: _searchKeyName,
-      value: base64Encode(searchKey),
-    );
+    await _secureStorage.write(key: _argonParamsKeyName, value: jsonEncode(argonParams.toJson()));
+    await _secureStorage.write(key: _dekKeyName, value: encryptedDEK.serialize());
+    await _secureStorage.write(key: _searchKeyName, value: base64Encode(searchKey));
     await _secureStorage.write(key: _deviceIdKeyName, value: deviceId);
 
     // Cache DEK in memory for session
@@ -125,13 +112,10 @@ class KeyManager {
     try {
       // Retrieve stored values
       final saltStr = await _secureStorage.read(key: _saltKeyName);
-      final argonParamsStr =
-          await _secureStorage.read(key: _argonParamsKeyName);
+      final argonParamsStr = await _secureStorage.read(key: _argonParamsKeyName);
       final encryptedDEKStr = await _secureStorage.read(key: _dekKeyName);
 
-      if (saltStr == null ||
-          argonParamsStr == null ||
-          encryptedDEKStr == null) {
+      if (saltStr == null || argonParamsStr == null || encryptedDEKStr == null) {
         return false; // Not initialized
       }
 
@@ -163,16 +147,11 @@ class KeyManager {
     } on Exception catch (e, stack) {
       // 区分「密码错误」与「系统错误」：返回 false 代表密码不正确或存储损坏
       // 如果是确实的系统错误（如 TEE 异常）则上报
-      final isWrongPassword =
-          e.runtimeType.toString() == 'InvalidCipherTextException' ||
-              e.toString().contains('InvalidCipherTextException');
+      final isWrongPassword = e.runtimeType.toString() == 'InvalidCipherTextException' ||
+          e.toString().contains('InvalidCipherTextException');
 
       if (!isWrongPassword) {
-        CrashReportService.instance.reportError(
-          e,
-          stack,
-          source: 'KeyManager.unlock',
-        );
+        CrashReportService.instance.reportError(e, stack, source: 'KeyManager.unlock');
       }
       return false;
     }
@@ -190,8 +169,7 @@ class KeyManager {
   bool get isUnlocked => _cachedDEK != null;
 
   /// Get DEK (only when unlocked)
-  Uint8List? get dek =>
-      _cachedDEK != null ? Uint8List.fromList(_cachedDEK!) : null;
+  Uint8List? get dek => _cachedDEK != null ? Uint8List.fromList(_cachedDEK!) : null;
 
   /// Get search key for blind indexes
   Future<Uint8List?> getSearchKey() async {
@@ -212,10 +190,7 @@ class KeyManager {
   /// 3. Derive new KEK
   /// 4. Re-encrypt DEK with new KEK
   /// 5. Store new encrypted DEK and salt
-  Future<bool> changeMasterPassword(
-    String oldPassword,
-    String newPassword,
-  ) async {
+  Future<bool> changeMasterPassword(String oldPassword, String newPassword) async {
     // Verify old password
     if (!await unlock(oldPassword)) {
       return false;
@@ -244,29 +219,19 @@ class KeyManager {
       final newEncryptedDEK = _cryptoService.encryptAESGCM(dek, newKek);
 
       // Store new values
-      await _secureStorage.write(
-        key: _saltKeyName,
-        value: base64Encode(newSalt),
-      );
+      await _secureStorage.write(key: _saltKeyName, value: base64Encode(newSalt));
       await _secureStorage.write(
         key: _argonParamsKeyName,
         value: jsonEncode(newArgonParams.toJson()),
       );
-      await _secureStorage.write(
-        key: _dekKeyName,
-        value: newEncryptedDEK.serialize(),
-      );
+      await _secureStorage.write(key: _dekKeyName, value: newEncryptedDEK.serialize());
 
       // Clear new KEK
       _cryptoService.clearBuffer(newKek);
 
       return true;
     } on Exception catch (e, stack) {
-      CrashReportService.instance.reportError(
-        e,
-        stack,
-        source: 'KeyManager.changeMasterPassword',
-      );
+      CrashReportService.instance.reportError(e, stack, source: 'KeyManager.changeMasterPassword');
       return false;
     }
   }
@@ -289,8 +254,7 @@ class KeyManager {
 
       // Get salt and parameters
       final saltStr = await _secureStorage.read(key: _saltKeyName);
-      final argonParamsStr =
-          await _secureStorage.read(key: _argonParamsKeyName);
+      final argonParamsStr = await _secureStorage.read(key: _argonParamsKeyName);
 
       if (saltStr == null || argonParamsStr == null) return null;
 
@@ -312,10 +276,7 @@ class KeyManager {
       final encryptedNewDEK = _cryptoService.encryptAESGCM(newDek, kek);
 
       // Store new encrypted DEK
-      await _secureStorage.write(
-        key: _dekKeyName,
-        value: encryptedNewDEK.serialize(),
-      );
+      await _secureStorage.write(key: _dekKeyName, value: encryptedNewDEK.serialize());
 
       // Update cache
       _cachedDEK = newDek;
@@ -326,11 +287,7 @@ class KeyManager {
 
       return newDek;
     } on Exception catch (e, stack) {
-      CrashReportService.instance.reportError(
-        e,
-        stack,
-        source: 'KeyManager.rotateDEK',
-      );
+      CrashReportService.instance.reportError(e, stack, source: 'KeyManager.rotateDEK');
       return null;
     }
   }
@@ -391,11 +348,7 @@ class KeyManager {
 
       return jsonEncode(kit);
     } on Exception catch (e, stack) {
-      CrashReportService.instance.reportError(
-        e,
-        stack,
-        source: 'KeyManager.exportEmergencyKit',
-      );
+      CrashReportService.instance.reportError(e, stack, source: 'KeyManager.exportEmergencyKit');
       return null;
     }
   }
@@ -417,19 +370,12 @@ class KeyManager {
       _cachedDEK = dek;
 
       // Store search key and device ID
-      await _secureStorage.write(
-        key: _searchKeyName,
-        value: base64Encode(searchKey),
-      );
+      await _secureStorage.write(key: _searchKeyName, value: base64Encode(searchKey));
       await _secureStorage.write(key: _deviceIdKeyName, value: deviceId);
 
       return true;
     } on Exception catch (e, stack) {
-      CrashReportService.instance.reportError(
-        e,
-        stack,
-        source: 'KeyManager.importEmergencyKit',
-      );
+      CrashReportService.instance.reportError(e, stack, source: 'KeyManager.importEmergencyKit');
       return false;
     }
   }

@@ -20,14 +20,8 @@ void main() {
     });
 
     test('交换律：merge(a, b) == merge(b, a)', () {
-      final a = makePasswordCard(
-        cardId: kTestCardId1,
-        updatedAt: makeHLC(physicalTime: 1000),
-      );
-      final b = makePasswordCard(
-        cardId: kTestCardId1,
-        updatedAt: makeHLC(physicalTime: 2000),
-      );
+      final a = makePasswordCard(cardId: kTestCardId1, updatedAt: makeHLC(physicalTime: 1000));
+      final b = makePasswordCard(cardId: kTestCardId1, updatedAt: makeHLC(physicalTime: 2000));
       expect(a, isCrdtCommutativeWith(b));
     });
 
@@ -122,9 +116,7 @@ void main() {
     });
 
     test('cardUpdated 更新已有卡片', () {
-      final existing = makePasswordCard(
-        updatedAt: makeHLC(physicalTime: 1000),
-      );
+      final existing = makePasswordCard(updatedAt: makeHLC(physicalTime: 1000));
       final newPayload = makeEncryptedPayload(ciphertext: 'new-cipher');
       final event = makePasswordEvent(
         type: EventType.cardUpdated,
@@ -150,9 +142,7 @@ void main() {
     });
 
     test('cardDeleted 标记墓碑', () {
-      final existing = makePasswordCard(
-        updatedAt: makeHLC(physicalTime: 1000),
-      );
+      final existing = makePasswordCard(updatedAt: makeHLC(physicalTime: 1000));
       final event = makePasswordEvent(
         type: EventType.cardDeleted,
         hlc: makeHLC(physicalTime: 2000),
@@ -173,12 +163,8 @@ void main() {
 
   group('CrdtMerger.mergeEventSets — 事件集合合并', () {
     test('合并两个不交集', () {
-      final local = [
-        makePasswordEvent(eventId: 'e1', hlc: makeHLC(physicalTime: 1000)),
-      ];
-      final remote = [
-        makePasswordEvent(eventId: 'e2', hlc: makeHLC(physicalTime: 2000)),
-      ];
+      final local = [makePasswordEvent(eventId: 'e1', hlc: makeHLC(physicalTime: 1000))];
+      final remote = [makePasswordEvent(eventId: 'e2', hlc: makeHLC(physicalTime: 2000))];
       final merged = CrdtMerger.mergeEventSets(local, remote);
       expect(merged, hasLength(2));
       // 应按 HLC 排序
@@ -206,11 +192,7 @@ void main() {
   group('CrdtMerger.buildStateFromEvents — 事件重放', () {
     test('创建事件生成卡片', () {
       final events = [
-        makePasswordEvent(
-          type: EventType.cardCreated,
-          cardId: 'card-1',
-          eventId: 'e1',
-        ),
+        makePasswordEvent(type: EventType.cardCreated, cardId: 'card-1', eventId: 'e1'),
       ];
       final state = CrdtMerger.buildStateFromEvents(events);
       expect(state.containsKey('card-1'), isTrue);
@@ -271,16 +253,14 @@ void main() {
         makePasswordEvent(
           cardId: 'card-a',
           eventId: 'e1',
-          hlc:
-              makeHLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'dev-a'),
+          hlc: makeHLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'dev-a'),
         ),
       ];
       final remote = [
         makePasswordEvent(
           cardId: 'card-a',
           eventId: 'e2',
-          hlc:
-              makeHLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'dev-b'),
+          hlc: makeHLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'dev-b'),
         ),
       ];
       final conflicts = CrdtMerger.detectConflicts(local, remote);
@@ -302,11 +282,7 @@ void main() {
         hlc: makeHLC(physicalTime: 1000, logicalCounter: 0, deviceId: 'dev-b'),
       );
       final conflicts = [
-        Conflict(
-          cardId: 'card-a',
-          localEvent: localEvent,
-          remoteEvent: remoteEvent,
-        ),
+        Conflict(cardId: 'card-a', localEvent: localEvent, remoteEvent: remoteEvent),
       ];
       final resolutions = CrdtMerger.resolveConflicts(conflicts);
       expect(resolutions, hasLength(1));
@@ -330,14 +306,8 @@ void main() {
         hlc: makeHLC(physicalTime: 2000),
         type: EventType.cardUpdated,
       );
-      final currentState = {
-        'card-a': makePasswordCard(
-          cardId: 'card-a',
-          currentEventId: 'e2',
-        ),
-      };
-      final compacted =
-          CrdtMerger.compactEvents([event1, event2], currentState);
+      final currentState = {'card-a': makePasswordCard(cardId: 'card-a', currentEventId: 'e2')};
+      final compacted = CrdtMerger.compactEvents([event1, event2], currentState);
       expect(compacted, hasLength(1));
       expect(compacted.first.eventId, equals('e2'));
     });

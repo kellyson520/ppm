@@ -89,10 +89,12 @@ class EventStore {
 
     // Insert initial sync state
     await db.insert(
-      _syncStateTable,
-      {'id': 1, 'pending_count': 0},
-      conflictAlgorithm: ConflictAlgorithm.ignore,
-    );
+        _syncStateTable,
+        {
+          'id': 1,
+          'pending_count': 0,
+        },
+        conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 
   // ==================== Event Operations ====================
@@ -112,16 +114,11 @@ class EventStore {
   }
 
   /// Append multiple events
-  Future<void> appendEvents(List<PasswordEvent> events,
-      {Transaction? txn}) async {
+  Future<void> appendEvents(List<PasswordEvent> events, {Transaction? txn}) async {
     final executor = txn ?? _db;
     final batch = executor.batch();
     for (final event in events) {
-      batch.insert(
-        _eventsTable,
-        event.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      batch.insert(_eventsTable, event.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
     }
     await batch.commit(noResult: true);
 
@@ -156,10 +153,7 @@ class EventStore {
 
   /// Get all events sorted by HLC
   Future<List<PasswordEvent>> getAllEvents() async {
-    final result = await _db.query(
-      _eventsTable,
-      orderBy: 'hlc_physical, hlc_logical, hlc_device',
-    );
+    final result = await _db.query(_eventsTable, orderBy: 'hlc_physical, hlc_logical, hlc_device');
 
     return result.map((r) => PasswordEvent.fromMap(r)).toList();
   }
@@ -199,17 +193,13 @@ class EventStore {
   }
 
   /// Mark events as synced
-  Future<void> markEventsAsSynced(List<String> eventIds,
-      {Transaction? txn}) async {
+  Future<void> markEventsAsSynced(List<String> eventIds, {Transaction? txn}) async {
     final executor = txn ?? _db;
     final batch = executor.batch();
     for (final eventId in eventIds) {
       batch.update(
         _eventsTable,
-        {
-          'is_synced': 1,
-          'synced_at': DateTime.now().toIso8601String(),
-        },
+        {'is_synced': 1, 'synced_at': DateTime.now().toIso8601String()},
         where: 'event_id = ?',
         whereArgs: [eventId],
       );
@@ -239,9 +229,7 @@ class EventStore {
 
   /// Get event count
   Future<int> getEventCount() async {
-    final result = await _db.rawQuery(
-      'SELECT COUNT(*) as count FROM $_eventsTable',
-    );
+    final result = await _db.rawQuery('SELECT COUNT(*) as count FROM $_eventsTable');
     return (result.first['count'] as int?) ?? 0;
   }
 
@@ -312,11 +300,7 @@ class EventStore {
 
   /// Get latest snapshot
   Future<Snapshot?> getLatestSnapshot() async {
-    final result = await _db.query(
-      _snapshotsTable,
-      orderBy: 'version DESC',
-      limit: 1,
-    );
+    final result = await _db.query(_snapshotsTable, orderBy: 'version DESC', limit: 1);
 
     if (result.isEmpty) return null;
     return Snapshot.fromMap(result.first);
@@ -337,10 +321,7 @@ class EventStore {
 
   /// Get all snapshots
   Future<List<Snapshot>> getAllSnapshots() async {
-    final result = await _db.query(
-      _snapshotsTable,
-      orderBy: 'version DESC',
-    );
+    final result = await _db.query(_snapshotsTable, orderBy: 'version DESC');
 
     return result.map((r) => Snapshot.fromMap(r)).toList();
   }
@@ -353,11 +334,7 @@ class EventStore {
     final toDelete = snapshots.sublist(keepCount);
     final batch = _db.batch();
     for (final snapshot in toDelete) {
-      batch.delete(
-        _snapshotsTable,
-        where: 'snapshot_id = ?',
-        whereArgs: [snapshot.snapshotId],
-      );
+      batch.delete(_snapshotsTable, where: 'snapshot_id = ?', whereArgs: [snapshot.snapshotId]);
     }
     await batch.commit(noResult: true);
   }
@@ -367,26 +344,21 @@ class EventStore {
   /// Update last sync timestamp
   Future<void> updateLastSync(HLC hlc) async {
     await _db.update(
-      _syncStateTable,
-      {
-        'last_sync_at': DateTime.now().toIso8601String(),
-        'last_sync_hlc_physical': hlc.physicalTime,
-        'last_sync_hlc_logical': hlc.logicalCounter,
-        'last_sync_hlc_device': hlc.deviceId,
-      },
-      where: 'id = 1',
-    );
+        _syncStateTable,
+        {
+          'last_sync_at': DateTime.now().toIso8601String(),
+          'last_sync_hlc_physical': hlc.physicalTime,
+          'last_sync_hlc_logical': hlc.logicalCounter,
+          'last_sync_hlc_device': hlc.deviceId,
+        },
+        where: 'id = 1');
   }
 
   /// Get last sync HLC
   Future<HLC?> getLastSyncHlc() async {
     final result = await _db.query(
       _syncStateTable,
-      columns: [
-        'last_sync_hlc_physical',
-        'last_sync_hlc_logical',
-        'last_sync_hlc_device',
-      ],
+      columns: ['last_sync_hlc_physical', 'last_sync_hlc_logical', 'last_sync_hlc_device'],
       where: 'id = 1',
       limit: 1,
     );
@@ -428,11 +400,14 @@ class EventStore {
 
   Future<void> _updatePendingCount(int delta, {Transaction? txn}) async {
     final executor = txn ?? _db;
-    await executor.rawUpdate('''
+    await executor.rawUpdate(
+      '''
       UPDATE $_syncStateTable
       SET pending_count = pending_count + ?
       WHERE id = 1
-    ''', [delta]);
+    ''',
+      [delta],
+    );
   }
 
   Future<void> _recalculatePendingCount({Transaction? txn}) async {
@@ -442,11 +417,7 @@ class EventStore {
     ''');
     final count = (result.first['count'] as int?) ?? 0;
 
-    await executor.update(
-      _syncStateTable,
-      {'pending_count': count},
-      where: 'id = 1',
-    );
+    await executor.update(_syncStateTable, {'pending_count': count}, where: 'id = 1');
   }
 
   /// Close the database
@@ -488,8 +459,7 @@ class Snapshot {
         'logicalCounter': map['timestamp_logical'] as int,
         'deviceId': map['timestamp_device'] as String,
       }),
-      stateJson:
-          jsonDecode(map['state_json'] as String) as Map<String, dynamic>,
+      stateJson: jsonDecode(map['state_json'] as String) as Map<String, dynamic>,
       eventRangeStart: HLC.fromJson(
         jsonDecode(map['event_range_start'] as String) as Map<String, dynamic>,
       ),

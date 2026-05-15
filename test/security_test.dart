@@ -34,8 +34,11 @@ void main() {
       for (final payload in sqlPayloads) {
         final envelope = cryptoFacade.encryptString(payload, key);
         final decrypted = cryptoFacade.decryptString(envelope, key);
-        expect(decrypted, equals(payload),
-            reason: 'SQL injection payload should round-trip correctly');
+        expect(
+          decrypted,
+          equals(payload),
+          reason: 'SQL injection payload should round-trip correctly',
+        );
       }
     });
 
@@ -54,8 +57,11 @@ void main() {
       for (final payload in xssPayloads) {
         final envelope = cryptoFacade.encryptString(payload, key);
         final decrypted = cryptoFacade.decryptString(envelope, key);
-        expect(decrypted, equals(payload),
-            reason: 'XSS payload should round-trip without corruption');
+        expect(
+          decrypted,
+          equals(payload),
+          reason: 'XSS payload should round-trip without corruption',
+        );
       }
     });
 
@@ -72,8 +78,7 @@ void main() {
       for (final payload in nullPayloads) {
         final envelope = cryptoFacade.encrypt(payload, key);
         final decrypted = cryptoFacade.decrypt(envelope, key);
-        expect(decrypted, equals(payload),
-            reason: 'Null byte payload should round-trip correctly');
+        expect(decrypted, equals(payload), reason: 'Null byte payload should round-trip correctly');
       }
     });
 
@@ -95,8 +100,11 @@ void main() {
       for (final payload in unicodePayloads) {
         final envelope = cryptoFacade.encryptString(payload, key);
         final decrypted = cryptoFacade.decryptString(envelope, key);
-        expect(decrypted, equals(payload),
-            reason: 'Unicode payload should survive encryption round-trip');
+        expect(
+          decrypted,
+          equals(payload),
+          reason: 'Unicode payload should survive encryption round-trip',
+        );
       }
     });
 
@@ -115,8 +123,7 @@ void main() {
       for (final payload in pathPayloads) {
         final envelope = cryptoFacade.encryptString(payload, key);
         final decrypted = cryptoFacade.decryptString(envelope, key);
-        expect(decrypted, equals(payload),
-            reason: 'Path traversal payload should round-trip');
+        expect(decrypted, equals(payload), reason: 'Path traversal payload should round-trip');
       }
     });
 
@@ -153,8 +160,11 @@ void main() {
       for (int i = 0; i < 200; i++) {
         final envelope = cryptoFacade.encrypt(data, key);
         final nonceHex = cryptoFacade.bytesToHex(envelope.nonce);
-        expect(nonces.contains(nonceHex), isFalse,
-            reason: 'Nonce must never repeat (nonce reuse breaks AES-GCM security)');
+        expect(
+          nonces.contains(nonceHex),
+          isFalse,
+          reason: 'Nonce must never repeat (nonce reuse breaks AES-GCM security)',
+        );
         nonces.add(nonceHex);
       }
     });
@@ -171,8 +181,11 @@ void main() {
       }
 
       // All ciphertexts should be different (due to unique nonces)
-      expect(ciphertexts.length, equals(50),
-          reason: 'Each encryption should produce unique ciphertext');
+      expect(
+        ciphertexts.length,
+        equals(50),
+        reason: 'Each encryption should produce unique ciphertext',
+      );
     });
 
     test('Tampered ciphertext fails decryption', () {
@@ -301,11 +314,7 @@ void main() {
       final key = cryptoFacade.generateDEK();
       final data = utf8.encode('AAD-bound data');
 
-      const aadMeta = {
-        'vaultId': 'vault-primary',
-        'entryType': 'password',
-        'version': '1',
-      };
+      const aadMeta = {'vaultId': 'vault-primary', 'entryType': 'password', 'version': '1'};
 
       final envelope = cryptoFacade.encrypt(data, key, aadMeta: aadMeta);
       final decrypted = cryptoFacade.decrypt(envelope, key);
@@ -361,8 +370,11 @@ void main() {
       cryptoFacade.clearBuffer(buffer);
 
       // After clearing, buffer should be all zeros
-      expect(buffer.every((b) => b == 0), isTrue,
-          reason: 'Sensitive data must be zeroed after clearBuffer');
+      expect(
+        buffer.every((b) => b == 0),
+        isTrue,
+        reason: 'Sensitive data must be zeroed after clearBuffer',
+      );
       // Original values are gone
       expect(buffer, isNot(equals(originalCopy)));
     });
@@ -401,8 +413,11 @@ void main() {
 
       // Re-access - should still have original data (defensive copy)
       final reaccessed = await buffer.access();
-      expect(reaccessed![0], equals(1),
-          reason: 'SecureBuffer must return defensive copies, not references');
+      expect(
+        reaccessed![0],
+        equals(1),
+        reason: 'SecureBuffer must return defensive copies, not references',
+      );
 
       await buffer.dispose();
     });
@@ -421,16 +436,12 @@ void main() {
       await secureStr.dispose();
 
       final afterDispose = await secureStr.get();
-      expect(afterDispose, isNull,
-          reason: 'After dispose, SecureString must return null');
+      expect(afterDispose, isNull, reason: 'After dispose, SecureString must return null');
     });
 
     test('SecureString from bytes', () async {
       final bytes = Uint8List.fromList(utf8.encode('binary secret data'));
-      final secureStr = await SecureString.fromBytes(
-        bytes,
-        ttl: const Duration(hours: 1),
-      );
+      final secureStr = await SecureString.fromBytes(bytes, ttl: const Duration(hours: 1));
 
       final value = await secureStr.get();
       expect(value, equals('binary secret data'));
@@ -559,17 +570,11 @@ void main() {
 
     test('constantTimeEquals: single byte comparison', () {
       expect(
-        cryptoFacade.constantTimeEquals(
-          Uint8List.fromList([42]),
-          Uint8List.fromList([42]),
-        ),
+        cryptoFacade.constantTimeEquals(Uint8List.fromList([42]), Uint8List.fromList([42])),
         isTrue,
       );
       expect(
-        cryptoFacade.constantTimeEquals(
-          Uint8List.fromList([42]),
-          Uint8List.fromList([43]),
-        ),
+        cryptoFacade.constantTimeEquals(Uint8List.fromList([42]), Uint8List.fromList([43])),
         isFalse,
       );
     });
@@ -582,8 +587,11 @@ void main() {
     });
 
     test('constantTimeEqualsHex: case sensitive', () {
-      expect(cryptoFacade.constantTimeEqualsHex('ABC', 'abc'), isFalse,
-          reason: 'Hex comparison must be case-sensitive');
+      expect(
+        cryptoFacade.constantTimeEqualsHex('ABC', 'abc'),
+        isFalse,
+        reason: 'Hex comparison must be case-sensitive',
+      );
     });
   });
 
@@ -601,8 +609,11 @@ void main() {
       for (int i = 0; i < 100; i++) {
         final bytes = cryptoFacade.generateRandomBytes(32);
         final hex = cryptoFacade.bytesToHex(bytes);
-        expect(samples.contains(hex), isFalse,
-            reason: 'Random bytes must be unique across multiple calls');
+        expect(
+          samples.contains(hex),
+          isFalse,
+          reason: 'Random bytes must be unique across multiple calls',
+        );
         samples.add(hex);
       }
       expect(samples.length, equals(100));
@@ -634,8 +645,11 @@ void main() {
       }
 
       // Allow up to 3 missing bytes (statistically very unlikely but possible)
-      expect(missingBytes.length, lessThanOrEqualTo(3),
-          reason: 'Random bytes should cover most byte values');
+      expect(
+        missingBytes.length,
+        lessThanOrEqualTo(3),
+        reason: 'Random bytes should cover most byte values',
+      );
     });
 
     test('generateDEK produces unique 32-byte keys', () {
@@ -646,8 +660,7 @@ void main() {
         final hex = cryptoFacade.bytesToHex(dek);
         keys.add(hex);
       }
-      expect(keys.length, equals(50),
-          reason: 'All DEKs must be unique');
+      expect(keys.length, equals(50), reason: 'All DEKs must be unique');
     });
   });
 
@@ -666,8 +679,7 @@ void main() {
       final key1 = cryptoFacade.deriveKEK('password123', salt);
       final key2 = cryptoFacade.deriveKEK('password124', salt);
 
-      expect(key1, isNot(equals(key2)),
-          reason: 'Different passwords must produce different KEKs');
+      expect(key1, isNot(equals(key2)), reason: 'Different passwords must produce different KEKs');
       expect(key1.length, equals(32));
       expect(key2.length, equals(32));
     });
@@ -681,8 +693,7 @@ void main() {
       final key1 = cryptoFacade.deriveKEK(password, salt1);
       final key2 = cryptoFacade.deriveKEK(password, salt2);
 
-      expect(key1, isNot(equals(key2)),
-          reason: 'Different salts must produce different KEKs');
+      expect(key1, isNot(equals(key2)), reason: 'Different salts must produce different KEKs');
     });
 
     test('deriveKEK: same inputs produce same key (deterministic)', () {
@@ -692,8 +703,7 @@ void main() {
       final key1 = cryptoFacade.deriveKEK(password, salt);
       final key2 = cryptoFacade.deriveKEK(password, salt);
 
-      expect(key1, equals(key2),
-          reason: 'KDF must be deterministic for same inputs');
+      expect(key1, equals(key2), reason: 'KDF must be deterministic for same inputs');
     });
 
     test('deriveKEK: handles empty password', () {
@@ -712,20 +722,20 @@ void main() {
     test('deriveKEK: handles unicode password', () {
       final salt = cryptoFacade.generateRandomBytes(32);
 
-      expect(
-        () => cryptoFacade.deriveKEK('密码🔐安全Key!@#', salt),
-        returnsNormally,
-      );
+      expect(() => cryptoFacade.deriveKEK('密码🔐安全Key!@#', salt), returnsNormally);
     });
 
     test('deriveKEK: output is always 32 bytes', () {
       final salt = cryptoFacade.generateRandomBytes(32);
-      const passwords = ['', 'a', 'short', 'normal-password', 'A' * 500];
+      final passwords = ['', 'a', 'short', 'normal-password', 'A' * 500];
 
       for (final pw in passwords) {
         final key = cryptoFacade.deriveKEK(pw, salt);
-        expect(key.length, equals(32),
-            reason: 'KEK must always be 32 bytes regardless of password length');
+        expect(
+          key.length,
+          equals(32),
+          reason: 'KEK must always be 32 bytes regardless of password length',
+        );
       }
     });
   });
@@ -762,22 +772,19 @@ void main() {
       final defaultId = policy.defaultSuiteId;
 
       final rejection = policy.validateForDecryption(defaultId);
-      expect(rejection, isNull,
-          reason: 'Default suite must be allowed for decryption');
+      expect(rejection, isNull, reason: 'Default suite must be allowed for decryption');
     });
 
     test('policy allows legacy suite for decryption', () {
       final policy = cryptoFacade.policy;
       final rejection = policy.validateForDecryption('ZTDPM_LEGACY_V1');
-      expect(rejection, isNull,
-          reason: 'Legacy suite must be allowed for backward compatibility');
+      expect(rejection, isNull, reason: 'Legacy suite must be allowed for backward compatibility');
     });
 
     test('policy rejects unknown suite', () {
       final policy = cryptoFacade.policy;
       final rejection = policy.validateForDecryption('ATTACKER_SUITE_V99');
-      expect(rejection, isNotNull,
-          reason: 'Unknown suite must be rejected (downgrade protection)');
+      expect(rejection, isNotNull, reason: 'Unknown suite must be rejected (downgrade protection)');
     });
 
     test('policy allows only default suite for encryption', () {
@@ -798,7 +805,6 @@ void main() {
 
     test('decrypt fails with unknown suite envelope', () {
       final key = cryptoFacade.generateDEK();
-      final data = utf8.encode('test');
 
       final fakeEnvelope = CiphertextEnvelope(
         suiteId: 'EVIL_SUITE',
@@ -874,11 +880,7 @@ void main() {
     });
 
     test('CryptoService Argon2Parameters toKdfParams conversion', () {
-      const params = Argon2Parameters(
-        memoryKB: 131072,
-        iterations: 5,
-        parallelism: 8,
-      );
+      const params = Argon2Parameters(memoryKB: 131072, iterations: 5, parallelism: 8);
 
       final kdfParams = params.toKdfParams();
       expect(kdfParams.kdfId, equals('pbkdf2-hmac-sha256'));
@@ -917,25 +919,16 @@ void main() {
 
     test('hexToBytes: uppercase input', () {
       final bytes = cryptoFacade.hexToBytes('ABCDEF0123456789');
-      expect(
-        bytes,
-        equals(Uint8List.fromList([0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89])),
-      );
+      expect(bytes, equals(Uint8List.fromList([0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89])));
     });
 
     test('hexToBytes: lowercase input', () {
       final bytes = cryptoFacade.hexToBytes('abcdef0123456789');
-      expect(
-        bytes,
-        equals(Uint8List.fromList([0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89])),
-      );
+      expect(bytes, equals(Uint8List.fromList([0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89])));
     });
 
     test('hexToBytes: odd length throws', () {
-      expect(
-        () => cryptoFacade.hexToBytes('abc'),
-        throwsA(isA<Object>()),
-      );
+      expect(() => cryptoFacade.hexToBytes('abc'), throwsA(isA<Object>()));
     });
   });
 }

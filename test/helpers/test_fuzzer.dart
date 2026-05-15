@@ -22,10 +22,8 @@ class TestFuzzer {
   }
 
   static String _simpleString(int len) {
-    const chars =
-        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return List.generate(len, (i) => chars[_random.nextInt(chars.length)])
-        .join();
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return List.generate(len, (i) => chars[_random.nextInt(chars.length)]).join();
   }
 
   static String _unicodeString(int len) {

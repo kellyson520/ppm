@@ -19,15 +19,11 @@ class CryptoPolicyEngine {
   /// 单例
   static CryptoPolicyEngine? _instance;
   factory CryptoPolicyEngine({CryptoRegistry? registry}) {
-    _instance ??= CryptoPolicyEngine._internal(
-      registry: registry ?? CryptoRegistry(),
-    );
+    _instance ??= CryptoPolicyEngine._internal(registry: registry ?? CryptoRegistry());
     return _instance!;
   }
 
-  CryptoPolicyEngine._internal({
-    required CryptoRegistry registry,
-  }) : _registry = registry;
+  CryptoPolicyEngine._internal({required CryptoRegistry registry}) : _registry = registry;
 
   // ==================== 策略查询 ====================
 
@@ -35,9 +31,7 @@ class CryptoPolicyEngine {
   CryptoSuite get defaultSuite {
     final suite = _registry.getSuite(_defaultSuiteId);
     if (suite == null) {
-      throw StateError(
-        '默认套件 "$_defaultSuiteId" 未注册，系统不安全！',
-      );
+      throw StateError('默认套件 "$_defaultSuiteId" 未注册，系统不安全！');
     }
     return suite;
   }
@@ -52,9 +46,7 @@ class CryptoPolicyEngine {
       throw ArgumentError('套件 "$suiteId" 未注册');
     }
     if (suite.securityLevel < _minSecurityLevel) {
-      throw ArgumentError(
-        '套件 "$suiteId" 安全等级 ${suite.securityLevel} 低于最低要求 $_minSecurityLevel',
-      );
+      throw ArgumentError('套件 "$suiteId" 安全等级 ${suite.securityLevel} 低于最低要求 $_minSecurityLevel');
     }
     _defaultSuiteId = suiteId;
   }

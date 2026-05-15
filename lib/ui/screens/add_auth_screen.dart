@@ -34,8 +34,7 @@ class AddAuthScreen extends StatefulWidget {
   State<AddAuthScreen> createState() => _AddAuthScreenState();
 }
 
-class _AddAuthScreenState extends State<AddAuthScreen>
-    with SingleTickerProviderStateMixin {
+class _AddAuthScreenState extends State<AddAuthScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
 
@@ -111,8 +110,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
       _tabController.animateTo(0);
       _showSuccess(l10n.uriParsedSuccessfully);
     } on Exception catch (e, stack) {
-      CrashReportService.instance
-          .reportError(e, stack, source: 'AddAuthScreen:parseUri');
+      CrashReportService.instance.reportError(e, stack, source: 'AddAuthScreen:parseUri');
       _showError('${l10n.uriParseFailed}: $e');
     }
   }
@@ -133,9 +131,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
     final l10n = AppLocalizations.of(context)!;
     final result = await Navigator.push<String>(
       context,
-      MaterialPageRoute(
-        builder: (context) => const QrScannerScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const QrScannerScreen()),
     );
 
     if (result != null && result.startsWith('otpauth://')) {
@@ -155,8 +151,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
         _tabController.animateTo(0);
         _showSuccess(l10n.qrParsedSuccessfully);
       } on Exception catch (e, stack) {
-        CrashReportService.instance
-            .reportError(e, stack, source: 'AddAuthScreen:openQrScanner');
+        CrashReportService.instance.reportError(e, stack, source: 'AddAuthScreen:openQrScanner');
         _showError('${l10n.qrParseFailed}: $e');
       }
     }
@@ -166,9 +161,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
-    if (widget.dek == null ||
-        widget.searchKey == null ||
-        widget.deviceId == null) {
+    if (widget.dek == null || widget.searchKey == null || widget.deviceId == null) {
       _showError(l10n.encryptionKeysNotReady);
       return;
     }
@@ -181,16 +174,11 @@ class _AddAuthScreenState extends State<AddAuthScreen>
       final payload = AuthPayload(
         issuer: _issuerController.text.trim(),
         account: _accountController.text.trim(),
-        secret: _secretController.text
-            .trim()
-            .toUpperCase()
-            .replaceAll(RegExp(r'\s'), ''),
+        secret: _secretController.text.trim().toUpperCase().replaceAll(RegExp(r'\s'), ''),
         algorithm: _algorithm,
         digits: _digits,
         period: _period,
-        notes: _notesController.text.trim().isEmpty
-            ? null
-            : _notesController.text.trim(),
+        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
       );
 
       // createCard/updateCard 是同步方法，数据存入内存 _cards 列表
@@ -215,8 +203,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
         Navigator.pop(context, true);
       }
     } on Exception catch (e, stack) {
-      CrashReportService.instance
-          .reportError(e, stack, source: 'AddAuthScreen:save');
+      CrashReportService.instance.reportError(e, stack, source: 'AddAuthScreen:save');
       setState(() {
         _isLoading = false;
       });
@@ -233,9 +220,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
       _showError(l10n.pleaseEnterContent);
       return;
     }
-    if (widget.dek == null ||
-        widget.searchKey == null ||
-        widget.deviceId == null) {
+    if (widget.dek == null || widget.searchKey == null || widget.deviceId == null) {
       _showError(l10n.encryptionKeysNotReady);
       return;
     }
@@ -249,7 +234,8 @@ class _AddAuthScreenState extends State<AddAuthScreen>
 
     if (imported.isNotEmpty) {
       _showSuccess(
-          '${l10n.importedSuccessfullyPart1} ${imported.length} ${l10n.importedSuccessfullyPart2}');
+        '${l10n.importedSuccessfullyPart1} ${imported.length} ${l10n.importedSuccessfullyPart2}',
+      );
       if (mounted) {
         Navigator.pop(context, true);
       }
@@ -313,22 +299,23 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                 Text(
                   isEditing ? l10n.editAuthenticator : l10n.addAuthenticator,
                   style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 if (_isLoading)
                   const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2))
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                 else
                   TextButton(
                     onPressed: _save,
                     style: TextButton.styleFrom(
                       foregroundColor: const Color(0xFF6C63FF),
-                      textStyle: const TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 16),
+                      textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                     ),
                     child: Text(l10n.save),
                   ),
@@ -374,8 +361,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
     return Material(
       color: Colors.transparent,
       child: Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: content,
       ),
     );
@@ -430,9 +416,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
             hintText: 'JBSWY3DPEHPK3PXP',
             prefixIcon: const Icon(Icons.key),
             suffixIcon: IconButton(
-              icon: Icon(
-                _showSecret ? Icons.visibility_off : Icons.visibility,
-              ),
+              icon: Icon(_showSecret ? Icons.visibility_off : Icons.visibility),
               onPressed: () {
                 setState(() {
                   _showSecret = !_showSecret;
@@ -445,8 +429,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               return l10n.secretRequired;
             }
             // 基本的 Base32 验证
-            final cleaned =
-                value.trim().toUpperCase().replaceAll(RegExp(r'\s'), '');
+            final cleaned = value.trim().toUpperCase().replaceAll(RegExp(r'\s'), '');
             if (!RegExp(r'^[A-Z2-7=]+$').hasMatch(cleaned)) {
               return l10n.invalidSecretFormat;
             }
@@ -462,22 +445,20 @@ class _AddAuthScreenState extends State<AddAuthScreen>
           child: ExpansionTile(
             title: Text(
               l10n.advancedOptions,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.white70,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.white70),
             ),
             leading: const Icon(Icons.tune, size: 20, color: Colors.white60),
             children: [
               // 算法选择
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text(l10n.hashAlgorithm,
-                          style: const TextStyle(color: Colors.white70)),
+                      child: Text(
+                        l10n.hashAlgorithm,
+                        style: const TextStyle(color: Colors.white70),
+                      ),
                     ),
                     SegmentedButton<String>(
                       segments: const [
@@ -493,9 +474,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                       },
                       style: ButtonStyle(
                         visualDensity: VisualDensity.compact,
-                        textStyle: WidgetStateProperty.all(
-                          const TextStyle(fontSize: 11),
-                        ),
+                        textStyle: WidgetStateProperty.all(const TextStyle(fontSize: 11)),
                       ),
                     ),
                   ],
@@ -503,20 +482,19 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               ),
               // 位数
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text(l10n.verificationDigits,
-                          style: const TextStyle(color: Colors.white70)),
+                      child: Text(
+                        l10n.verificationDigits,
+                        style: const TextStyle(color: Colors.white70),
+                      ),
                     ),
                     SegmentedButton<int>(
                       segments: [
-                        ButtonSegment(
-                            value: 6, label: Text('6 ${l10n.digitSpan}')),
-                        ButtonSegment(
-                            value: 8, label: Text('8 ${l10n.digitSpan}')),
+                        ButtonSegment(value: 6, label: Text('6 ${l10n.digitSpan}')),
+                        ButtonSegment(value: 8, label: Text('8 ${l10n.digitSpan}')),
                       ],
                       selected: {_digits},
                       onSelectionChanged: (selected) {
@@ -524,22 +502,21 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                           _digits = selected.first;
                         });
                       },
-                      style: const ButtonStyle(
-                        visualDensity: VisualDensity.compact,
-                      ),
+                      style: const ButtonStyle(visualDensity: VisualDensity.compact),
                     ),
                   ],
                 ),
               ),
               // 周期
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text(l10n.refreshPeriod,
-                          style: const TextStyle(color: Colors.white70)),
+                      child: Text(
+                        l10n.refreshPeriod,
+                        style: const TextStyle(color: Colors.white70),
+                      ),
                     ),
                     SegmentedButton<int>(
                       segments: const [
@@ -552,9 +529,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                           _period = selected.first;
                         });
                       },
-                      style: const ButtonStyle(
-                        visualDensity: VisualDensity.compact,
-                      ),
+                      style: const ButtonStyle(visualDensity: VisualDensity.compact),
                     ),
                   ],
                 ),
@@ -588,9 +563,7 @@ class _AddAuthScreenState extends State<AddAuthScreen>
         // 说明卡片
         Card(
           color: const Color(0xFF0F3460),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -598,15 +571,11 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.info_outline,
-                        color: Color(0xFF6C63FF), size: 20),
+                    const Icon(Icons.info_outline, color: Color(0xFF6C63FF), size: 20),
                     const SizedBox(width: 8),
                     Text(
                       l10n.importMethod,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
                     ),
                   ],
                 ),
@@ -696,16 +665,9 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
-                  width: 2,
-                ),
+                border: Border.all(color: const Color(0xFF6C63FF).withValues(alpha: 0.3), width: 2),
               ),
-              child: const Icon(
-                Icons.qr_code_scanner,
-                size: 72,
-                color: Color(0xFF6C63FF),
-              ),
+              child: const Icon(Icons.qr_code_scanner, size: 72, color: Color(0xFF6C63FF)),
             ),
             const SizedBox(height: 32),
 
@@ -737,18 +699,13 @@ class _AddAuthScreenState extends State<AddAuthScreen>
                 icon: const Icon(Icons.camera_alt, size: 22),
                 label: Text(
                   l10n.startScanning,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6C63FF),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   elevation: 4,
                 ),
               ),
@@ -764,20 +721,11 @@ class _AddAuthScreenState extends State<AddAuthScreen>
               ),
               child: Column(
                 children: [
-                  _SupportItem(
-                    icon: Icons.check_circle_outline,
-                    text: l10n.supportGoogleAuth,
-                  ),
+                  _SupportItem(icon: Icons.check_circle_outline, text: l10n.supportGoogleAuth),
                   const SizedBox(height: 8),
-                  _SupportItem(
-                    icon: Icons.check_circle_outline,
-                    text: l10n.supportTotpHotp,
-                  ),
+                  _SupportItem(icon: Icons.check_circle_outline, text: l10n.supportTotpHotp),
                   const SizedBox(height: 8),
-                  _SupportItem(
-                    icon: Icons.check_circle_outline,
-                    text: l10n.autoRecognizeURI,
-                  ),
+                  _SupportItem(icon: Icons.check_circle_outline, text: l10n.autoRecognizeURI),
                 ],
               ),
             ),
@@ -793,10 +741,7 @@ class _SupportItem extends StatelessWidget {
   final IconData icon;
   final String text;
 
-  const _SupportItem({
-    required this.icon,
-    required this.text,
-  });
+  const _SupportItem({required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -804,13 +749,7 @@ class _SupportItem extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: const Color(0xFF00BFA6)),
         const SizedBox(width: 8),
-        Text(
-          text,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Colors.white60,
-          ),
-        ),
+        Text(text, style: const TextStyle(fontSize: 13, color: Colors.white60)),
       ],
     );
   }

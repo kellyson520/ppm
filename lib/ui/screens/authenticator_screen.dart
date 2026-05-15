@@ -38,8 +38,7 @@ class AuthenticatorScreen extends StatefulWidget {
   State<AuthenticatorScreen> createState() => _AuthenticatorScreenState();
 }
 
-class _AuthenticatorScreenState extends State<AuthenticatorScreen>
-    with TickerProviderStateMixin {
+class _AuthenticatorScreenState extends State<AuthenticatorScreen> with TickerProviderStateMixin {
   final _searchController = TextEditingController();
   List<AuthCard> _cards = [];
   List<AuthCard> _filteredCards = [];
@@ -77,12 +76,8 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
               digits: entry.payload.digits,
               period: entry.payload.period,
             );
-            entry.remaining = TOTPGenerator.getRemainingSeconds(
-              period: entry.payload.period,
-            );
-            entry.progress = TOTPGenerator.getProgress(
-              period: entry.payload.period,
-            );
+            entry.remaining = TOTPGenerator.getRemainingSeconds(period: entry.payload.period);
+            entry.progress = TOTPGenerator.getProgress(period: entry.payload.period);
           }
         });
       }
@@ -147,8 +142,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
             _decryptedEntries[card.cardId] = _DecryptedEntry(
               payload: payload,
               code: code,
-              remaining:
-                  TOTPGenerator.getRemainingSeconds(period: payload.period),
+              remaining: TOTPGenerator.getRemainingSeconds(period: payload.period),
               progress: TOTPGenerator.getProgress(period: payload.period),
             );
             HapticFeedback.mediumImpact();
@@ -231,10 +225,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 2,
-            child: _buildAuthListColumn(l10n),
-          ),
+          Expanded(flex: 2, child: _buildAuthListColumn(l10n)),
           const VerticalDivider(width: 1, thickness: 1),
           Expanded(
             flex: 3,
@@ -243,16 +234,14 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                 ? Center(
                     child: Text(
                       l10n.noAuthenticators,
-                      style:
-                          TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                     ),
                   )
                 : AuthDetailScreen(
                     key: ValueKey(_selectedAuthCard!.cardId),
                     authService: widget.authService,
                     card: _selectedAuthCard!,
-                    payload:
-                        _decryptedEntries[_selectedAuthCard!.cardId]!.payload,
+                    payload: _decryptedEntries[_selectedAuthCard!.cardId]!.payload,
                     dek: widget.dek,
                     searchKey: widget.searchKey,
                     deviceId: widget.deviceId,
@@ -278,10 +267,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
             titlePadding: const EdgeInsets.only(left: 24, bottom: 16),
             title: Text(
               l10n.authenticator,
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
             ),
             background: Container(
               color: Colors.transparent, // iOS 扁平无色底
@@ -302,14 +288,11 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                   style: const TextStyle(color: Colors.white, fontSize: 16),
                   decoration: InputDecoration(
                     hintText: l10n.searchAuthenticator,
-                    hintStyle:
-                        TextStyle(color: Colors.white.withValues(alpha: 0.5)),
-                    prefixIcon: Icon(Icons.search,
-                        color: Colors.white.withValues(alpha: 0.5)),
+                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                    prefixIcon: Icon(Icons.search, color: Colors.white.withValues(alpha: 0.5)),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: Icon(Icons.clear,
-                                color: Colors.white.withValues(alpha: 0.5)),
+                            icon: Icon(Icons.clear, color: Colors.white.withValues(alpha: 0.5)),
                             onPressed: () {
                               _searchController.clear();
                               _search('');
@@ -333,17 +316,20 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Row(
               children: [
-                Text('ACCOUNTS',
-                    style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.white.withValues(alpha: 0.4),
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5)),
+                Text(
+                  'ACCOUNTS',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white.withValues(alpha: 0.4),
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
                 const Spacer(),
-                Text('${_cards.length} items',
-                    style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.white.withValues(alpha: 0.4))),
+                Text(
+                  '${_cards.length} items',
+                  style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.4)),
+                ),
               ],
             ),
           ),
@@ -351,23 +337,17 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
 
         // 卡片列表
         _isLoading
-            ? const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              )
+            ? const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
             : _filteredCards.isEmpty
                 ? SliverFillRemaining(child: _buildEmptyState(l10n))
                 : SliverPadding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                     sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final card = _filteredCards[index];
-                          final entry = _decryptedEntries[card.cardId];
-                          return _buildAuthCardItem(card, entry, l10n);
-                        },
-                        childCount: _filteredCards.length,
-                      ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final card = _filteredCards[index];
+                        final entry = _decryptedEntries[card.cardId];
+                        return _buildAuthCardItem(card, entry, l10n);
+                      }, childCount: _filteredCards.length),
                     ),
                   ),
         const SliverPadding(padding: EdgeInsets.only(bottom: 120)), // 为悬浮栏留白
@@ -375,8 +355,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
     );
   }
 
-  Widget _buildAuthCardItem(
-      AuthCard card, _DecryptedEntry? entry, AppLocalizations l10n) {
+  Widget _buildAuthCardItem(AuthCard card, _DecryptedEntry? entry, AppLocalizations l10n) {
     final isExpanded = entry != null;
 
     return BouncingWidget(
@@ -388,9 +367,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isExpanded
-              ? const Color(0xFF16213E).withValues(alpha: 0.8)
-              : Colors.transparent,
+          color: isExpanded ? const Color(0xFF16213E).withValues(alpha: 0.8) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isExpanded
@@ -425,7 +402,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                           ? [const Color(0xFF00BFA6), const Color(0xFF6C63FF)]
                           : [
                               const Color(0xFF6C63FF).withValues(alpha: 0.6),
-                              const Color(0xFF00BFA6).withValues(alpha: 0.6)
+                              const Color(0xFF00BFA6).withValues(alpha: 0.6),
                             ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -482,9 +459,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                 // 解锁状态
                 Icon(
                   isExpanded ? Icons.lock_open : Icons.lock_outline,
-                  color: isExpanded
-                      ? const Color(0xFF00BFA6)
-                      : Colors.white.withValues(alpha: 0.3),
+                  color: isExpanded ? const Color(0xFF00BFA6) : Colors.white.withValues(alpha: 0.3),
                   size: 20,
                 ),
               ],
@@ -534,9 +509,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: entry.remaining <= 5
-                                ? Colors.red
-                                : Colors.white,
+                            color: entry.remaining <= 5 ? Colors.red : Colors.white,
                           ),
                         ),
                       ],
@@ -548,17 +521,11 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                     child: GestureDetector(
                       onTap: () => _copyCode(entry.code),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
                           color: const Color(0xFF0F3460),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color:
-                                const Color(0xFF6C63FF).withValues(alpha: 0.2),
-                          ),
+                          border: Border.all(color: const Color(0xFF6C63FF).withValues(alpha: 0.2)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -594,11 +561,8 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
                   TextButton.icon(
                     onPressed: () => _navigateToAuthDetail(card),
                     icon: const Icon(Icons.info_outline, size: 16),
-                    label: Text(l10n.details,
-                        style: const TextStyle(fontSize: 12)),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white60,
-                    ),
+                    label: Text(l10n.details, style: const TextStyle(fontSize: 12)),
+                    style: TextButton.styleFrom(foregroundColor: Colors.white60),
                   ),
                 ],
               ),
@@ -621,29 +585,17 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.verified_user_outlined,
-            size: 80,
-            color: Colors.white.withValues(alpha: 0.2),
-          ),
+          Icon(Icons.verified_user_outlined, size: 80, color: Colors.white.withValues(alpha: 0.2)),
           const SizedBox(height: 16),
           Text(
-            _searchController.text.isEmpty
-                ? l10n.noAuthenticators
-                : l10n.noMatches,
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.white.withValues(alpha: 0.6),
-            ),
+            _searchController.text.isEmpty ? l10n.noAuthenticators : l10n.noMatches,
+            style: TextStyle(fontSize: 18, color: Colors.white.withValues(alpha: 0.6)),
           ),
           const SizedBox(height: 8),
           if (_searchController.text.isEmpty)
             Text(
               l10n.clickToAddAuth,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.4),
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.4)),
             ),
         ],
       ),

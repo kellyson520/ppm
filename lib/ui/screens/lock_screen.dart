@@ -19,8 +19,7 @@ class LockScreen extends StatefulWidget {
   State<LockScreen> createState() => _LockScreenState();
 }
 
-class _LockScreenState extends State<LockScreen>
-    with SingleTickerProviderStateMixin {
+class _LockScreenState extends State<LockScreen> with SingleTickerProviderStateMixin {
   final _passwordController = TextEditingController();
   final _secureStorage = const FlutterSecureStorage();
   bool _obscurePassword = true;
@@ -218,9 +217,7 @@ class _LockScreenState extends State<LockScreen>
     final l10n = AppLocalizations.of(context)!;
     bool authenticated = false;
     try {
-      authenticated = await _localAuth.authenticate(
-        localizedReason: l10n.biometricAuth,
-      );
+      authenticated = await _localAuth.authenticate(localizedReason: l10n.biometricAuth);
     } on Exception catch (e) {
       if (mounted) {
         setState(() {
@@ -270,9 +267,7 @@ class _LockScreenState extends State<LockScreen>
       });
       return;
     }
-    context.read<VaultBloc>().add(
-          VaultUnlockRequested(_passwordController.text),
-        );
+    context.read<VaultBloc>().add(VaultUnlockRequested(_passwordController.text));
   }
 
   void _handleFailedAttempt(AppLocalizations l10n) {
@@ -285,10 +280,8 @@ class _LockScreenState extends State<LockScreen>
     if (delay > Duration.zero) {
       _lockoutUntil = DateTime.now().add(delay);
       Future.wait([
-        _secureStorage.write(
-            key: _kFailedAttemptsKey, value: _failedAttempts.toString()),
-        _secureStorage.write(
-            key: _kLockoutUntilKey, value: _lockoutUntil!.toIso8601String()),
+        _secureStorage.write(key: _kFailedAttemptsKey, value: _failedAttempts.toString()),
+        _secureStorage.write(key: _kLockoutUntilKey, value: _lockoutUntil!.toIso8601String()),
       ]);
 
       setState(() {
@@ -296,8 +289,7 @@ class _LockScreenState extends State<LockScreen>
       });
       _startCooldownTimer();
     } else {
-      _secureStorage.write(
-          key: _kFailedAttemptsKey, value: _failedAttempts.toString());
+      _secureStorage.write(key: _kFailedAttemptsKey, value: _failedAttempts.toString());
       setState(() {
         _errorMessage =
             '${l10n.incorrectPassword} ${_failedAttempts > 1 ? '($_failedAttempts ${l10n.attempts})' : ''}';
@@ -361,18 +353,13 @@ class _LockScreenState extends State<LockScreen>
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF6C63FF)
-                                    .withValues(alpha: 0.3),
+                                color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
                                 blurRadius: 20,
                                 spreadRadius: 5,
                               ),
                             ],
                           ),
-                          child: const Icon(
-                            Icons.lock,
-                            size: 50,
-                            color: Colors.white,
-                          ),
+                          child: const Icon(Icons.lock, size: 50, color: Colors.white),
                         ),
                         const SizedBox(height: 40),
                         // Title
@@ -387,10 +374,7 @@ class _LockScreenState extends State<LockScreen>
                         const SizedBox(height: 8),
                         Text(
                           l10n.enterMasterPassword,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.white60,
-                          ),
+                          style: const TextStyle(fontSize: 14, color: Colors.white60),
                         ),
                         const SizedBox(height: 40),
                         // Password field
@@ -405,9 +389,7 @@ class _LockScreenState extends State<LockScreen>
                             prefixIcon: const Icon(Icons.lock_outline),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
+                                _obscurePassword ? Icons.visibility_off : Icons.visibility,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -428,11 +410,7 @@ class _LockScreenState extends State<LockScreen>
                             ),
                             child: Row(
                               children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: Colors.red,
-                                  size: 20,
-                                ),
+                                const Icon(Icons.error_outline, color: Colors.red, size: 20),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
@@ -449,17 +427,14 @@ class _LockScreenState extends State<LockScreen>
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: (isLoading || !_isUnlockAllowed)
-                                ? null
-                                : _unlock,
+                            onPressed: (isLoading || !_isUnlockAllowed) ? null : _unlock,
                             child: isLoading
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white),
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                     ),
                                   )
                                 : Text(l10n.unlock),

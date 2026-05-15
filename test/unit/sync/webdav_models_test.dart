@@ -169,10 +169,7 @@ void main() {
 
   group('NodeSyncResult', () {
     test('should have default values', () {
-      final result = NodeSyncResult(
-        nodeName: 'test-node',
-        success: true,
-      );
+      final result = NodeSyncResult(nodeName: 'test-node', success: true);
 
       expect(result.downloadedCount, equals(0));
       expect(result.uploadedCount, equals(0));
@@ -244,12 +241,7 @@ void main() {
 
   group('WebDavNode validation', () {
     test('should handle empty URL gracefully', () {
-      final node = WebDavNode(
-        name: 'Empty URL Node',
-        url: '',
-        username: 'user',
-        password: 'pass',
-      );
+      final node = WebDavNode(name: 'Empty URL Node', url: '', username: 'user', password: 'pass');
 
       expect(node.url, equals(''));
       expect(node.name, equals('Empty URL Node'));

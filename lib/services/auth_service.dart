@@ -19,8 +19,7 @@ class AuthService {
   // 内存中缓存的卡片列表（加密状态）
   final List<AuthCard> _cards = [];
 
-  AuthService({CryptoService? cryptoService})
-      : _cryptoService = cryptoService ?? CryptoService();
+  AuthService({CryptoService? cryptoService}) : _cryptoService = cryptoService ?? CryptoService();
 
   /// 获取所有卡片
   List<AuthCard> get cards => List.unmodifiable(_cards);
@@ -42,10 +41,7 @@ class AuthService {
 
     // 生成盲索引（用于搜索发行方和账号名）
     final searchableText = '${payload.issuer} ${payload.account}';
-    final blindIndexes = _cryptoService.generateBlindIndexes(
-      searchableText,
-      searchKey,
-    );
+    final blindIndexes = _cryptoService.generateBlindIndexes(searchableText, searchKey);
 
     final now = HLC.now(deviceId);
     final card = AuthCard(
@@ -73,10 +69,7 @@ class AuthService {
 
     final encryptedPayload = _encryptPayload(newPayload, dek);
     final searchableText = '${newPayload.issuer} ${newPayload.account}';
-    final blindIndexes = _cryptoService.generateBlindIndexes(
-      searchableText,
-      searchKey,
-    );
+    final blindIndexes = _cryptoService.generateBlindIndexes(searchableText, searchKey);
 
     final updated = _cards[index].copyWith(
       encryptedPayload: encryptedPayload,
@@ -126,14 +119,9 @@ class AuthService {
       // 反序列化完整三段，不再使用硬编码零字节 IV
       final encryptedData = EncryptedData.deserialize(card.encryptedPayload);
 
-      final decrypted = _cryptoService.decryptString(
-        encryptedData,
-        dek,
-      );
+      final decrypted = _cryptoService.decryptString(encryptedData, dek);
 
-      return AuthPayload.fromJson(
-        jsonDecode(decrypted) as Map<String, dynamic>,
-      );
+      return AuthPayload.fromJson(jsonDecode(decrypted) as Map<String, dynamic>);
     } on Exception catch (e, stack) {
       CrashReportService.instance.reportError(
         e,
@@ -169,37 +157,18 @@ class AuthService {
   // ==================== Import / Export ====================
 
   /// 从 otpauth:// URI 导入
-  AuthCard? importFromUri(
-    String uri,
-    Uint8List dek,
-    Uint8List searchKey,
-    String deviceId,
-  ) {
+  AuthCard? importFromUri(String uri, Uint8List dek, Uint8List searchKey, String deviceId) {
     try {
       final payload = AuthPayload.fromOtpAuthUri(uri);
-      return createCard(
-        payload: payload,
-        dek: dek,
-        searchKey: searchKey,
-        deviceId: deviceId,
-      );
+      return createCard(payload: payload, dek: dek, searchKey: searchKey, deviceId: deviceId);
     } on Exception catch (e, stack) {
-      CrashReportService.instance.reportError(
-        e,
-        stack,
-        source: 'AuthService.importFromUri',
-      );
+      CrashReportService.instance.reportError(e, stack, source: 'AuthService.importFromUri');
       return null;
     }
   }
 
   /// 批量导入（从文本中解析多个 otpauth:// URI）
-  List<AuthCard> importFromText(
-    String text,
-    Uint8List dek,
-    Uint8List searchKey,
-    String deviceId,
-  ) {
+  List<AuthCard> importFromText(String text, Uint8List dek, Uint8List searchKey, String deviceId) {
     final imported = <AuthCard>[];
 
     // 匹配所有 otpauth:// URI
@@ -257,14 +226,8 @@ class AuthService {
 
     return jsonEncode({
       'version': 1,
-      'header': {
-        'slots': null,
-        'params': null,
-      },
-      'db': {
-        'version': 1,
-        'entries': items,
-      },
+      'header': {'slots': null, 'params': null},
+      'db': {'version': 1, 'entries': items},
     });
   }
 
@@ -274,10 +237,7 @@ class AuthService {
   List<AuthCard> search(String query, Uint8List searchKey) {
     if (query.isEmpty) return getActiveCards();
 
-    final searchHashes = _cryptoService.generateBlindIndexes(
-      query.toLowerCase(),
-      searchKey,
-    );
+    final searchHashes = _cryptoService.generateBlindIndexes(query.toLowerCase(), searchKey);
 
     return getActiveCards().where((card) {
       return card.blindIndexes.any((idx) => searchHashes.contains(idx));

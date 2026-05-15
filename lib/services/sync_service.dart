@@ -12,10 +12,8 @@ class SyncService {
   WebDavSyncManager? _manager;
   final _syncProgressController = StreamController<SyncProgress>.broadcast();
 
-  SyncService({
-    DatabaseService? database,
-    KeyManager? keyManager,
-  })  : _database = database ?? DatabaseService(),
+  SyncService({DatabaseService? database, KeyManager? keyManager})
+      : _database = database ?? DatabaseService(),
         _keyManager = keyManager ?? KeyManager();
 
   /// Sync progress stream
@@ -37,8 +35,7 @@ class SyncService {
         _syncProgressController.add(progress);
       });
     } on Exception catch (e, stack) {
-      CrashReportService.instance
-          .reportError(e, stack, source: 'SyncService.initialize');
+      CrashReportService.instance.reportError(e, stack, source: 'SyncService.initialize');
     }
   }
 

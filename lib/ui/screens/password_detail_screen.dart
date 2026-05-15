@@ -47,8 +47,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
     HapticFeedback.lightImpact();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content:
-            Text('$label ${AppLocalizations.of(context)!.copiedToClipboard}'),
+        content: Text('$label ${AppLocalizations.of(context)!.copiedToClipboard}'),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
@@ -59,10 +58,8 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
     final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (context) => AddPasswordScreen(
-          vaultService: widget.vaultService,
-          editCard: widget.card,
-        ),
+        builder: (context) =>
+            AddPasswordScreen(vaultService: widget.vaultService, editCard: widget.card),
       ),
     );
 
@@ -79,10 +76,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
         title: Text(l10n.deletePasswordQuestion),
         content: Text(l10n.deletePasswordDesc),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
@@ -119,8 +113,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: Center(
-            child: Text(l10n.failedToDecryptPassword,
-                style: const TextStyle(color: Colors.white)),
+            child: Text(l10n.failedToDecryptPassword, style: const TextStyle(color: Colors.white)),
           ),
         ),
       );
@@ -131,14 +124,10 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
     // Apple 风格的面包屑模态底板结构
     final content = Container(
       decoration: BoxDecoration(
-          color: const Color(0xFF16213E)
-              .withValues(alpha: 0.95), // 强制极黑且微量透明以支撑背后模糊
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          border: Border(
-              top: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-            width: 0.5,
-          ))),
+        color: const Color(0xFF16213E).withValues(alpha: 0.95), // 强制极黑且微量透明以支撑背后模糊
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 0.5)),
+      ),
       child: Column(
         children: [
           // 悬浮在顶部的拖拽胶囊指示器 (Drag Handle)
@@ -204,8 +193,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
                   context: context,
                   label: 'ACCOUNT', // 使用大写的英文字体做 HIG 副标题隔离
                   value: payload.username,
-                  onCopy: () =>
-                      _copyToClipboard(payload.username, l10n.usernameLabel),
+                  onCopy: () => _copyToClipboard(payload.username, l10n.usernameLabel),
                 ),
                 const SizedBox(height: 24),
 
@@ -224,13 +212,12 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
                       final uri = Uri.tryParse(payload.url!);
                       if (uri != null) {
                         try {
-                          await launchUrl(uri,
-                              mode: LaunchMode.externalApplication);
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
                         } on Exception catch (e) {
                           if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${l10n.error}: $e')),
-                          );
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text('${l10n.error}: $e')));
                         }
                       }
                     },
@@ -298,9 +285,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
     return Card(
       elevation: 0,
       color: Colors.transparent, // iOS 扁平无色底
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         child: Column(
@@ -328,11 +313,9 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(
-                          alpha: 0.05), // Input field like flat area
+                      color: Colors.white.withValues(alpha: 0.05), // Input field like flat area
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -347,15 +330,17 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
                 ),
                 if (onCopy != null)
                   IconButton(
-                    icon: Icon(Icons.copy,
-                        size: 20, color: Colors.white.withValues(alpha: 0.5)),
+                    icon: Icon(Icons.copy, size: 20, color: Colors.white.withValues(alpha: 0.5)),
                     onPressed: onCopy,
                     tooltip: l10n.copy,
                   ),
                 if (onLaunch != null)
                   IconButton(
-                    icon: Icon(Icons.open_in_new,
-                        size: 20, color: Colors.white.withValues(alpha: 0.5)),
+                    icon: Icon(
+                      Icons.open_in_new,
+                      size: 20,
+                      color: Colors.white.withValues(alpha: 0.5),
+                    ),
                     onPressed: onLaunch,
                     tooltip: l10n.open,
                   ),
@@ -371,9 +356,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
     return Card(
       elevation: 0,
       color: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         child: Column(
@@ -404,8 +387,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
                   ),
                   label: Text(
                     _showPassword ? l10n.hide : l10n.show,
-                    style:
-                        TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                   ),
                 ),
               ],
@@ -415,8 +397,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(12),
@@ -437,10 +418,8 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.copy,
-                      size: 20, color: Colors.white.withValues(alpha: 0.5)),
-                  onPressed: () =>
-                      _copyToClipboard(password, l10n.passwordLabel),
+                  icon: Icon(Icons.copy, size: 20, color: Colors.white.withValues(alpha: 0.5)),
+                  onPressed: () => _copyToClipboard(password, l10n.passwordLabel),
                   tooltip: l10n.copyPassword,
                 ),
               ],
@@ -471,23 +450,16 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          _buildMetadataRow(
-            l10n.created,
-            _formatDateTime(widget.card.createdAt.physicalTime),
-          ),
+          _buildMetadataRow(l10n.created, _formatDateTime(widget.card.createdAt.physicalTime)),
           const SizedBox(height: 8),
-          _buildMetadataRow(
-            l10n.lastUpdated,
-            _formatDateTime(widget.card.updatedAt.physicalTime),
-          ),
+          _buildMetadataRow(l10n.lastUpdated, _formatDateTime(widget.card.updatedAt.physicalTime)),
           const SizedBox(height: 8),
           _buildMetadataRow(
             l10n.deviceID,
             widget.card.updatedAt.deviceId.substring(
-                0,
-                widget.card.updatedAt.deviceId.length > 8
-                    ? 8
-                    : widget.card.updatedAt.deviceId.length),
+              0,
+              widget.card.updatedAt.deviceId.length > 8 ? 8 : widget.card.updatedAt.deviceId.length,
+            ),
           ),
         ],
       ),
@@ -497,13 +469,7 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
   Widget _buildMetadataRow(String label, String value) {
     return Row(
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.white.withValues(alpha: 0.4),
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.4))),
         const Spacer(),
         Text(
           value,

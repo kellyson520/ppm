@@ -16,11 +16,7 @@ class EntropyCanvasWidget extends StatefulWidget {
   /// 采集完成回调
   final Function(Uint8List entropy) onComplete;
 
-  const EntropyCanvasWidget({
-    super.key,
-    this.targetPoints = 500,
-    required this.onComplete,
-  });
+  const EntropyCanvasWidget({super.key, this.targetPoints = 500, required this.onComplete});
 
   @override
   State<EntropyCanvasWidget> createState() => _EntropyCanvasWidgetState();
@@ -56,18 +52,12 @@ class _EntropyCanvasWidgetState extends State<EntropyCanvasWidget>
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.02),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: primaryColor.withValues(alpha: 0.2),
-                  width: 1,
-                ),
+                border: Border.all(color: primaryColor.withValues(alpha: 0.2), width: 1),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
                 child: CustomPaint(
-                  painter: _EntropyPainter(
-                    points: _visualPoints,
-                    color: primaryColor,
-                  ),
+                  painter: _EntropyPainter(points: _visualPoints, color: primaryColor),
                   size: Size.infinite,
                 ),
               ),
@@ -89,9 +79,7 @@ class _EntropyCanvasWidgetState extends State<EntropyCanvasWidget>
               ),
               const SizedBox(height: 12),
               Text(
-                _isFinished
-                    ? '混沌能量已注满'
-                    : '指尖滑动，注入物理随机性能量',
+                _isFinished ? '混沌能量已注满' : '指尖滑动，注入物理随机性能量',
                 style: TextStyle(
                   color: primaryColor.withValues(alpha: 0.8),
                   fontSize: 14,
@@ -139,14 +127,11 @@ class _EntropyCanvasWidgetState extends State<EntropyCanvasWidget>
 
     final avgVelocity = _velocityHistory.isEmpty
         ? Offset.zero
-        : _velocityHistory.reduce((a, b) => a + b) /
-              _velocityHistory.length.toDouble();
+        : _velocityHistory.reduce((a, b) => a + b) / _velocityHistory.length.toDouble();
 
-    _visualPoints.add(_VisualPathPoint(
-      position: event.position,
-      velocity: avgVelocity,
-      pressure: event.pressure,
-    ));
+    _visualPoints.add(
+      _VisualPathPoint(position: event.position, velocity: avgVelocity, pressure: event.pressure),
+    );
 
     if (_collectedCount >= widget.targetPoints && !_isFinished) {
       _finishCollection();
@@ -164,12 +149,7 @@ class _EntropyCanvasWidgetState extends State<EntropyCanvasWidget>
 
     final buffer = BytesBuilder();
     for (var p in _points) {
-      final data = Float64List.fromList([
-        p.x,
-        p.y,
-        p.pressure,
-        p.timestamp.toDouble(),
-      ]);
+      final data = Float64List.fromList([p.x, p.y, p.pressure, p.timestamp.toDouble()]);
       buffer.add(data.buffer.asUint8List());
     }
 
@@ -197,11 +177,7 @@ class _VisualPathPoint {
   final double pressure;
   int age = 0;
 
-  _VisualPathPoint({
-    required this.position,
-    required this.velocity,
-    required this.pressure,
-  });
+  _VisualPathPoint({required this.position, required this.velocity, required this.pressure});
 
   int get maxAge {
     final speed = velocity.distance;

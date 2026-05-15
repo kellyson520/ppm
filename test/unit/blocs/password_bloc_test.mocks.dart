@@ -28,23 +28,11 @@ import 'package:ztd_password_manager/services/vault_service.dart' as _i3;
 // ignore_for_file: invalid_use_of_internal_member
 
 class _FakePasswordCard_0 extends _i1.SmartFake implements _i2.PasswordCard {
-  _FakePasswordCard_0(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakePasswordCard_0(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeVaultStats_1 extends _i1.SmartFake implements _i3.VaultStats {
-  _FakeVaultStats_1(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeVaultStats_1(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 /// A class which mocks [VaultService].
@@ -56,336 +44,203 @@ class MockVaultService extends _i1.Mock implements _i3.VaultService {
   }
 
   @override
-  bool get isUnlocked => (super.noSuchMethod(
-        Invocation.getter(#isUnlocked),
-        returnValue: false,
-      ) as bool);
+  bool get isUnlocked =>
+      (super.noSuchMethod(Invocation.getter(#isUnlocked), returnValue: false) as bool);
 
   @override
   _i4.Future<bool> isInitialized() => (super.noSuchMethod(
-        Invocation.method(
-          #isInitialized,
-          [],
-        ),
+        Invocation.method(#isInitialized, []),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 
   @override
-  _i4.Future<void> initialize(
-    String? masterPassword, {
-    _i5.Uint8List? entropy,
-  }) =>
+  _i4.Future<void> initialize(String? masterPassword, {_i5.Uint8List? entropy}) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #initialize,
-          [masterPassword],
-          {#entropy: entropy},
-        ),
+        Invocation.method(#initialize, [masterPassword], {#entropy: entropy}),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<bool> unlock(String? masterPassword) => (super.noSuchMethod(
-        Invocation.method(
-          #unlock,
-          [masterPassword],
-        ),
+        Invocation.method(#unlock, [masterPassword]),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 
   @override
   _i4.Future<void> lock() => (super.noSuchMethod(
-        Invocation.method(
-          #lock,
-          [],
-        ),
+        Invocation.method(#lock, []),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
-  _i4.Future<_i2.PasswordCard> createCard(_i2.PasswordPayload? payload) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #createCard,
-          [payload],
+  _i4.Future<_i2.PasswordCard> createCard(_i2.PasswordPayload? payload) => (super.noSuchMethod(
+        Invocation.method(#createCard, [payload]),
+        returnValue: _i4.Future<_i2.PasswordCard>.value(
+          _FakePasswordCard_0(this, Invocation.method(#createCard, [payload])),
         ),
-        returnValue: _i4.Future<_i2.PasswordCard>.value(_FakePasswordCard_0(
-          this,
-          Invocation.method(
-            #createCard,
-            [payload],
-          ),
-        )),
       ) as _i4.Future<_i2.PasswordCard>);
 
   @override
-  _i4.Future<_i2.PasswordCard?> updateCard(
-    String? cardId,
-    _i2.PasswordPayload? newPayload,
-  ) =>
+  _i4.Future<_i2.PasswordCard?> updateCard(String? cardId, _i2.PasswordPayload? newPayload) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #updateCard,
-          [
-            cardId,
-            newPayload,
-          ],
-        ),
+        Invocation.method(#updateCard, [cardId, newPayload]),
         returnValue: _i4.Future<_i2.PasswordCard?>.value(),
       ) as _i4.Future<_i2.PasswordCard?>);
 
   @override
   _i4.Future<bool> deleteCard(String? cardId) => (super.noSuchMethod(
-        Invocation.method(
-          #deleteCard,
-          [cardId],
-        ),
+        Invocation.method(#deleteCard, [cardId]),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 
   @override
   _i4.Future<bool> permanentlyDeleteCard(String? cardId) => (super.noSuchMethod(
-        Invocation.method(
-          #permanentlyDeleteCard,
-          [cardId],
-        ),
+        Invocation.method(#permanentlyDeleteCard, [cardId]),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 
   @override
   _i4.Future<_i2.PasswordCard?> getCard(String? cardId) => (super.noSuchMethod(
-        Invocation.method(
-          #getCard,
-          [cardId],
-        ),
+        Invocation.method(#getCard, [cardId]),
         returnValue: _i4.Future<_i2.PasswordCard?>.value(),
       ) as _i4.Future<_i2.PasswordCard?>);
 
   @override
   _i4.Future<List<_i2.PasswordCard>> getAllCards() => (super.noSuchMethod(
-        Invocation.method(
-          #getAllCards,
-          [],
-        ),
-        returnValue:
-            _i4.Future<List<_i2.PasswordCard>>.value(<_i2.PasswordCard>[]),
+        Invocation.method(#getAllCards, []),
+        returnValue: _i4.Future<List<_i2.PasswordCard>>.value(<_i2.PasswordCard>[]),
       ) as _i4.Future<List<_i2.PasswordCard>>);
 
   @override
-  _i4.Future<_i2.PasswordPayload?> decryptCard(_i2.PasswordCard? card) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #decryptCard,
-          [card],
-        ),
+  _i4.Future<_i2.PasswordPayload?> decryptCard(_i2.PasswordCard? card) => (super.noSuchMethod(
+        Invocation.method(#decryptCard, [card]),
         returnValue: _i4.Future<_i2.PasswordPayload?>.value(),
       ) as _i4.Future<_i2.PasswordPayload?>);
 
   @override
-  _i4.Future<List<_i2.PasswordCard>> search(String? query) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #search,
-          [query],
-        ),
-        returnValue:
-            _i4.Future<List<_i2.PasswordCard>>.value(<_i2.PasswordCard>[]),
+  _i4.Future<List<_i2.PasswordCard>> search(String? query) => (super.noSuchMethod(
+        Invocation.method(#search, [query]),
+        returnValue: _i4.Future<List<_i2.PasswordCard>>.value(<_i2.PasswordCard>[]),
       ) as _i4.Future<List<_i2.PasswordCard>>);
 
   @override
   _i4.Future<List<_i2.PasswordEvent>> getAllEvents() => (super.noSuchMethod(
-        Invocation.method(
-          #getAllEvents,
-          [],
-        ),
-        returnValue:
-            _i4.Future<List<_i2.PasswordEvent>>.value(<_i2.PasswordEvent>[]),
+        Invocation.method(#getAllEvents, []),
+        returnValue: _i4.Future<List<_i2.PasswordEvent>>.value(<_i2.PasswordEvent>[]),
       ) as _i4.Future<List<_i2.PasswordEvent>>);
 
   @override
-  _i4.Future<List<_i2.PasswordEvent>> getCardEvents(String? cardId) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getCardEvents,
-          [cardId],
-        ),
-        returnValue:
-            _i4.Future<List<_i2.PasswordEvent>>.value(<_i2.PasswordEvent>[]),
+  _i4.Future<List<_i2.PasswordEvent>> getCardEvents(String? cardId) => (super.noSuchMethod(
+        Invocation.method(#getCardEvents, [cardId]),
+        returnValue: _i4.Future<List<_i2.PasswordEvent>>.value(<_i2.PasswordEvent>[]),
       ) as _i4.Future<List<_i2.PasswordEvent>>);
 
   @override
-  _i4.Future<List<_i2.PasswordEvent>> getUnsyncedEvents() =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getUnsyncedEvents,
-          [],
-        ),
-        returnValue:
-            _i4.Future<List<_i2.PasswordEvent>>.value(<_i2.PasswordEvent>[]),
+  _i4.Future<List<_i2.PasswordEvent>> getUnsyncedEvents() => (super.noSuchMethod(
+        Invocation.method(#getUnsyncedEvents, []),
+        returnValue: _i4.Future<List<_i2.PasswordEvent>>.value(<_i2.PasswordEvent>[]),
       ) as _i4.Future<List<_i2.PasswordEvent>>);
 
   @override
   _i4.Future<int> getPendingSyncCount() => (super.noSuchMethod(
-        Invocation.method(
-          #getPendingSyncCount,
-          [],
-        ),
+        Invocation.method(#getPendingSyncCount, []),
         returnValue: _i4.Future<int>.value(0),
       ) as _i4.Future<int>);
 
   @override
   _i4.Future<void> createSnapshot() => (super.noSuchMethod(
-        Invocation.method(
-          #createSnapshot,
-          [],
-        ),
+        Invocation.method(#createSnapshot, []),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<List<_i6.Snapshot>> getSnapshots() => (super.noSuchMethod(
-        Invocation.method(
-          #getSnapshots,
-          [],
-        ),
+        Invocation.method(#getSnapshots, []),
         returnValue: _i4.Future<List<_i6.Snapshot>>.value(<_i6.Snapshot>[]),
       ) as _i4.Future<List<_i6.Snapshot>>);
 
   @override
-  _i4.Future<String> exportVaultAsJson({bool? encrypted = true}) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #exportVaultAsJson,
-          [],
-          {#encrypted: encrypted},
-        ),
-        returnValue: _i4.Future<String>.value(_i7.dummyValue<String>(
-          this,
-          Invocation.method(
-            #exportVaultAsJson,
-            [],
-            {#encrypted: encrypted},
+  _i4.Future<String> exportVaultAsJson({bool? encrypted = true}) => (super.noSuchMethod(
+        Invocation.method(#exportVaultAsJson, [], {#encrypted: encrypted}),
+        returnValue: _i4.Future<String>.value(
+          _i7.dummyValue<String>(
+            this,
+            Invocation.method(#exportVaultAsJson, [], {#encrypted: encrypted}),
           ),
-        )),
+        ),
       ) as _i4.Future<String>);
 
   @override
-  _i4.Future<int> importVaultFromJson(String? inputString) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #importVaultFromJson,
-          [inputString],
-        ),
+  _i4.Future<int> importVaultFromJson(String? inputString) => (super.noSuchMethod(
+        Invocation.method(#importVaultFromJson, [inputString]),
         returnValue: _i4.Future<int>.value(0),
       ) as _i4.Future<int>);
 
   @override
-  _i4.Future<bool> changeMasterPassword(
-    String? oldPassword,
-    String? newPassword,
-  ) =>
+  _i4.Future<bool> changeMasterPassword(String? oldPassword, String? newPassword) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #changeMasterPassword,
-          [
-            oldPassword,
-            newPassword,
-          ],
-        ),
+        Invocation.method(#changeMasterPassword, [oldPassword, newPassword]),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 
   @override
   _i4.Future<bool> rotateDEK(String? masterPassword) => (super.noSuchMethod(
-        Invocation.method(
-          #rotateDEK,
-          [masterPassword],
-        ),
+        Invocation.method(#rotateDEK, [masterPassword]),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 
   @override
-  _i4.Future<String?> exportEmergencyKit(String? masterPassword) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #exportEmergencyKit,
-          [masterPassword],
-        ),
+  _i4.Future<String?> exportEmergencyKit(String? masterPassword) => (super.noSuchMethod(
+        Invocation.method(#exportEmergencyKit, [masterPassword]),
         returnValue: _i4.Future<String?>.value(),
       ) as _i4.Future<String?>);
 
   @override
   _i4.Future<bool> importEmergencyKit(String? kitJson) => (super.noSuchMethod(
-        Invocation.method(
-          #importEmergencyKit,
-          [kitJson],
-        ),
+        Invocation.method(#importEmergencyKit, [kitJson]),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 
   @override
   _i4.Future<_i3.VaultStats> getStats() => (super.noSuchMethod(
-        Invocation.method(
-          #getStats,
-          [],
+        Invocation.method(#getStats, []),
+        returnValue: _i4.Future<_i3.VaultStats>.value(
+          _FakeVaultStats_1(this, Invocation.method(#getStats, [])),
         ),
-        returnValue: _i4.Future<_i3.VaultStats>.value(_FakeVaultStats_1(
-          this,
-          Invocation.method(
-            #getStats,
-            [],
-          ),
-        )),
       ) as _i4.Future<_i3.VaultStats>);
 
   @override
   _i4.Future<bool> isBiometricEnabled() => (super.noSuchMethod(
-        Invocation.method(
-          #isBiometricEnabled,
-          [],
-        ),
+        Invocation.method(#isBiometricEnabled, []),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 
   @override
-  _i4.Future<void> enableBiometricMode(String? masterPassword) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #enableBiometricMode,
-          [masterPassword],
-        ),
+  _i4.Future<void> enableBiometricMode(String? masterPassword) => (super.noSuchMethod(
+        Invocation.method(#enableBiometricMode, [masterPassword]),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<void> disableBiometricMode() => (super.noSuchMethod(
-        Invocation.method(
-          #disableBiometricMode,
-          [],
-        ),
+        Invocation.method(#disableBiometricMode, []),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
   @override
   _i4.Future<String?> getStoredBiometricPassword() => (super.noSuchMethod(
-        Invocation.method(
-          #getStoredBiometricPassword,
-          [],
-        ),
+        Invocation.method(#getStoredBiometricPassword, []),
         returnValue: _i4.Future<String?>.value(),
       ) as _i4.Future<String?>);
 
   @override
   _i4.Future<void> dispose() => (super.noSuchMethod(
-        Invocation.method(
-          #dispose,
-          [],
-        ),
+        Invocation.method(#dispose, []),
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);

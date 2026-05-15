@@ -35,8 +35,7 @@ void main() {
       final merge2 = CrdtMerger.mergeCards(cardB, cardA);
 
       // [1] SEC 验证：合并结果必须与顺序无关
-      expect(merge1, equals(merge2),
-          reason: 'SEC Failure: Merged state depends on order.');
+      expect(merge1, equals(merge2), reason: 'SEC Failure: Merged state depends on order.');
 
       // [2] Tie-breaking 验证：应该根据 deviceId 决定胜负
       // 'device-B' > 'device-A'，所以 payload-B 应获胜
@@ -53,11 +52,9 @@ void main() {
       final v3 = makePasswordCard(updatedAt: h3, encryptedPayload: 'v3');
 
       // 路径 1: (v1 merge v2) merge v3
-      final merge_12_3 =
-          CrdtMerger.mergeCards(CrdtMerger.mergeCards(v1, v2), v3);
+      final merge_12_3 = CrdtMerger.mergeCards(CrdtMerger.mergeCards(v1, v2), v3);
       // 路径 2: v1 merge (v2 merge v3)
-      final merge_1_23 =
-          CrdtMerger.mergeCards(v1, CrdtMerger.mergeCards(v2, v3));
+      final merge_1_23 = CrdtMerger.mergeCards(v1, CrdtMerger.mergeCards(v2, v3));
 
       expect(merge_12_3.encryptedPayload, equals('v3'));
       expect(merge_1_23.encryptedPayload, equals('v3'));

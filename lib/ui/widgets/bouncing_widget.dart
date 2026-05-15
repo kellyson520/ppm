@@ -34,8 +34,7 @@ class BouncingWidget extends StatefulWidget {
   State<BouncingWidget> createState() => _BouncingWidgetState();
 }
 
-class _BouncingWidgetState extends State<BouncingWidget>
-    with SingleTickerProviderStateMixin {
+class _BouncingWidgetState extends State<BouncingWidget> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -50,8 +49,7 @@ class _BouncingWidgetState extends State<BouncingWidget>
 
     // 使用非线性曲线，按下时平滑，松开时有真实物理回弹感 (elasticOut 会稍微夸张，
     // 这里采用类似 apple 真实的弹性阻尼曲线 easeOutCubic/easeOutBack)
-    _scaleAnimation =
-        Tween<double>(begin: 1.0, end: widget.scaleFactor).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: widget.scaleFactor).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Curves.easeOutCubic,
@@ -104,10 +102,7 @@ class _BouncingWidgetState extends State<BouncingWidget>
       onTapCancel: _onTapCancel,
       onLongPress: _onLongPress,
       // 动效核心缩盖
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: widget.child,
-      ),
+      child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
     );
   }
 }

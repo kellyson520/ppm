@@ -43,37 +43,21 @@ class AesGcmProvider implements AeadCipher {
     final authTag = output.sublist(output.length - 16);
     final ciphertext = output.sublist(0, output.length - 16);
 
-    return EncryptedBox(
-      ciphertext: ciphertext,
-      nonce: nonce,
-      authTag: authTag,
-    );
+    return EncryptedBox(ciphertext: ciphertext, nonce: nonce, authTag: authTag);
   }
 
   @override
-  Uint8List open({
-    required EncryptedBox box,
-    required Uint8List key,
-    Uint8List? aad,
-  }) {
+  Uint8List open({required EncryptedBox box, required Uint8List key, Uint8List? aad}) {
     assert(key.length == 32, 'AES-256 requires 32-byte key');
 
     final gcm = GCMBlockCipher(AESEngine())
       ..init(
         false, // decrypt
-        AEADParameters(
-          KeyParameter(key),
-          128,
-          box.nonce,
-          aad ?? Uint8List(0),
-        ),
+        AEADParameters(KeyParameter(key), 128, box.nonce, aad ?? Uint8List(0)),
       );
 
     // 拼接 ciphertext + authTag（PointyCastle 期望的格式）
-    final combined = Uint8List.fromList([
-      ...box.ciphertext,
-      ...box.authTag,
-    ]);
+    final combined = Uint8List.fromList([...box.ciphertext, ...box.authTag]);
 
     return gcm.process(combined);
   }
