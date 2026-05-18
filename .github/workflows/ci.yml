@@ -98,13 +98,57 @@ jobs:
         run: flutter pub get
 
       - name: Check formatting
-        run: dart format --line-length 100 .
+        run: |
+          dart format --line-length 100 . 2>&1 | tee format-report.txt
+          echo "FORMAT_EXIT=${PIPESTATUS[0]}" >> $GITHUB_ENV
 
       - name: Analyze code
-        run: flutter analyze --no-fatal-infos
+        run: |
+          flutter analyze --no-fatal-infos 2>&1 | tee analyze-report.txt
+          echo "ANALYZE_EXIT=${PIPESTATUS[0]}" >> $GITHUB_ENV
 
       - name: Run tests
-        run: flutter test --no-pub
+        run: |
+          flutter test --no-pub 2>&1 | tee test-report.txt
+          echo "TEST_EXIT=${PIPESTATUS[0]}" >> $GITHUB_ENV
+
+      - name: Upload CI reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports
+          path: |
+            format-report.txt
+            analyze-report.txt
+            test-report.txt
+          retention-days: 3
+
+      - name: Report failures
+        if: always()
+        run: |
+          FAILED=false
+          if [ "$FORMAT_EXIT" != "0" ]; then
+            echo "❌ Format check FAILED" >> $GITHUB_STEP_SUMMARY
+            FAILED=true
+          else
+            echo "✅ Format check passed" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "$ANALYZE_EXIT" != "0" ]; then
+            echo "❌ Code analysis FAILED" >> $GITHUB_STEP_SUMMARY
+            FAILED=true
+          else
+            echo "✅ Code analysis passed" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "$TEST_EXIT" != "0" ]; then
+            echo "❌ Tests FAILED" >> $GITHUB_STEP_SUMMARY
+            FAILED=true
+          else
+            echo "✅ Tests passed" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "📥 Download the **ci-reports** artifact for detailed logs." >> $GITHUB_STEP_SUMMARY
+          if [ "$FAILED" = "true" ]; then
+            exit 1
+          fi
 
   build-android:
     name: Build Android
