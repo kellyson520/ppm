@@ -77,7 +77,7 @@ void main() {
     blocTest<VaultBloc, VaultState>(
       '初始化成功 → loading→unlocked',
       build: () {
-        when(mockVaultService.initialize(any, entropy: entropy))
+        when(mockVaultService.initialize(any, entropy: anyNamed('entropy')))
             .thenAnswer((_) async {});
         return vaultBloc;
       },
@@ -110,7 +110,7 @@ void main() {
       '初始化成功（带熵） → unlocked',
       build: () {
         final entropy = Uint8List.fromList([1, 2, 3, 4]);
-        when(mockVaultService.initialize(any, entropy: anyNamed('entropy')))
+        when(mockVaultService.initialize(any, entropy: entropy))
             .thenAnswer((_) async {});
         return vaultBloc;
       },
