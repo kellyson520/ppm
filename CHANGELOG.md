@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.21] - 2026-05-18
+
+### ✨ 新增 (Features)
+- **ContextMenu 长按菜单**: 毛玻璃气泡菜单 — 密码/验证器列表长按弹出复制/编辑/详情/删除操作。
+- **GlowInput 微光输入框**: Apple HIG 风格 — unfocused 透明底+虚线下划线，focused 背景渐亮+品牌色微光，错误动画淡入。
+- **EmptyState 空状态组件**: 统一动画空态（图标+标题+描述+CTA 按钮），带淡入+上滑动画。
+- **HelpTooltip 帮助提示**: 点击?图标弹出毛玻璃说明气泡，叠加层展示，点击任意处关闭。
+
+### 🔧 修复 (Fixes)
+- **输入框全局升级**: `add_password_screen`、`add_auth_screen`、`setup_screen`、`webdav_settings_screen` 所有输入框替换为 GlowInput。
+- **空状态统一**: `vault_screen`、`authenticator_screen`、`webdav_settings_screen` 使用 EmptyState 组件。
+- **废弃代码清理**: 移除 `webdav_settings_screen` 未使用的 `_buildTextField` 辅助方法。
+
 ## [0.2.20] - 2026-05-18
 
 ### ✨ 新增 (Features)
