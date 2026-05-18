@@ -99,18 +99,21 @@ jobs:
 
       - name: Check formatting
         run: |
+          set +o pipefail
           dart format --line-length 100 . 2>&1 | tee format-report.txt
-          echo "FORMAT_EXIT=${PIPESTATUS[0]}" >> $GITHUB_ENV
+          echo "${PIPESTATUS[0]}" > format-exit.txt
 
       - name: Analyze code
         run: |
+          set +o pipefail
           flutter analyze --no-fatal-infos 2>&1 | tee analyze-report.txt
-          echo "ANALYZE_EXIT=${PIPESTATUS[0]}" >> $GITHUB_ENV
+          echo "${PIPESTATUS[0]}" > analyze-exit.txt
 
       - name: Run tests
         run: |
+          set +o pipefail
           flutter test --no-pub 2>&1 | tee test-report.txt
-          echo "TEST_EXIT=${PIPESTATUS[0]}" >> $GITHUB_ENV
+          echo "${PIPESTATUS[0]}" > test-exit.txt
 
       - name: Upload CI reports
         if: always()
@@ -121,25 +124,31 @@ jobs:
             format-report.txt
             analyze-report.txt
             test-report.txt
+            format-exit.txt
+            analyze-exit.txt
+            test-exit.txt
           retention-days: 3
 
       - name: Report failures
         if: always()
         run: |
           FAILED=false
-          if [ "$FORMAT_EXIT" != "0" ]; then
+          FMT=$(cat format-exit.txt 2>/dev/null || echo 0)
+          ANA=$(cat analyze-exit.txt 2>/dev/null || echo 0)
+          TST=$(cat test-exit.txt 2>/dev/null || echo 0)
+          if [ "$FMT" != "0" ]; then
             echo "❌ Format check FAILED" >> $GITHUB_STEP_SUMMARY
             FAILED=true
           else
             echo "✅ Format check passed" >> $GITHUB_STEP_SUMMARY
           fi
-          if [ "$ANALYZE_EXIT" != "0" ]; then
+          if [ "$ANA" != "0" ]; then
             echo "❌ Code analysis FAILED" >> $GITHUB_STEP_SUMMARY
             FAILED=true
           else
             echo "✅ Code analysis passed" >> $GITHUB_STEP_SUMMARY
           fi
-          if [ "$TEST_EXIT" != "0" ]; then
+          if [ "$TST" != "0" ]; then
             echo "❌ Tests FAILED" >> $GITHUB_STEP_SUMMARY
             FAILED=true
           else
