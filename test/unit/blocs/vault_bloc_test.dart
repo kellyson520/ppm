@@ -65,7 +65,7 @@ void main() {
       expect: () => [
         const VaultState(status: VaultStatus.loading),
         predicate<VaultState>(
-          (s) => s.status == VaultStatus.error && (s.errorMessage ?? '').contains('DB corrupt'),
+          (s) => s.status == VaultStatus.error && (s.errorMessage ?? '').contains('internal error'),
         ),
       ],
     );
