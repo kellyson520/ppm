@@ -56,7 +56,7 @@ void main() {
         isA<PasswordError>().having(
           (s) => s.message,
           'error msg',
-          contains('DB connection failed'),
+          contains('internal error'),
         ),
       ],
     );

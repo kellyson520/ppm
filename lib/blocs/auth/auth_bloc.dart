@@ -27,7 +27,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final cards = _authService.getActiveCards();
       emit(AuthLoaded(cards: cards));
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(const AuthError('An internal error occurred'));
     }
   }
@@ -49,7 +49,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       // Actually, let's assume search is handled elsewhere or we add searchKey to event.
       final cards = _authService.getActiveCards();
       emit(AuthLoaded(cards: cards, query: event.query));
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(const AuthError('An internal error occurred'));
     }
   }
@@ -64,7 +64,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         deviceId: event.deviceId,
       );
       add(AuthLoadRequested());
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(const AuthError('An internal error occurred'));
     }
   }
@@ -80,7 +80,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         deviceId: event.deviceId,
       );
       add(AuthLoadRequested());
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(const AuthError('An internal error occurred'));
     }
   }
@@ -90,7 +90,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       _authService.deleteCard(event.cardId, event.deviceId);
       add(AuthLoadRequested());
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(const AuthError('An internal error occurred'));
     }
   }

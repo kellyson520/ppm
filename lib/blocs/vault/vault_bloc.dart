@@ -29,7 +29,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
       } else {
         emit(state.copyWith(status: VaultStatus.locked));
       }
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(state.copyWith(status: VaultStatus.error, errorMessage: 'An internal error occurred'));
     }
   }
@@ -42,7 +42,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
     try {
       await _vaultService.initialize(event.masterPassword, entropy: event.entropy);
       emit(state.copyWith(status: VaultStatus.unlocked));
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(state.copyWith(status: VaultStatus.error, errorMessage: 'An internal error occurred'));
     }
   }
@@ -56,7 +56,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
       } else {
         emit(state.copyWith(status: VaultStatus.locked, errorMessage: 'Invalid master password'));
       }
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(state.copyWith(status: VaultStatus.error, errorMessage: 'An internal error occurred'));
     }
   }
@@ -86,7 +86,7 @@ class VaultBloc extends Bloc<VaultEvent, VaultState> {
           ),
         );
       }
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(state.copyWith(status: VaultStatus.unlocked, errorMessage: 'An internal error occurred'));
     }
   }

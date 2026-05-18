@@ -28,7 +28,7 @@ class PasswordBloc extends Bloc<PasswordEvent, PasswordState> {
     try {
       final cards = await _vaultService.getAllCards();
       emit(PasswordLoaded(cards: cards));
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(const PasswordError('An internal error occurred'));
     }
   }
@@ -43,7 +43,7 @@ class PasswordBloc extends Bloc<PasswordEvent, PasswordState> {
     try {
       final cards = await _vaultService.search(event.query);
       emit(PasswordLoaded(cards: cards, query: event.query));
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(const PasswordError('An internal error occurred'));
     }
   }
@@ -56,7 +56,7 @@ class PasswordBloc extends Bloc<PasswordEvent, PasswordState> {
     try {
       await _vaultService.createCard(event.payload);
       add(PasswordLoadRequested()); // Reload list
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(const PasswordError('An internal error occurred'));
     }
   }
@@ -69,7 +69,7 @@ class PasswordBloc extends Bloc<PasswordEvent, PasswordState> {
     try {
       await _vaultService.updateCard(event.cardId, event.payload);
       add(PasswordLoadRequested()); // Reload list
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(const PasswordError('An internal error occurred'));
     }
   }
@@ -82,7 +82,7 @@ class PasswordBloc extends Bloc<PasswordEvent, PasswordState> {
     try {
       await _vaultService.deleteCard(event.cardId);
       add(PasswordLoadRequested()); // Reload list
-    } on Object catch (e) {
+    } on Object catch (_) {
       emit(const PasswordError('An internal error occurred'));
     }
   }
