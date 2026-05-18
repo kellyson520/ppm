@@ -101,7 +101,7 @@ void main() {
       expect: () => [
         const VaultState(status: VaultStatus.loading),
         predicate<VaultState>(
-          (s) => s.status == VaultStatus.error && (s.errorMessage ?? '').contains('Init failed'),
+          (s) => s.status == VaultStatus.error && (s.errorMessage ?? '').contains('internal error'),
         ),
       ],
     );
@@ -170,7 +170,7 @@ void main() {
         predicate<VaultState>(
           (s) =>
               s.status == VaultStatus.error &&
-              (s.errorMessage ?? '').contains('Key derivation failed'),
+              (s.errorMessage ?? '').contains('internal error'),
         ),
       ],
     );
@@ -240,7 +240,7 @@ void main() {
         const VaultState(status: VaultStatus.loading),
         predicate<VaultState>(
           (s) => s.status == VaultStatus.unlocked
-              && (s.errorMessage ?? '').contains('Key rotation failed'),
+              && (s.errorMessage ?? '').contains('internal error'),
         ),
       ],
     );

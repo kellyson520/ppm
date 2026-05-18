@@ -440,19 +440,21 @@ class VaultService {
     _ensureUnlocked();
 
     try {
-      String jsonString = inputString;
+      String jsonString;
 
-      // Check if it looks like an encrypted base64 string (EncryptedData)
-      // Base64 of JSON starting with {"ciphertext":...}
-      if (!inputString.trim().startsWith('[')) {
+      // 双路径尝试：先解密，失败则尝试明文 JSON
+      try {
+        final encryptedData = EncryptedData.deserialize(inputString);
+        jsonString = _cryptoService.decryptString(encryptedData, _sessionDek!);
+      } on Exception {
+        // 不是加密数据，尝试直接解析为 JSON
         try {
-          final encryptedData = EncryptedData.deserialize(inputString);
-          jsonString = _cryptoService.decryptString(encryptedData, _sessionDek!);
-        } on Exception catch (_) {
-          // If decryption fails or it's not EncryptedData, search for plain JSON array
-          if (!inputString.trim().startsWith('[')) {
-            throw const FormatException('Invalid or unreadable backup format');
-          }
+          jsonString = inputString;
+          jsonDecode(jsonString); // 测试是否可解析
+        } on Exception {
+          throw const FormatException(
+            'Invalid backup format: not a valid encrypted or plain JSON file',
+          );
         }
       }
 

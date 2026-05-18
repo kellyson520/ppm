@@ -56,7 +56,7 @@ void main() {
       act: (b) => b.add(AuthLoadRequested()),
       expect: () => [
         isA<AuthLoading>(),
-        isA<AuthError>().having((s) => s.message, 'message', contains('DB error')),
+        isA<AuthError>().having((s) => s.message, 'message', contains('internal error')),
       ],
     );
 
@@ -103,7 +103,7 @@ void main() {
       act: (b) => b.add(const AuthSearchRequested('')),
       expect: () => [
         isA<AuthLoading>(),
-        isA<AuthError>().having((s) => s.message, 'msg', contains('search failed')),
+        isA<AuthError>().having((s) => s.message, 'msg', contains('internal error')),
       ],
     );
   });
@@ -176,7 +176,7 @@ void main() {
       )),
       expect: () => [
         isA<AuthOperationInProgress>(),
-        isA<AuthError>().having((s) => s.message, 'msg', contains('create failed')),
+        isA<AuthError>().having((s) => s.message, 'msg', contains('internal error')),
       ],
     );
   });
@@ -241,7 +241,7 @@ void main() {
       )),
       expect: () => [
         isA<AuthOperationInProgress>(),
-        isA<AuthError>().having((s) => s.message, 'msg', contains('update failed')),
+        isA<AuthError>().having((s) => s.message, 'msg', contains('internal error')),
       ],
     );
   });
@@ -274,7 +274,7 @@ void main() {
       act: (b) => b.add(const AuthDeleteRequested('card-1', 'device-1')),
       expect: () => [
         isA<AuthOperationInProgress>(),
-        isA<AuthError>().having((s) => s.message, 'msg', contains('delete failed')),
+        isA<AuthError>().having((s) => s.message, 'msg', contains('internal error')),
       ],
     );
   });

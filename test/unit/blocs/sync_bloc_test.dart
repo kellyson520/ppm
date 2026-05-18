@@ -61,7 +61,7 @@ void main() {
       expect: () => [
         predicate<SyncState>((s) => s.isLoading == true),
         predicate<SyncState>(
-          (s) => s.isLoading == false && (s.error ?? '').contains('Network error'),
+          (s) => s.isLoading == false && (s.error ?? '').contains('internal error'),
         ),
       ],
     );

@@ -30,7 +30,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       final nodes = await _syncService.getNodes();
       emit(state.copyWith(nodes: nodes, isLoading: false));
     } on Exception catch (e) {
-      emit(state.copyWith(error: e.toString(), isLoading: false));
+      emit(state.copyWith(error: 'An internal error occurred', isLoading: false));
     }
   }
 
@@ -44,7 +44,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         emit(state.copyWith(error: result.error, isLoading: false));
       }
     } on Exception catch (e) {
-      emit(state.copyWith(error: e.toString(), isLoading: false));
+      emit(state.copyWith(error: 'An internal error occurred', isLoading: false));
     }
   }
 
@@ -55,7 +55,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       final nodes = await _syncService.getNodes();
       emit(state.copyWith(nodes: nodes, isLoading: false));
     } on Exception catch (e) {
-      emit(state.copyWith(error: e.toString(), isLoading: false));
+      emit(state.copyWith(error: 'An internal error occurred', isLoading: false));
     }
   }
 
@@ -66,7 +66,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       final nodes = await _syncService.getNodes();
       emit(state.copyWith(nodes: nodes, isLoading: false));
     } on Exception catch (e) {
-      emit(state.copyWith(error: e.toString(), isLoading: false));
+      emit(state.copyWith(error: 'An internal error occurred', isLoading: false));
     }
   }
 

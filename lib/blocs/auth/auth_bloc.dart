@@ -28,7 +28,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final cards = _authService.getActiveCards();
       emit(AuthLoaded(cards: cards));
     } on Object catch (e) {
-      emit(AuthError(e.toString()));
+      emit(const AuthError('An internal error occurred'));
     }
   }
 
@@ -50,7 +50,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final cards = _authService.getActiveCards();
       emit(AuthLoaded(cards: cards, query: event.query));
     } on Object catch (e) {
-      emit(AuthError(e.toString()));
+      emit(const AuthError('An internal error occurred'));
     }
   }
 
@@ -65,7 +65,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
       add(AuthLoadRequested());
     } on Object catch (e) {
-      emit(AuthError(e.toString()));
+      emit(const AuthError('An internal error occurred'));
     }
   }
 
@@ -81,7 +81,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
       add(AuthLoadRequested());
     } on Object catch (e) {
-      emit(AuthError(e.toString()));
+      emit(const AuthError('An internal error occurred'));
     }
   }
 
@@ -91,7 +91,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       _authService.deleteCard(event.cardId, event.deviceId);
       add(AuthLoadRequested());
     } on Object catch (e) {
-      emit(AuthError(e.toString()));
+      emit(const AuthError('An internal error occurred'));
     }
   }
 }

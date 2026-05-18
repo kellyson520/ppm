@@ -406,20 +406,14 @@ class DatabaseService {
     String passwordToStore;
     int isEncrypted;
 
-    if (dek != null) {
-      final envelope = _cryptoService.facade.encryptString(node.password, dek);
-      passwordToStore = jsonEncode(envelope.toJson());
-      isEncrypted = 1;
-    } else {
-      // DEK not available — store as plaintext and log warning
-      CrashReportService.instance.reportError(
-        Exception('Saving WebDAV node "${node.name}" without DEK — password stored as plaintext'),
-        StackTrace.current,
-        source: 'DatabaseService.saveWebDavNode',
+    if (dek == null) {
+      throw StateError(
+        'Cannot save WebDAV node: DEK not available. Unlock the vault first.',
       );
-      passwordToStore = node.password;
-      isEncrypted = 0;
     }
+    final envelope = _cryptoService.facade.encryptString(node.password, dek);
+    passwordToStore = jsonEncode(envelope.toJson());
+    isEncrypted = 1;
 
     await db.insert(
         'webdav_nodes',
