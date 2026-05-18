@@ -148,7 +148,7 @@ void main() {
         isA<PasswordError>().having(
           (s) => s.message,
           'contains error',
-          contains('Vault not unlocked'),
+          contains('internal error'),
         ),
       ],
     );

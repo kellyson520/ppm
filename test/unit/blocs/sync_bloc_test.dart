@@ -101,7 +101,7 @@ void main() {
       expect: () => [
         predicate<SyncState>((s) => s.isLoading == true),
         predicate<SyncState>(
-          (s) => s.isLoading == false && (s.error ?? '').contains('Connection refused'),
+          (s) => s.isLoading == false && (s.error ?? '').contains('internal error'),
         ),
       ],
     );
@@ -116,7 +116,7 @@ void main() {
       expect: () => [
         predicate<SyncState>((s) => s.isLoading == true),
         predicate<SyncState>(
-          (s) => s.isLoading == false && (s.error ?? '').contains('Unexpected crash'),
+          (s) => s.isLoading == false && (s.error ?? '').contains('internal error'),
         ),
       ],
     );
@@ -158,7 +158,7 @@ void main() {
       expect: () => [
         predicate<SyncState>((s) => s.isLoading == true),
         predicate<SyncState>(
-          (s) => s.isLoading == false && (s.error ?? '').contains('Invalid URL'),
+          (s) => s.isLoading == false && (s.error ?? '').contains('internal error'),
         ),
       ],
     );
@@ -192,7 +192,7 @@ void main() {
       expect: () => [
         predicate<SyncState>((s) => s.isLoading == true),
         predicate<SyncState>(
-          (s) => s.isLoading == false && (s.error ?? '').contains('Node not found'),
+          (s) => s.isLoading == false && (s.error ?? '').contains('internal error'),
         ),
       ],
     );
