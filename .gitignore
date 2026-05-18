@@ -116,6 +116,11 @@ coverage/
 .DS_Store
 Thumbs.db
 
+# Local development scripts (NOT for CI)
+/build-all-mocks.sh
+/build-mocks.sh
+/run-tests.sh
+
 # Sensitive data (NEVER commit these)
 *.key
 *.pem
