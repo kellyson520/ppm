@@ -115,7 +115,9 @@ void main() {
             .thenAnswer((_) async {});
         return vaultBloc;
       },
-      act: (b) => b.add(VaultInitializeRequested('mypassword', entropy: Uint8List.fromList([1, 2, 3, 4]))),
+      act: (b) => b.add(
+        VaultInitializeRequested('mypassword', entropy: Uint8List.fromList([1, 2, 3, 4])),
+      ),
       expect: () => [
         const VaultState(status: VaultStatus.loading),
         const VaultState(status: VaultStatus.unlocked),
@@ -150,7 +152,9 @@ void main() {
       expect: () => [
         const VaultState(status: VaultStatus.loading),
         predicate<VaultState>(
-          (s) => s.status == VaultStatus.locked && (s.errorMessage ?? '').contains('Invalid master password'),
+          (s) =>
+              s.status == VaultStatus.locked &&
+              (s.errorMessage ?? '').contains('Invalid master password'),
         ),
       ],
     );
@@ -165,7 +169,9 @@ void main() {
       expect: () => [
         const VaultState(status: VaultStatus.loading),
         predicate<VaultState>(
-          (s) => s.status == VaultStatus.error && (s.errorMessage ?? '').contains('Key derivation failed'),
+          (s) =>
+              s.status == VaultStatus.error &&
+              (s.errorMessage ?? '').contains('Key derivation failed'),
         ),
       ],
     );
@@ -211,7 +217,9 @@ void main() {
             .thenAnswer((_) async => false);
         return vaultBloc;
       },
-      act: (b) => b.add(const VaultChangePasswordRequested(oldPassword: 'wrong', newPassword: 'new')),
+      act: (b) => b.add(
+        const VaultChangePasswordRequested(oldPassword: 'wrong', newPassword: 'new'),
+      ),
       expect: () => [
         const VaultState(status: VaultStatus.loading),
         predicate<VaultState>(

@@ -184,7 +184,11 @@ void main() {
   // ==================== [4] 更新 ====================
 
   group('AuthUpdateRequested', () {
-    const payload = AuthPayload(issuer: 'Updated', account: 'updated@test.com', secret: 'NEWSECRET');
+    const payload = AuthPayload(
+      issuer: 'Updated',
+      account: 'updated@test.com',
+      secret: 'NEWSECRET',
+    );
     final dek = Uint8List(32);
     final searchKey = Uint8List(16);
     const deviceId = 'device-1';
