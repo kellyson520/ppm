@@ -534,6 +534,7 @@ class VaultService {
   }
 
   Future<void> enableBiometricMode(String masterPassword) async {
+    _ensureUnlocked();
     await _keyManager.savePasswordForBiometric(masterPassword);
   }
 

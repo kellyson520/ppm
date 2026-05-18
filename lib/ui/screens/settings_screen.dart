@@ -149,6 +149,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
 
       if (result != null && result.isNotEmpty) {
+        // Verify master password BEFORE enabling biometric
+        final isPasswordCorrect = await widget.vaultService.unlock(result);
+        if (!isPasswordCorrect) {
+          _showError(l10n.incorrectPassword);
+          return;
+        }
+
         bool authenticated = false;
         try {
           authenticated = await _localAuth.authenticate(
@@ -156,6 +163,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           );
         } on Exception catch (e) {
           _showError('Biometric error: $e');
+          return;
         }
 
         if (authenticated) {
