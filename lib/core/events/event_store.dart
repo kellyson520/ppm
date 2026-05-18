@@ -52,7 +52,8 @@ class EventStore {
       CREATE INDEX IF NOT EXISTS idx_events_card_id ON $_eventsTable(card_id)
     ''');
     await db.execute('''
-      CREATE INDEX IF NOT EXISTS idx_events_hlc ON $_eventsTable(hlc_physical, hlc_logical, hlc_device)
+      CREATE INDEX IF NOT EXISTS idx_events_hlc
+        ON $_eventsTable(hlc_physical, hlc_logical, hlc_device)
     ''');
     await db.execute('''
       CREATE INDEX IF NOT EXISTS idx_events_synced ON $_eventsTable(is_synced)

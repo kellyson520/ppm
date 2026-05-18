@@ -485,7 +485,11 @@ class _PasswordDetailScreenState extends State<PasswordDetailScreen> {
 
   String _formatDateTime(int timestamp) {
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} '
-        '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    final y = date.year;
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
+    final h = date.hour.toString().padLeft(2, '0');
+    final min = date.minute.toString().padLeft(2, '0');
+    return '$y-$m-$d $h:$min';
   }
 }

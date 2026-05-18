@@ -218,7 +218,8 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
       builder: (context) => AlertDialog(
         title: Text(l10n.deleteAuthenticatorLabel),
         content: Text(
-          '${l10n.deleteAuthenticatorConfirmPart1} "${widget.payload.issuer}" ${l10n.deleteAuthenticatorConfirmPart2}\n\n'
+          '${l10n.deleteAuthenticatorConfirmPart1} "${widget.payload.issuer}"' 
+              ' ${l10n.deleteAuthenticatorConfirmPart2}\n\n'
           '⚠️ ${l10n.deleteAuthenticatorWarning}',
         ),
         actions: [

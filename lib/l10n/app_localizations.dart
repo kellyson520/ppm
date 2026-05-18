@@ -366,7 +366,8 @@ abstract class AppLocalizations {
   /// No description provided for @compactStorageDesc.
   ///
   /// In en, this message translates to:
-  /// **'This will compress your event history and create a snapshot. This action cannot be undone.'**
+  /// **'This will compress your event history and create a snapshot.'**
+  /// **' This action cannot be undone.'**
   String get compactStorageDesc;
 
   /// No description provided for @compact.
@@ -1182,7 +1183,8 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAuthenticatorWarning.
   ///
   /// In en, this message translates to:
-  /// **'Deleting this will be permanent! Make sure you have backed up the 2FA secret or disabled it in the respective service.'**
+  /// **'Deleting this will be permanent! Make sure you have backed up'**
+  /// **' the 2FA secret or disabled it in the respective service.'**
   String get deleteAuthenticatorWarning;
 
   /// No description provided for @addAuthenticator.
@@ -1356,7 +1358,8 @@ abstract class AppLocalizations {
   /// No description provided for @uriImportDesc.
   ///
   /// In en, this message translates to:
-  /// **'Paste an otpauth:// URI or multiple URIs (one per line) for batch import.\nFormat: otpauth://totp/Label?secret=XXX&issuer=YYY'**
+  /// **'Paste an otpauth:// URI or multiple URIs (one per line)'**
+  /// **' for batch import.\nFormat: otpauth://totp/Label?secret=XXX&issuer=YYY'**
   String get uriImportDesc;
 
   /// No description provided for @pasteFromClipboard.

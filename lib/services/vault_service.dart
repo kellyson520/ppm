@@ -595,6 +595,8 @@ class VaultStats {
 
   @override
   String toString() {
-    return 'VaultStats(cards: $cardCount, events: $eventCount, pending: $pendingSyncCount, snapshots: $snapshotCount)';
+    return 'VaultStats'
+        '(cards: $cardCount, events: $eventCount, pending: $pendingSyncCount,'
+        ' snapshots: $snapshotCount)';
   }
 }

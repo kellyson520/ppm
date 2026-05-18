@@ -558,7 +558,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAuthenticatorWarning =>
-      'Deleting this will be permanent! Make sure you have backed up the 2FA secret or disabled it in the respective service.';
+      'Deleting this will be permanent! Make sure you have backed up'
+      ' the 2FA secret or disabled it in the respective service.';
 
   @override
   String get addAuthenticator => 'Add Authenticator';
@@ -646,7 +647,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uriImportDesc =>
-      'Paste an otpauth:// URI or multiple URIs (one per line) for batch import.\nFormat: otpauth://totp/Label?secret=XXX&issuer=YYY';
+      'Paste an otpauth:// URI or multiple URIs (one per line)'
+      ' for batch import.\n'
+      'Format: otpauth://totp/Label?secret=XXX&issuer=YYY';
 
   @override
   String get pasteFromClipboard => 'Paste from Clipboard';

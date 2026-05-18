@@ -215,8 +215,9 @@ void main() {
     });
 
     test('fromOtpAuthUri 解析标准 URI', () {
-      const uri =
-          'otpauth://totp/GitHub:test@example.com?secret=JBSWY3DPEHPK3PXP&issuer=GitHub&algorithm=SHA1&digits=6&period=30';
+      const uri = 'otpauth://totp/GitHub:test@example.com'
+          '?secret=JBSWY3DPEHPK3PXP'
+          '&issuer=GitHub&algorithm=SHA1&digits=6&period=30';
       final payload = AuthPayload.fromOtpAuthUri(uri);
       expect(payload.issuer, equals('GitHub'));
       expect(payload.account, equals('test@example.com'));

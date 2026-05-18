@@ -447,7 +447,9 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen> with TickerPr
                         ),
                       if (!isExpanded)
                         Text(
-                          'ID: ${card.cardId.substring(0, card.cardId.length > 12 ? 12 : card.cardId.length)}...',
+                          card.cardId.length > 12
+                              ? 'ID: ${card.cardId.substring(0, 12)}...'
+                              : 'ID: $card.cardId',
                           style: TextStyle(
                             fontSize: 11,
                             color: Colors.white.withValues(alpha: 0.3),

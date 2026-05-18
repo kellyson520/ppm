@@ -291,8 +291,10 @@ class _LockScreenState extends State<LockScreen> with SingleTickerProviderStateM
     } else {
       _secureStorage.write(key: _kFailedAttemptsKey, value: _failedAttempts.toString());
       setState(() {
-        _errorMessage =
-            '${l10n.incorrectPassword} ${_failedAttempts > 1 ? '($_failedAttempts ${l10n.attempts})' : ''}';
+        _errorMessage = l10n.incorrectPassword;
+        if (_failedAttempts > 1) {
+          _errorMessage = '$_errorMessage ($_failedAttempts ${l10n.attempts})';
+        }
       });
     }
   }
