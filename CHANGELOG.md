@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.20] - 2026-05-18
+
+### ✨ 新增 (Features)
+- **CI 分析报告系统**: CI 现在生成 `ci-reports` artifact（format / analyze / test 报告），支持下载后精确修复。
+- **ci-report-reader 技能**: 新增自动化技能 — 下载 CI 失败报告 → 解析精确错误 → 生成 SEARCH/REPLACE 修复。
+- **BLoC 单元测试**: 新增 `AuthBloc`、`SyncBloc`、`VaultBloc` 三个完整状态机测试（45+ 用例），全部 313 测试通过。
+
+### 🔧 修复 (Fixes)
+- **代码格式化**: 修复全部超长行 (>100 chars)，兼容 dart format line-length 100 检查。
+- **Analyze 警告**: 修复 4 个 analyze warnings（未使用 import、未使用局部变量）。
+- **测试编译错误**: 修复 `vault_bloc_test.dart` 中 `entropy` 变量作用域错误。
+- **Mock 过期**: 补全 `vault_orchestration_test.mocks.dart` 中缺失的 `setDek` 方法 stub。
+
 ## [0.2.19] - 2026-05-15
 
 ### 🔧 修复 (Fixes)
