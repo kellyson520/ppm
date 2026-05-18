@@ -579,6 +579,9 @@ class _VaultScreenState extends State<VaultScreen> {
                               card: card,
                               payload: _payloads[card.cardId],
                               onTap: () => _navigateToPasswordDetail(card),
+                              onCopy: () => _copyCardPayload(card),
+                              onEdit: () => _editCard(card),
+                              onDelete: () => _deleteCard(card),
                             );
                           }, childCount: _filteredCards.length),
                         ),
@@ -592,6 +595,9 @@ class _VaultScreenState extends State<VaultScreen> {
                               card: card,
                               payload: _payloads[card.cardId],
                               onTap: () => _navigateToPasswordDetail(card),
+                              onCopy: () => _copyCardPayload(card),
+                              onEdit: () => _editCard(card),
+                              onDelete: () => _deleteCard(card),
                             );
                           }, childCount: _filteredCards.length),
                         ),
@@ -688,6 +694,76 @@ class _VaultScreenState extends State<VaultScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  void _copyCardPayload(PasswordCard card) {
+    final payload = _payloads[card.cardId];
+    if (payload == null) return;
+    Clipboard.setData(ClipboardData(text: payload.password));
+    HapticFeedback.lightImpact();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.copiedToClipboard,
+          ),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _editCard(PasswordCard card) {
+    setState(() => _isModalOpen = true);
+    showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      barrierColor: Colors.black.withValues(alpha: 0.4),
+      transitionAnimationController: AnimationController(
+        vsync: Navigator.of(context),
+        duration: const Duration(milliseconds: 400),
+        reverseDuration: const Duration(milliseconds: 300),
+      )..drive(CurveTween(curve: Curves.easeOutCubic)),
+      builder: (context) => AddPasswordScreen(
+        vaultService: widget.vaultService,
+        editCard: card,
+      ),
+    ).then((result) {
+      if (mounted) {
+        setState(() => _isModalOpen = false);
+        if (result == true) _loadData();
+      }
+    });
+  }
+
+  void _deleteCard(PasswordCard card) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A2E),
+        title: Text(l10n.deletePasswordQuestion, style: const TextStyle(color: Colors.white)),
+        content: Text(l10n.deletePasswordDesc, style: TextStyle(color: Colors.white.withValues(alpha: 0.7))),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel, style: const TextStyle(color: Colors.white54)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              widget.vaultService.deleteCard(card.cardId).then((_) {
+                if (mounted) _loadData();
+              });
+            },
+            child: Text(l10n.delete, style: const TextStyle(color: Color(0xFFFF6B6B))),
+          ),
+        ],
+      ),
     );
   }
 

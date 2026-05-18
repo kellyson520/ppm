@@ -18,9 +18,13 @@ import 'blocs/password/password_bloc.dart';
 import 'blocs/auth/auth_bloc.dart';
 import 'blocs/sync/sync_bloc.dart';
 import 'services/sync_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// 全局 Navigator Key，供 CrashReportService 在 Widget 树外进行界面跳转
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+/// 全局主题模式切换回调
+void Function(ThemeMode mode)? setAppThemeMode;
 
 void main() {
   runZonedGuarded(
@@ -99,6 +103,7 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
   late final VaultService _vaultService;
   late final AuthService _authService;
   late final SyncService _syncService;
+  ThemeMode _themeMode = ThemeMode.system;
 
   @override
   void initState() {
@@ -106,6 +111,39 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
     _vaultService = VaultService();
     _authService = AuthService();
     _syncService = SyncService();
+    _loadThemeMode();
+    setAppThemeMode = setThemeMode;
+  }
+
+  Future<void> _loadThemeMode() async {
+    try {
+      const storage = FlutterSecureStorage();
+      final mode = await storage.read(key: 'theme_mode');
+      if (mode != null && mounted) {
+        setState(() {
+          _themeMode = _parseThemeMode(mode);
+        });
+      }
+    } catch (_) {}
+  }
+
+  static ThemeMode _parseThemeMode(String mode) {
+    switch (mode) {
+      case 'dark':
+        return ThemeMode.dark;
+      case 'light':
+        return ThemeMode.light;
+      default:
+        return ThemeMode.system;
+    }
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    setState(() => _themeMode = mode);
+    try {
+      const storage = FlutterSecureStorage();
+      await storage.write(key: 'theme_mode', value: mode.name);
+    } catch (_) {}
   }
 
   @override
@@ -146,88 +184,97 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: const [Locale('zh', 'CN'), Locale('en', 'US')],
-          theme: ThemeData(
-            useMaterial3: true,
-            // 彻底移除 Material 按钮的水波纹和高亮点击反馈，为弹簧动画让路
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            hoverColor: Colors.transparent,
-            focusColor: Colors.transparent,
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF6C63FF),
-              brightness: Brightness.dark,
-            ),
-            // 修改为更深邃无垠的暗色底，为了毛玻璃做衬底
-            scaffoldBackgroundColor: const Color(0xFF101018),
-            cardColor: Colors.transparent, // 废弃传统实心 Card
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: true,
-              titleTextStyle: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            // Apple HIG 排版系统
-            textTheme: const TextTheme(
-              displayLarge: TextStyle(
-                fontSize: 34,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-              ), // LargeTitle
-              titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w700), // Title
-              bodyLarge: TextStyle(fontSize: 17, fontWeight: FontWeight.w400), // Body/Action
-              bodyMedium: TextStyle(fontSize: 15, fontWeight: FontWeight.w400), // Secondary
-              labelSmall: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.5,
-              ), // Caption
-            ),
-            inputDecorationTheme: InputDecorationTheme(
-              filled: true,
-              fillColor: const Color(0xFF0F3460),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF6C63FF), width: 2),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            ),
-            elevatedButtonTheme: ElevatedButtonThemeData(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6C63FF),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16), // 稍微增加圆角
-                ),
-                textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-                elevation: 0, // 去除硬朗的高光阴影
-                splashFactory: NoSplash.splashFactory, // 强杀涟漪
-              ),
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF6C63FF),
-                splashFactory: NoSplash.splashFactory, // 强杀涟漪
-              ),
-            ),
-            iconTheme: const IconThemeData(color: Colors.white70),
-            fontFamily: 'Inter',
-          ),
+          themeMode: _themeMode,
+          theme: _buildTheme(Brightness.light),
+          darkTheme: _buildTheme(Brightness.dark),
           home: const AppNavigator(),
         ),
       ),
+    );
+  }
+
+  ThemeData _buildTheme(Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF1A1A2E);
+    final bgColor = isDark ? const Color(0xFF101018) : const Color(0xFFF2F2F7);
+    final surfaceColor = isDark ? const Color(0xFF0F3460) : const Color(0xFFE8E8ED);
+    final iconColor = isDark ? Colors.white70 : const Color(0xFF1A1A2E).withValues(alpha: 0.7);
+
+    return ThemeData(
+      useMaterial3: true,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      focusColor: Colors.transparent,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF6C63FF),
+        brightness: brightness,
+      ),
+      scaffoldBackgroundColor: bgColor,
+      cardColor: Colors.transparent,
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
+      textTheme: TextTheme(
+        displayLarge: TextStyle(
+          fontSize: 34,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+          color: textColor,
+        ),
+        titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: textColor),
+        bodyLarge: TextStyle(fontSize: 17, fontWeight: FontWeight.w400, color: textColor),
+        bodyMedium: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: textColor),
+        labelSmall: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.5,
+          color: textColor,
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: surfaceColor,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF6C63FF), width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF6C63FF),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+          elevation: 0,
+          splashFactory: NoSplash.splashFactory,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: const Color(0xFF6C63FF),
+          splashFactory: NoSplash.splashFactory,
+        ),
+      ),
+      iconTheme: IconThemeData(color: iconColor),
+      fontFamily: 'Inter',
     );
   }
 }

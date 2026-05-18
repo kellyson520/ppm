@@ -10,6 +10,8 @@ import '../../blocs/sync/sync_bloc.dart';
 import 'webdav_settings_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../main.dart' show setAppThemeMode;
 
 class SettingsScreen extends StatefulWidget {
   final VaultService vaultService;
@@ -253,6 +255,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  String _getThemeLabel() {
+    return '跟随系统 / 暗色 / 亮色';
+  }
+
+  void _showThemePicker() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A2E),
+        title: const Text('Theme', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _themeOption(ctx, '跟随系统', ThemeMode.system, Icons.brightness_auto),
+            _themeOption(ctx, '暗色模式', ThemeMode.dark, Icons.dark_mode),
+            _themeOption(ctx, '亮色模式', ThemeMode.light, Icons.light_mode),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _themeOption(BuildContext ctx, String label, ThemeMode mode, IconData icon) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white70),
+      title: Text(label, style: const TextStyle(color: Colors.white)),
+      onTap: () {
+        Navigator.pop(ctx);
+        setState(() {});
+        setAppThemeMode?.call(mode);
+      },
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   void _showComingSoon() {
     final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(
@@ -446,6 +490,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
 
+        // Theme
+        SliverToBoxAdapter(
+          child: _buildSection(
+            title: 'Theme',
+            children: [
+              _buildListTile(
+                icon: Icons.brightness_6_rounded,
+                title: 'Theme',
+                subtitle: _getThemeLabel(),
+                onTap: _showThemePicker,
+                showArrow: true,
+              ),
+            ],
+          ),
+        ),
+
         // About
         SliverToBoxAdapter(
           child: _buildSection(
@@ -460,14 +520,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildListTile(
                 icon: Icons.description_outlined,
                 title: l10n.documentation,
-                onTap: _showComingSoon,
+                onTap: () => _launchUrl('https://github.com/kellyson520/ppm/blob/main/README.md'),
                 showArrow: true,
               ),
               _buildDivider(),
               _buildListTile(
                 icon: Icons.code_rounded,
                 title: l10n.sourceCode,
-                onTap: _showComingSoon,
+                onTap: () => _launchUrl('https://github.com/kellyson520/ppm'),
                 showArrow: true,
               ),
             ],

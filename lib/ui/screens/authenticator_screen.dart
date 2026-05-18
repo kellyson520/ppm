@@ -67,19 +67,26 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen> with TickerPr
   }
 
   void _startTotpTimer() {
-    _totpTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+    _totpTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
       if (mounted && _decryptedEntries.isNotEmpty) {
         setState(() {
-          // 刷新所有已解密条目的验证码
           for (final entry in _decryptedEntries.values) {
+            final nowMs = DateTime.now().millisecondsSinceEpoch;
             entry.code = TOTPGenerator.generateCode(
               entry.payload.secret,
               algorithm: entry.payload.algorithm,
               digits: entry.payload.digits,
               period: entry.payload.period,
+              timeMs: nowMs,
             );
-            entry.remaining = TOTPGenerator.getRemainingSeconds(period: entry.payload.period);
-            entry.progress = TOTPGenerator.getProgress(period: entry.payload.period);
+            entry.remaining = TOTPGenerator.getRemainingSeconds(
+              period: entry.payload.period,
+              timeMs: nowMs,
+            );
+            entry.progress = TOTPGenerator.getProgress(
+              period: entry.payload.period,
+              timeMs: nowMs,
+            );
           }
         });
       }

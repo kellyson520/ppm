@@ -51,14 +51,16 @@ class TOTPGenerator {
   }
 
   /// 计算当前周期剩余秒数
-  static int getRemainingSeconds({int period = 30}) {
-    final currentSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  static int getRemainingSeconds({int period = 30, int? timeMs}) {
+    final ms = timeMs ?? DateTime.now().millisecondsSinceEpoch;
+    final currentSeconds = ms ~/ 1000;
     return period - (currentSeconds % period);
   }
 
   /// 获取当前周期进度 (0.0 ~ 1.0)
-  static double getProgress({int period = 30}) {
-    final currentSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  static double getProgress({int period = 30, int? timeMs}) {
+    final ms = timeMs ?? DateTime.now().millisecondsSinceEpoch;
+    final currentSeconds = ms ~/ 1000;
     return (currentSeconds % period) / period;
   }
 

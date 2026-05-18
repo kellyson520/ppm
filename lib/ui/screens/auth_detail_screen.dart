@@ -49,7 +49,7 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
   void initState() {
     super.initState();
     _updateCode();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+    _timer = Timer.periodic(const Duration(milliseconds: 100), (_) {
       _updateCode();
     });
   }
@@ -61,15 +61,23 @@ class _AuthDetailScreenState extends State<AuthDetailScreen> {
   }
 
   void _updateCode() {
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
     setState(() {
       _currentCode = TOTPGenerator.generateCode(
         widget.payload.secret,
         algorithm: widget.payload.algorithm,
         digits: widget.payload.digits,
         period: widget.payload.period,
+        timeMs: nowMs,
       );
-      _remaining = TOTPGenerator.getRemainingSeconds(period: widget.payload.period);
-      _progress = TOTPGenerator.getProgress(period: widget.payload.period);
+      _remaining = TOTPGenerator.getRemainingSeconds(
+        period: widget.payload.period,
+        timeMs: nowMs,
+      );
+      _progress = TOTPGenerator.getProgress(
+        period: widget.payload.period,
+        timeMs: nowMs,
+      );
     });
   }
 
