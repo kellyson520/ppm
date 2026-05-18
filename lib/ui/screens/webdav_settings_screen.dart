@@ -148,7 +148,7 @@ class WebDavSettingsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               GlowInput(
                 controller: urlController,
-                label: l10n.urlHint ?? 'URL',
+                label: l10n.urlHint,
                 prefixIcon: Icons.link_rounded,
                 keyboardType: TextInputType.url,
                 textInputAction: TextInputAction.next,
@@ -163,7 +163,7 @@ class WebDavSettingsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               GlowInput(
                 controller: passController,
-                label: l10n.password ?? 'Password',
+                label: l10n.password,
                 prefixIcon: Icons.lock_outline_rounded,
                 obscureText: true,
               ),

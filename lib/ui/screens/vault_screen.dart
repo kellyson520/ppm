@@ -698,7 +698,7 @@ class _VaultScreenState extends State<VaultScreen> {
       title: isEmpty ? l10n.noPasswords : l10n.noMatches,
       subtitle: isEmpty ? l10n.clickToAdd : null,
       actionLabel: isEmpty ? '+ ${l10n.addPassword}' : null,
-      onAction: isEmpty ? () => _navigateToAddPassword(null) : null,
+      onAction: isEmpty ? _navigateToAddPassword : null,
     );
   }
 }

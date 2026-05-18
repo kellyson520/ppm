@@ -1,7 +1,5 @@
-import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'glass_container.dart';
 
 /// 单个上下文菜单选项
@@ -101,7 +99,6 @@ class _ContextMenuOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final safePadding = MediaQuery.of(context).padding;
 
     // 计算菜单位置
     double top;
