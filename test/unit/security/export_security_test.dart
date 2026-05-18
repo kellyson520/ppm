@@ -11,9 +11,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ztd_password_manager/core/crypto/crypto_facade.dart';
 import 'package:ztd_password_manager/core/crypto/crypto_service.dart';
-import 'package:ztd_password_manager/core/models/password_card.dart';
 import 'package:ztd_password_manager/core/crypto/providers/pbkdf2_provider.dart';
 
 void main() {
@@ -63,8 +61,9 @@ void main() {
       final plaintext = 'sensitive_password_data_12345';
       final encrypted = cryptoService.encryptString(plaintext, key);
 
-      // 密文不应以任何形式包含原始明文
-      expect(encrypted.ciphertext, isNot(contains(plaintext.codeUnits)));
+      // 密文不应包含原始明文字节
+      final cipherStr = String.fromCharCodes(encrypted.ciphertext.take(200));
+      expect(cipherStr, isNot(contains(plaintext)));
       expect(encrypted.serialize(), isNot(contains(plaintext)));
     });
 
@@ -78,11 +77,11 @@ void main() {
       expect(encrypted.authTag.length, 16);
 
       // AES-GCM nonce 是 12 字节
-      expect(encrypted.nonce.length, 12);
+      expect(encrypted.iv.length, 12);
 
       // 序列化后应包含所有三个字段
       final serialized = encrypted.serialize();
-      expect(serialized, contains('"nonce"'));
+      expect(serialized, contains('"iv"'));
       expect(serialized, contains('"ciphertext"'));
       expect(serialized, contains('"authTag"'));
       expect(serialized, contains('"version"'));
@@ -99,9 +98,9 @@ void main() {
 
       // 三次加密的 nonce 必须全部不同
       final nonces = [
-        base64Encode(encrypted1.nonce),
-        base64Encode(encrypted2.nonce),
-        base64Encode(encrypted3.nonce),
+        base64Encode(encrypted1.iv),
+        base64Encode(encrypted2.iv),
+        base64Encode(encrypted3.iv),
       ];
       expect(nonces.toSet().length, 3, reason: 'All nonces must be unique');
 
