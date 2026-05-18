@@ -297,13 +297,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _showComingSoon() {
-    final l10n = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.comingSoon), behavior: SnackBarBehavior.floating));
-  }
-
   Future<void> _exportBackup() async {
     final l10n = AppLocalizations.of(context)!;
     try {
