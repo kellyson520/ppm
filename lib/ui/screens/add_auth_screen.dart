@@ -411,7 +411,7 @@ class _AddAuthScreenState extends State<AddAuthScreen> with SingleTickerProvider
               return l10n.secretRequired;
             }
             // 基本的 Base32 验证
-            final cleaned = v!.trim().toUpperCase().replaceAll(RegExp(r'\s'), '');
+            final cleaned = v.trim().toUpperCase().replaceAll(RegExp(r'\s'), '');
             if (!RegExp(r'^[A-Z2-7=]+$').hasMatch(cleaned)) {
               return l10n.invalidSecretFormat;
             }
