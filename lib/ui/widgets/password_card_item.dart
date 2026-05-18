@@ -2,18 +2,56 @@ import 'package:flutter/material.dart';
 import '../../core/models/models.dart';
 import '../../l10n/app_localizations.dart';
 import 'bouncing_widget.dart';
+import 'context_menu.dart';
 
 class PasswordCardItem extends StatelessWidget {
   final PasswordCard card;
   final PasswordPayload? payload;
   final VoidCallback onTap;
+  final VoidCallback? onCopy;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
-  const PasswordCardItem({super.key, required this.card, this.payload, required this.onTap});
+  const PasswordCardItem({
+    super.key,
+    required this.card,
+    this.payload,
+    required this.onTap,
+    this.onCopy,
+    this.onEdit,
+    this.onDelete,
+  });
+
+  void _showCardMenu(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    showContextMenu(
+      context: context,
+      options: [
+        ContextMenuOption(
+          icon: Icons.copy,
+          label: l10n.copy,
+          onTap: onCopy ?? () {},
+        ),
+        ContextMenuOption(
+          icon: Icons.edit,
+          label: l10n.edit,
+          onTap: onEdit ?? () {},
+        ),
+        ContextMenuOption(
+          icon: Icons.delete,
+          label: l10n.delete,
+          onTap: onDelete ?? () {},
+          destructive: true,
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return BouncingWidget(
       onTap: onTap,
+      onLongPress: () => _showCardMenu(context),
       scaleFactor: 0.96, // 点击微弱阻尼收缩
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),

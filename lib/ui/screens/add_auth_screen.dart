@@ -5,6 +5,7 @@ import '../../services/auth_service.dart';
 import '../../core/models/auth_card.dart';
 import 'qr_scanner_screen.dart';
 import '../../l10n/app_localizations.dart';
+import '../widgets/glow_input.dart';
 
 /// 添加验证器页面
 ///
@@ -372,60 +373,41 @@ class _AddAuthScreenState extends State<AddAuthScreen> with SingleTickerProvider
       padding: const EdgeInsets.all(16),
       children: [
         // 发行方
-        TextFormField(
+        GlowInput(
           controller: _issuerController,
-          decoration: InputDecoration(
-            labelText: l10n.issuerWithAsterisk,
-            hintText: l10n.issuerHint,
-            prefixIcon: const Icon(Icons.business),
-          ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return l10n.issuerRequired;
-            }
-            return null;
-          },
+          label: l10n.issuerWithAsterisk,
+          hint: l10n.issuerHint,
+          prefixIcon: Icons.business,
+          validator: (v) => (v == null || v.trim().isEmpty) ? l10n.issuerRequired : null,
           textInputAction: TextInputAction.next,
         ),
         const SizedBox(height: 16),
 
         // 账号
-        TextFormField(
+        GlowInput(
           controller: _accountController,
-          decoration: InputDecoration(
-            labelText: l10n.accountWithAsterisk,
-            hintText: l10n.usernameHint,
-            prefixIcon: const Icon(Icons.person_outline),
-          ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return l10n.accountRequired;
-            }
-            return null;
-          },
+          label: l10n.accountWithAsterisk,
+          hint: l10n.usernameHint,
+          prefixIcon: Icons.person_outline,
+          validator: (v) => (v == null || v.trim().isEmpty) ? l10n.accountRequired : null,
           textInputAction: TextInputAction.next,
         ),
         const SizedBox(height: 16),
 
         // 密钥 (Base32)
-        TextFormField(
+        GlowInput(
           controller: _secretController,
+          label: l10n.secretWithAsterisk,
+          hint: 'JBSWY3DPEHPK3PXP',
+          prefixIcon: Icons.key,
           obscureText: !_showSecret,
-          decoration: InputDecoration(
-            labelText: l10n.secretWithAsterisk,
-            hintText: 'JBSWY3DPEHPK3PXP',
-            prefixIcon: const Icon(Icons.key),
-            suffixIcon: IconButton(
-              icon: Icon(_showSecret ? Icons.visibility_off : Icons.visibility),
-              onPressed: () {
-                setState(() {
-                  _showSecret = !_showSecret;
-                });
-              },
-            ),
+          suffixIcon: IconButton(
+            icon: Icon(_showSecret ? Icons.visibility_off : Icons.visibility,
+                size: 20, color: Colors.white.withValues(alpha: 0.5)),
+            onPressed: () => setState(() => _showSecret = !_showSecret),
           ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
+          validator: (v) {
+            if (v == null || v.trim().isEmpty) {
               return l10n.secretRequired;
             }
             // 基本的 Base32 验证
@@ -541,14 +523,11 @@ class _AddAuthScreenState extends State<AddAuthScreen> with SingleTickerProvider
         const SizedBox(height: 16),
 
         // 备注
-        TextFormField(
+        GlowInput(
           controller: _notesController,
-          decoration: InputDecoration(
-            labelText: l10n.notes,
-            hintText: l10n.notesHint,
-            prefixIcon: const Icon(Icons.notes),
-            alignLabelWithHint: true,
-          ),
+          label: l10n.notes,
+          hint: l10n.notesHint,
+          prefixIcon: Icons.notes,
           maxLines: 2,
           textInputAction: TextInputAction.done,
         ),
@@ -591,18 +570,15 @@ class _AddAuthScreenState extends State<AddAuthScreen> with SingleTickerProvider
         const SizedBox(height: 16),
 
         // URI 输入
-        TextFormField(
+        GlowInput(
           controller: _uriController,
-          decoration: InputDecoration(
-            labelText: 'otpauth:// URI',
-            hintText: 'otpauth://totp/GitHub:user@example.com?secret=...',
-            prefixIcon: const Icon(Icons.link),
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.paste),
-              onPressed: _pasteFromClipboard,
-              tooltip: l10n.pasteFromClipboard,
-            ),
-            alignLabelWithHint: true,
+          label: 'otpauth:// URI',
+          hint: 'otpauth://totp/GitHub:user@example.com?secret=...',
+          prefixIcon: Icons.link,
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.paste, size: 20, color: Color(0xFF6C63FF)),
+            onPressed: _pasteFromClipboard,
+            tooltip: l10n.pasteFromClipboard,
           ),
           maxLines: 5,
           textInputAction: TextInputAction.done,

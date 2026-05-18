@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/vault/vault_bloc.dart';
 import '../../l10n/app_localizations.dart';
+import '../widgets/glow_input.dart';
 import '../widgets/entropy_canvas_widget.dart';
 
 class SetupScreen extends StatefulWidget {
@@ -263,14 +264,12 @@ class _SetupScreenState extends State<SetupScreen> {
         const SizedBox(height: 8),
         Text(l10n.masterPasswordDesc, style: const TextStyle(fontSize: 14, color: Colors.white60)),
         const SizedBox(height: 32),
-        TextField(
+        GlowInput(
           controller: _passwordController,
+          label: l10n.masterPassword,
+          prefixIcon: Icons.lock_outline,
           obscureText: true,
           onChanged: _calculatePasswordStrength,
-          decoration: InputDecoration(
-            labelText: l10n.masterPassword,
-            prefixIcon: const Icon(Icons.lock_outline),
-          ),
         ),
         const SizedBox(height: 16),
         // Password strength indicator
@@ -362,13 +361,11 @@ class _SetupScreenState extends State<SetupScreen> {
         const SizedBox(height: 8),
         Text(l10n.enterPasswordAgain, style: const TextStyle(fontSize: 14, color: Colors.white60)),
         const SizedBox(height: 32),
-        TextField(
+        GlowInput(
           controller: _confirmController,
+          label: l10n.confirmPassword,
+          prefixIcon: Icons.lock_outline,
           obscureText: true,
-          decoration: InputDecoration(
-            labelText: l10n.confirmPassword,
-            prefixIcon: const Icon(Icons.lock_outline),
-          ),
         ),
         if (_errorMessage.isNotEmpty) ...[
           const SizedBox(height: 16),

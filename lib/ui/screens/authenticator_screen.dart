@@ -7,6 +7,8 @@ import '../../core/models/auth_card.dart';
 import '../../core/crypto/totp_generator.dart';
 import '../widgets/responsive_layout.dart';
 import '../widgets/bouncing_widget.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/context_menu.dart';
 import 'auth_detail_screen.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -360,7 +362,7 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen> with TickerPr
 
     return BouncingWidget(
       onTap: () => _toggleCard(card),
-      onLongPress: isExpanded ? () => _navigateToAuthDetail(card) : null,
+      onLongPress: () => _showAuthContextMenu(context, card, entry, l10n),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -575,6 +577,45 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen> with TickerPr
     );
   }
 
+  void _showAuthContextMenu(
+    BuildContext context,
+    AuthCard card,
+    _DecryptedEntry? entry,
+    AppLocalizations l10n,
+  ) {
+    showContextMenu(
+      context: context,
+      options: [
+        if (entry != null)
+          ContextMenuOption(
+            icon: Icons.copy,
+            label: l10n.copy,
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: entry.code));
+              HapticFeedback.lightImpact();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(l10n.codeCopied),
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+          ),
+        ContextMenuOption(
+          icon: Icons.info_outline,
+          label: l10n.details,
+          onTap: () => _navigateToAuthDetail(card),
+        ),
+        ContextMenuOption(
+          icon: Icons.edit,
+          label: l10n.edit,
+          onTap: () => _navigateToAuthDetail(card),
+        ),
+      ],
+    );
+  }
+
   /// 格式化验证码显示 (123 456)
   String _formatCode(String code) {
     if (code.length <= 3) return code;
@@ -583,24 +624,11 @@ class _AuthenticatorScreenState extends State<AuthenticatorScreen> with TickerPr
   }
 
   Widget _buildEmptyState(AppLocalizations l10n) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.verified_user_outlined, size: 80, color: Colors.white.withValues(alpha: 0.2)),
-          const SizedBox(height: 16),
-          Text(
-            _searchController.text.isEmpty ? l10n.noAuthenticators : l10n.noMatches,
-            style: TextStyle(fontSize: 18, color: Colors.white.withValues(alpha: 0.6)),
-          ),
-          const SizedBox(height: 8),
-          if (_searchController.text.isEmpty)
-            Text(
-              l10n.clickToAddAuth,
-              style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.4)),
-            ),
-        ],
-      ),
+    final isEmpty = _searchController.text.isEmpty;
+    return EmptyState(
+      icon: isEmpty ? Icons.verified_user_outlined : Icons.search_off,
+      title: isEmpty ? l10n.noAuthenticators : l10n.noMatches,
+      subtitle: isEmpty ? l10n.clickToAddAuth : null,
     );
   }
 }

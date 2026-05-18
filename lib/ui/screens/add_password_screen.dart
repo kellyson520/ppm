@@ -4,6 +4,7 @@ import '../../core/diagnostics/crash_report_service.dart';
 import '../../services/vault_service.dart';
 import '../../core/models/models.dart';
 import '../../l10n/app_localizations.dart';
+import '../widgets/glow_input.dart';
 
 class AddPasswordScreen extends StatefulWidget {
   final VaultService vaultService;
@@ -212,75 +213,61 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                 children: [
                   // Title
-                  TextFormField(
+                  GlowInput(
                     controller: _titleController,
-                    decoration: InputDecoration(
-                      labelText: l10n.titleWithAsterisk,
-                      hintText: l10n.titleHint,
-                      prefixIcon: const Icon(Icons.label_outline),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return l10n.titleRequired;
-                      }
-                      return null;
-                    },
+                    label: l10n.titleWithAsterisk,
+                    hint: l10n.titleHint,
+                    prefixIcon: Icons.label_outline,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? l10n.titleRequired : null,
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 16),
 
                   // Username
-                  TextFormField(
+                  GlowInput(
                     controller: _usernameController,
-                    decoration: InputDecoration(
-                      labelText: l10n.usernameWithAsterisk,
-                      hintText: l10n.usernameHint,
-                      prefixIcon: const Icon(Icons.person_outline),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return l10n.usernameRequired;
-                      }
-                      return null;
-                    },
+                    label: l10n.usernameWithAsterisk,
+                    hint: l10n.usernameHint,
+                    prefixIcon: Icons.person_outline,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? l10n.usernameRequired : null,
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 16),
 
                   // Password
-                  TextFormField(
+                  GlowInput(
                     controller: _passwordController,
+                    label: l10n.passwordWithAsterisk,
+                    prefixIcon: Icons.lock_outline,
                     obscureText: _obscurePassword,
                     onChanged: _calculatePasswordStrength,
-                    decoration: InputDecoration(
-                      labelText: l10n.passwordWithAsterisk,
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
+                    suffixIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            size: 20,
+                            color: Colors.white.withValues(alpha: 0.5),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.refresh),
-                            onPressed: _generatePassword,
-                            tooltip: l10n.generatePassword,
-                          ),
-                        ],
-                      ),
+                          onPressed: () =>
+                              setState(() => _obscurePassword = !_obscurePassword),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.refresh,
+                              size: 20, color: Color(0xFF6C63FF)),
+                          onPressed: _generatePassword,
+                          tooltip: l10n.generatePassword,
+                        ),
+                      ],
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return l10n.passwordRequired;
-                      }
-                      if (value.length < 6) {
-                        return l10n.passwordTooShortShort;
-                      }
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return l10n.passwordRequired;
+                      if (v.length < 6) return l10n.passwordTooShortShort;
                       return null;
                     },
                   ),
@@ -312,27 +299,22 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
                   const SizedBox(height: 16),
 
                   // URL
-                  TextFormField(
+                  GlowInput(
                     controller: _urlController,
-                    decoration: InputDecoration(
-                      labelText: l10n.websiteURL,
-                      hintText: 'https://example.com',
-                      prefixIcon: const Icon(Icons.link),
-                    ),
+                    label: l10n.websiteURL,
+                    hint: 'https://example.com',
+                    prefixIcon: Icons.link,
                     keyboardType: TextInputType.url,
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 16),
 
                   // Notes
-                  TextFormField(
+                  GlowInput(
                     controller: _notesController,
-                    decoration: InputDecoration(
-                      labelText: l10n.notes,
-                      hintText: l10n.notesHint,
-                      prefixIcon: const Icon(Icons.notes),
-                      alignLabelWithHint: true,
-                    ),
+                    label: l10n.notes,
+                    hint: l10n.notesHint,
+                    prefixIcon: Icons.notes,
                     maxLines: 3,
                     textInputAction: TextInputAction.done,
                   ),

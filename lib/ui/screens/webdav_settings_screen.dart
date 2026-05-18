@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/sync/sync_bloc.dart';
 import '../../l10n/app_localizations.dart';
+import '../widgets/glow_input.dart';
+import '../widgets/empty_state.dart';
 
 class WebDavSettingsScreen extends StatelessWidget {
   const WebDavSettingsScreen({super.key});
@@ -26,29 +28,14 @@ class WebDavSettingsScreen extends StatelessWidget {
           if (state.nodes.isEmpty) {
             return Center(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.cloud_off_rounded,
-                    size: 80,
-                    color: Colors.white.withValues(alpha: 0.1),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.noWebDavNodes,
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
-                  ),
-                  const SizedBox(height: 32),
-                  ElevatedButton.icon(
-                    onPressed: () => _showAddNodeBottomSheet(context),
-                    icon: const Icon(Icons.add_rounded),
-                    label: Text(l10n.addNode),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6C63FF),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    ),
+                  EmptyState(
+                    icon: Icons.cloud_off_rounded,
+                    title: l10n.noWebDavNodes,
+                    subtitle: l10n.configureSyncDestinations,
+                    actionLabel: l10n.addNode,
+                    onAction: () => _showAddNodeBottomSheet(context),
                   ),
                 ],
               ),
@@ -152,33 +139,33 @@ class WebDavSettingsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              _buildTextField(
-                nameController,
-                l10n.nodeName,
-                Icons.label_outline_rounded,
-                next: true,
+              GlowInput(
+                controller: nameController,
+                label: l10n.nodeName,
+                prefixIcon: Icons.label_outline_rounded,
+                textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 16),
-              _buildTextField(
-                urlController,
-                l10n.urlHint,
-                Icons.link_rounded,
-                next: true,
-                type: TextInputType.url,
+              GlowInput(
+                controller: urlController,
+                label: l10n.urlHint ?? 'URL',
+                prefixIcon: Icons.link_rounded,
+                keyboardType: TextInputType.url,
+                textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 16),
-              _buildTextField(
-                userController,
-                l10n.username,
-                Icons.person_outline_rounded,
-                next: true,
+              GlowInput(
+                controller: userController,
+                label: l10n.username,
+                prefixIcon: Icons.person_outline_rounded,
+                textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 16),
-              _buildTextField(
-                passController,
-                l10n.password,
-                Icons.lock_outline_rounded,
-                obscure: true,
+              GlowInput(
+                controller: passController,
+                label: l10n.password ?? 'Password',
+                prefixIcon: Icons.lock_outline_rounded,
+                obscureText: true,
               ),
               const SizedBox(height: 32),
               ElevatedButton(
@@ -208,38 +195,6 @@ class WebDavSettingsScreen extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label,
-    IconData icon, {
-    bool next = false,
-    bool obscure = false,
-    TextInputType type = TextInputType.text,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: obscure,
-      keyboardType: type,
-      textInputAction: next ? TextInputAction.next : TextInputAction.done,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
-        prefixIcon: Icon(icon, size: 20, color: const Color(0xFF6C63FF).withValues(alpha: 0.7)),
-        filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.05),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF6C63FF), width: 1),
         ),
       ),
     );

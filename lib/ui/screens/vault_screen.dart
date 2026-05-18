@@ -6,6 +6,7 @@ import '../../services/auth_service.dart';
 import '../../core/models/models.dart';
 import '../widgets/password_card_item.dart';
 import '../widgets/responsive_layout.dart';
+import '../widgets/empty_state.dart';
 import 'add_password_screen.dart';
 import 'password_detail_screen.dart';
 import 'authenticator_screen.dart';
@@ -691,24 +692,13 @@ class _VaultScreenState extends State<VaultScreen> {
   }
 
   Widget _buildEmptyState(AppLocalizations l10n) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.lock_outline, size: 80, color: Colors.white.withValues(alpha: 0.2)),
-          const SizedBox(height: 16),
-          Text(
-            _searchController.text.isEmpty ? l10n.noPasswords : l10n.noMatches,
-            style: TextStyle(fontSize: 18, color: Colors.white.withValues(alpha: 0.6)),
-          ),
-          const SizedBox(height: 8),
-          if (_searchController.text.isEmpty)
-            Text(
-              l10n.clickToAdd,
-              style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.4)),
-            ),
-        ],
-      ),
+    final isEmpty = _searchController.text.isEmpty;
+    return EmptyState(
+      icon: isEmpty ? Icons.lock_outline : Icons.search_off,
+      title: isEmpty ? l10n.noPasswords : l10n.noMatches,
+      subtitle: isEmpty ? l10n.clickToAdd : null,
+      actionLabel: isEmpty ? '+ ${l10n.addPassword}' : null,
+      onAction: isEmpty ? () => _navigateToAddPassword(null) : null,
     );
   }
 }
