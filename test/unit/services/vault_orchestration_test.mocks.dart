@@ -94,6 +94,12 @@ class MockDatabaseService extends _i1.Mock implements _i7.DatabaseService {
       ) as _i4.Future<void>);
 
   @override
+  void setDek(_i10.Uint8List? dek) => super.noSuchMethod(
+        Invocation.method(#setDek, [dek]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
   _i4.Future<T> transaction<T>(_i4.Future<T> Function(_i2.Transaction)? action) =>
       (super.noSuchMethod(
         Invocation.method(#transaction, [action]),

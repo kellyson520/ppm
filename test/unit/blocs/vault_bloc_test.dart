@@ -8,7 +8,6 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:ztd_password_manager/blocs/vault/vault_bloc.dart';
 import 'package:ztd_password_manager/services/vault_service.dart';
-import '../../helpers/test_helpers.dart';
 
 import 'vault_bloc_test.mocks.dart';
 
@@ -78,7 +77,7 @@ void main() {
     blocTest<VaultBloc, VaultState>(
       '初始化成功 → loading→unlocked',
       build: () {
-        when(mockVaultService.initialize(any, entropy: anyNamed('entropy')))
+        when(mockVaultService.initialize(any, entropy: entropy))
             .thenAnswer((_) async {});
         return vaultBloc;
       },
@@ -98,7 +97,7 @@ void main() {
             .thenThrow(Exception('Init failed'));
         return vaultBloc;
       },
-      act: (b) => b.add(VaultInitializeRequested('mypassword', entropy: Uint8List(0))),
+      act: (b) => b.add(const VaultInitializeRequested('mypassword')),
       expect: () => [
         const VaultState(status: VaultStatus.loading),
         predicate<VaultState>(
