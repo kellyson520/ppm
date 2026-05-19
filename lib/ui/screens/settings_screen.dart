@@ -150,7 +150,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       if (result != null && result.isNotEmpty) {
         // Verify master password BEFORE enabling biometric
-        final isPasswordCorrect = await widget.vaultService.unlock(result);
+        final isPasswordCorrect = await widget.vaultService.verifyMasterPassword(result);
         if (!isPasswordCorrect) {
           _showError(l10n.incorrectPassword);
           return;

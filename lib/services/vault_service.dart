@@ -76,10 +76,18 @@ class VaultService {
   }
 
   /// Unlock vault with master password
+  /// Verify master password without unlocking the vault.
+  /// Returns true if password is correct.
+  Future<bool> verifyMasterPassword(String masterPassword) async {
+    // Use KeyManager.unlock() to verify — it decrypts the DEK.
+    // If vault is already unlocked, temporarily re-unlock with the provided password.
+    return await _keyManager.unlock(masterPassword);
+  }
+
   Future<bool> unlock(String masterPassword) async {
     if (_isUnlocked) return true;
 
-    // Unlock key manager
+    // Unlock key manager (this also verifies the password)
     if (!await _keyManager.unlock(masterPassword)) {
       return false;
     }

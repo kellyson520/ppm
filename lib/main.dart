@@ -195,10 +195,11 @@ class _ZTDPasswordManagerAppState extends State<ZTDPasswordManagerApp> {
 
   ThemeData _buildTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : const Color(0xFF1A1A2E);
-    final bgColor = isDark ? const Color(0xFF101018) : const Color(0xFFF2F2F7);
-    final surfaceColor = isDark ? const Color(0xFF0F3460) : const Color(0xFFE8E8ED);
-    final iconColor = isDark ? Colors.white70 : const Color(0xFF1A1A2E).withValues(alpha: 0.7);
+    // Light mode: use a dim/dark surface so white text remains readable (password vault aesthetic)
+    final textColor = isDark ? Colors.white : Colors.white;
+    final bgColor = isDark ? const Color(0xFF101018) : const Color(0xFF1C1C2E);
+    final surfaceColor = isDark ? const Color(0xFF0F3460) : const Color(0xFF2A2A40);
+    final iconColor = isDark ? Colors.white70 : Colors.white.withValues(alpha: 0.7);
 
     return ThemeData(
       useMaterial3: true,

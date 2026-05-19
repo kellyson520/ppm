@@ -125,6 +125,11 @@ class _EntropyCanvasWidgetState extends State<EntropyCanvasWidget>
     _points.add(entropyPoint);
     _collectedCount++;
 
+    // Throttle setState to ~30fps for smooth visual feedback
+    if (_collectedCount % 3 == 0) {
+      setState(() {});
+    }
+
     final avgVelocity = _velocityHistory.isEmpty
         ? Offset.zero
         : _velocityHistory.reduce((a, b) => a + b) / _velocityHistory.length.toDouble();
@@ -142,10 +147,12 @@ class _EntropyCanvasWidgetState extends State<EntropyCanvasWidget>
     _lastPosition = null;
     _lastTime = null;
     _velocityHistory.clear();
+    setState(() {});
   }
 
   void _finishCollection() {
     _isFinished = true;
+    setState(() {});
 
     final buffer = BytesBuilder();
     for (var p in _points) {
