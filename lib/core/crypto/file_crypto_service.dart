@@ -1,6 +1,6 @@
 import 'dart:typed_data';
-import 'crypto_service.dart';
 import 'crypto_facade.dart';
+import 'crypto_core.dart';
 
 /// ZTDF (Zero-Trust Data File) 信封格式 — 流式分块 AES-256-GCM 文件加密引擎
 ///
@@ -99,9 +99,9 @@ class FileCryptoService {
 
     // flags = envelope[5]
     final kdfSalt = envelope.sublist(6, 38);
-    final metaIv = envelope.sublist(38, 50);
+    final _metaIv = envelope.sublist(38, 50);
     final metaLen = _read32LE(envelope, 50);
-    final chunkSize = _read32LE(envelope, 54);
+    final _chunkSize = _read32LE(envelope, 54);
     final originalSize = _read64LE(envelope, 58);
     const headerEnd = 66;
 

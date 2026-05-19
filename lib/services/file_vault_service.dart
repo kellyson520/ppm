@@ -4,7 +4,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import '../core/crypto/file_crypto_service.dart';
 import '../core/storage/file_storage_service.dart';
-import '../core/diagnostics/crash_report_service.dart';
 
 /// 文件保险库服务 — 加密/解密文件的业务编排层
 ///

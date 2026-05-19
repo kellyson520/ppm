@@ -5,8 +5,6 @@ import '../../core/storage/file_storage_service.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/bouncing_widget.dart';
 import '../widgets/context_menu.dart';
-import '../../l10n/app_localizations.dart';
-import 'file_encrypt_screen.dart';
 
 /// 加密文件列表页
 class FileListScreen extends StatefulWidget {
