@@ -10,6 +10,12 @@ import '../widgets/empty_state.dart';
 import 'add_password_screen.dart';
 import 'password_detail_screen.dart';
 import 'authenticator_screen.dart';
+import 'file_list_screen.dart';
+import 'file_encrypt_screen.dart';
+import '../../services/file_vault_service.dart';
+import '../../core/storage/file_storage_service.dart';
+import '../../core/crypto/file_crypto_service.dart';
+import '../../core/storage/database_service.dart';
 import 'add_auth_screen.dart';
 import 'settings_screen.dart';
 import '../../l10n/app_localizations.dart';
@@ -22,9 +28,15 @@ import '../../l10n/app_localizations.dart';
 /// 3. 设置 (Settings) - 配置管理
 class VaultScreen extends StatefulWidget {
   final VaultService vaultService;
+  final FileVaultService? fileVaultService;
   final VoidCallback onLockRequested;
 
-  const VaultScreen({super.key, required this.vaultService, required this.onLockRequested});
+  const VaultScreen({
+    super.key,
+    required this.vaultService,
+    this.fileVaultService,
+    required this.onLockRequested,
+  });
 
   @override
   State<VaultScreen> createState() => _VaultScreenState();
@@ -35,6 +47,7 @@ class _VaultScreenState extends State<VaultScreen> {
   bool _isModalOpen = false;
 
   final AuthService _authService = AuthService();
+  late final FileVaultService _fileVaultService;
 
   final _searchController = TextEditingController();
   List<PasswordCard> _cards = [];
@@ -47,6 +60,11 @@ class _VaultScreenState extends State<VaultScreen> {
   @override
   void initState() {
     super.initState();
+    _fileVaultService = widget.fileVaultService ?? FileVaultService(
+      crypto: FileCryptoService(),
+      storage: FileStorageService(db: DatabaseService()),
+      getSessionDEK: () => widget.vaultService.sessionDek!,
+    );
     _loadData();
   }
 
@@ -253,9 +271,16 @@ class _VaultScreenState extends State<VaultScreen> {
               bottom: 110,
               right: 24,
               child: FloatingActionButton(
-                onPressed: _currentIndex == 0 ? _navigateToAddPassword : _navigateToAddAuth,
-                backgroundColor:
-                    _currentIndex == 0 ? const Color(0xFF6C63FF) : const Color(0xFF00BFA6),
+                onPressed: _currentIndex == 0
+                    ? _navigateToAddPassword
+                    : _currentIndex == 1
+                        ? _navigateToAddAuth
+                        : _navigateToEncryptFile,
+                backgroundColor: _currentIndex == 0
+                    ? const Color(0xFF6C63FF)
+                    : _currentIndex == 1
+                        ? const Color(0xFF00BFA6)
+                        : const Color(0xFFFFB74D),
                 elevation: 4,
                 highlightElevation: 0,
                 child: const Icon(Icons.add),
@@ -306,6 +331,12 @@ class _VaultScreenState extends State<VaultScreen> {
                 icon: Icons.settings_outlined,
                 activeIcon: Icons.settings,
                 color: const Color(0xFFFF6B6B),
+              ),
+              _buildDockItem(
+                index: 3,
+                icon: Icons.folder_outlined,
+                activeIcon: Icons.folder_rounded,
+                color: const Color(0xFFFFB74D),
               ),
             ],
           ),
@@ -441,6 +472,8 @@ class _VaultScreenState extends State<VaultScreen> {
         );
       case 2:
         return _buildSettingsTab();
+      case 3:
+        return FileListScreen(fileVaultService: _fileVaultService);
       default:
         return const SizedBox.shrink();
     }
@@ -613,6 +646,28 @@ class _VaultScreenState extends State<VaultScreen> {
       onLockRequested: widget.onLockRequested,
       isEmbedded: true,
     );
+  }
+
+  void _navigateToEncryptFile() {
+    setState(() => _isModalOpen = true);
+    showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      barrierColor: Colors.black.withValues(alpha: 0.4),
+      transitionAnimationController: AnimationController(
+        vsync: Navigator.of(context),
+        duration: const Duration(milliseconds: 400),
+        reverseDuration: const Duration(milliseconds: 300),
+      )..drive(CurveTween(curve: Curves.easeOutCubic)),
+      builder: (context) => FileEncryptScreen(
+        fileVaultService: _fileVaultService,
+        onComplete: () => setState(() {}),
+      ),
+    ).then((_) {
+      if (mounted) setState(() => _isModalOpen = false);
+    });
   }
 
   void _navigateToAddAuth() {
