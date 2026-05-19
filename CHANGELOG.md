@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.2.22] - 2026-05-19
+
+### 🔒 安全修复 (Security)
+- **BLoC 错误消息脱敏**: 4 个 BLoC 文件共 19 处 `e.toString()` 替换为通用消息，防止内部异常细节泄露到 UI。
+- **导入验证加固**: `importVaultFromJson` 改为双路径 JSON 尝试（解密→明文解析），移除脆弱的 `startsWith('[')` 试探。
+- **WebDAV 明文拒绝**: `saveWebDavNode` 在 DEK 不可用时抛 `StateError`，不再降级为明文存储。
+- **PBKDF2 迭代强化**: 从 2k-4k 提升到 30k-120k（OWASP 2024 合规），移除混淆的 `×1000` 乘数。
+- **生物识别绕过修复**: 启用指纹解锁前必须验证主密码正确性。
+
+### 🧪 测试增强 (Testing)
+- **导出安全性测试**: 新增 `export_security_test.dart` — 9 项测试覆盖 nonce 唯一性、香农熵、卡方分布、错误密钥拒绝等。
+- **测试总数**: 335 tests ✅
+
+### 🛠 工程优化 (Engineering)
+- **CI 报告系统**: 生成 `ci-reports` artifact（format/analyze/test 报告），支持下载后精确修复。
+- **ci-report-reader 技能**: 自动化 CI 失败分析闭环。
+- **session-hygiene 钩子**: 防止长时间运行导致 VPS 负载飙升。
+- **25 个技能迁移**: 从 `/tmp/.agent/skills/` 复制到 `.reasonix/skills/`。
+
+### 🎨 UI 增强 (UI)
+- **ContextMenu 长按菜单**: 毛玻璃气泡 — 密码列表长按弹出复制/编辑/删除。
+- **GlowInput 微光输入框**: 焦点微光动画。
+- **EmptyState 统一空态**: 动画淡入空状态组件。
+- **HelpTooltip**: 点击帮助气泡。
+- **主题切换**: 支持跟随系统/暗色/亮色，FlutterSecureStorage 持久化。
+- **设置页**: 文档和源码链接指向真实 GitHub URL。
+- **TOTP 计时修复**: 100ms 刷新率 + 统一时间采样，消除 5 秒偏差。
+
 ## [0.2.21] - 2026-05-18
 
 ### ✨ 新增 (Features)
