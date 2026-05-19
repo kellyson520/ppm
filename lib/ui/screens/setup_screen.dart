@@ -7,8 +7,7 @@ import '../widgets/glow_input.dart';
 import '../widgets/entropy_canvas_widget.dart';
 
 class SetupScreen extends StatefulWidget {
-  final bool forceDark;
-  const SetupScreen({super.key, this.forceDark = true});
+  const SetupScreen({super.key});
 
   @override
   State<SetupScreen> createState() => _SetupScreenState();
@@ -114,7 +113,7 @@ class _SetupScreenState extends State<SetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final child = BlocListener<VaultBloc, VaultState>(
+    return BlocListener<VaultBloc, VaultState>(
       listener: (context, state) {
         final l10n = AppLocalizations.of(context)!;
         if (state.status == VaultStatus.error) {
