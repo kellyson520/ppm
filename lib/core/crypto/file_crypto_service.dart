@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'crypto_facade.dart';
 import 'crypto_core.dart';
@@ -99,9 +100,9 @@ class FileCryptoService {
 
     // flags = envelope[5]
     final kdfSalt = envelope.sublist(6, 38);
-    final _metaIv = envelope.sublist(38, 50);
+    // metaIv at 38-50 (embedded in stored meta block)
     final metaLen = _read32LE(envelope, 50);
-    final _chunkSize = _read32LE(envelope, 54);
+    // chunkSize at offset 54 — reserved for future chunk validation
     final originalSize = _read64LE(envelope, 58);
     const headerEnd = 66;
 
@@ -175,8 +176,8 @@ class FileCryptoService {
   }
 
   Uint8List _encodeMetadata(String fileName, String mimeType, int originalSize) {
-    final nameBytes = fileName.codeUnits;
-    final mimeBytes = mimeType.codeUnits;
+    final nameBytes = utf8.encode(fileName);
+    final mimeBytes = utf8.encode(mimeType);
     final buf = BytesBuilder();
     buf.add(_uint16LE(nameBytes.length));
     buf.add(Uint8List.fromList(nameBytes));
@@ -188,9 +189,9 @@ class FileCryptoService {
   _Meta _decodeMetadata(Uint8List bytes) {
     var pos = 0;
     final nameLen = _read16LE(bytes, pos); pos += 2;
-    final fileName = String.fromCharCodes(bytes.sublist(pos, pos + nameLen)); pos += nameLen;
+    final fileName = utf8.decode(bytes.sublist(pos, pos + nameLen)); pos += nameLen;
     final mimeLen = _read16LE(bytes, pos); pos += 2;
-    final mimeType = String.fromCharCodes(bytes.sublist(pos, pos + mimeLen));
+    final mimeType = utf8.decode(bytes.sublist(pos, pos + mimeLen));
     return _Meta(fileName: fileName, mimeType: mimeType);
   }
 
